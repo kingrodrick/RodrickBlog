@@ -6,7 +6,8 @@ import { Footer } from '@/components/layout/Footer';
 
 const plusJakarta = Plus_Jakarta_Sans({
   subsets: ['latin', 'vietnamese'],
-  weight: ['400', '500', '600', '700', '800'],
+  // 🌟 Đã tăng cường thêm các mức weight dày hơn cho Headline
+  weight: ['500', '600', '700', '800'],
   style: ['normal', 'italic'],
   variable: '--font-plus-jakarta',
   display: 'swap',
@@ -14,7 +15,8 @@ const plusJakarta = Plus_Jakarta_Sans({
 
 const inter = Inter({
   subsets: ['latin', 'vietnamese'],
-  weight: ['300', '400', '500', '600', '700'],
+  // 🌟 Đẩy trọng số Body từ 300/400 lên các mức đậm đà hơn (400, 500, 600, 700)
+  weight: ['400', '500', '600', '700'],
   variable: '--font-inter',
   display: 'swap',
 });
@@ -35,8 +37,7 @@ export default function RootLayout({
       className={`${plusJakarta.variable} ${inter.variable} scroll-smooth`}
       style={{ backgroundColor: '#FAF8F5' }}
     >
-      {/* Cập nhật màu chữ Neutral #1A1A1A và màu bôi đen Primary #B61C25 */}
-      <body className="bg-[#FAF8F5] text-[#1A1A1A] font-sans antialiased selection:bg-[#B61C25]/15 selection:text-[#B61C25] min-h-screen flex flex-col">
+      <body className="bg-[#FAF8F5] text-[#1A1A1A] font-sans font-medium antialiased selection:bg-[#B61C25]/15 selection:text-[#B61C25] min-h-screen flex flex-col">
         <Navbar />
         <div className="flex-1 bg-[#FAF8F5]">
           {children}
