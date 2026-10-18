@@ -60,8 +60,8 @@ export function ImageUploadInput({
       // Resize large images via Canvas to keep size light and performant
       const img = new Image();
       img.onload = () => {
-        const maxWidth = 1600;
-        const maxHeight = 1200;
+        const maxWidth = 1200;
+        const maxHeight = 900;
         let width = img.width;
         let height = img.height;
 
@@ -71,7 +71,7 @@ export function ImageUploadInput({
             width = maxWidth;
           } else {
             width = Math.round((width * maxHeight) / height);
-            maxHeight;
+            height = maxHeight;
           }
         }
 
@@ -81,7 +81,7 @@ export function ImageUploadInput({
         const ctx = canvas.getContext('2d');
         if (ctx) {
           ctx.drawImage(img, 0, 0, width, height);
-          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
           onChange(compressedDataUrl);
         } else {
           onChange(result);
@@ -101,6 +101,7 @@ export function ImageUploadInput({
     const file = e.target.files?.[0];
     if (file) {
       processFile(file);
+      e.target.value = '';
     }
   };
 

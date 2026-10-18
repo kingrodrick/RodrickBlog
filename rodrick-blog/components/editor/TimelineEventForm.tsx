@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ItineraryService } from '@/services/itinerary.service';
-import { ImageUploadInput } from './ImageUploadInput';
+import { TimelinePhotosManager, TimelineImageItem } from './TimelinePhotosManager';
 import { Trip, TimelineEvent } from '@/types/database.type';
 
 interface TimelineEventFormProps {
@@ -12,15 +12,6 @@ interface TimelineEventFormProps {
   onOpenSqlModal?: () => void;
   hideHeader?: boolean;
   hideTripSelector?: boolean;
-}
-
-interface ImageInputItem {
-  id: string;
-  url: string;
-  caption: string;
-  isRealPhoto: boolean;
-  cameraGear: string;
-  exifInfo: string;
 }
 
 export function TimelineEventForm({
@@ -44,7 +35,7 @@ export function TimelineEventForm({
   const [notes, setNotes] = useState<string>('');
 
   // Images attached to this timeline event
-  const [images, setImages] = useState<ImageInputItem[]>([
+  const [images, setImages] = useState<TimelineImageItem[]>([
     {
       id: 'img-1',
       url: '',
@@ -77,31 +68,6 @@ export function TimelineEventForm({
     }
     loadTrips();
   }, [initialTripId]);
-
-  // Image helpers
-  const addImageField = () => {
-    setImages((prev) => [
-      ...prev,
-      {
-        id: `img-${Date.now()}`,
-        url: '',
-        caption: '',
-        isRealPhoto: true,
-        cameraGear: 'Sony A6400 • 18-135mm',
-        exifInfo: '50mm • f/4.0 • 1/200s • ISO 100',
-      },
-    ]);
-  };
-
-  const removeImageField = (id: string) => {
-    setImages((prev) => prev.filter((img) => img.id !== id));
-  };
-
-  const updateImageField = (id: string, updates: Partial<ImageInputItem>) => {
-    setImages((prev) =>
-      prev.map((img) => (img.id === id ? { ...img, ...updates } : img))
-    );
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -422,141 +388,12 @@ export function TimelineEventForm({
           />
         </div>
 
-        {/* Attach Photos to Event */}
-        <div className="space-y-4 pt-4 border-t border-[#F0ECE4]">
-          <div className="flex items-center justify-between">
-            <div>
-              <h4 className="font-serif text-base font-bold text-[#1C1B18]">
-                Ảnh đính kèm mốc sự kiện (Sony A6400 & Tham khảo)
-              </h4>
-              <p className="font-mono text-[11px] text-[#78756E]">
-                Thêm một hoặc nhiều bức ảnh sẽ hiển thị trong thẻ sự kiện này.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={addImageField}
-              className="bg-white hover:bg-stone-50 border border-[#E6E2DA] text-[#1C1B18] hover:text-[#B93829] text-xs font-mono font-semibold px-3 py-1.5 rounded-xl transition-colors cursor-pointer flex items-center gap-1"
-            >
-              <span>+ Thêm ảnh khác</span>
-            </button>
-          </div>
-
-          <div className="space-y-4">
-            {images.map((img, index) => (
-              <div
-                key={img.id}
-                className="p-4 rounded-2xl bg-[#FAF8F5] border border-[#E6E2DA] space-y-3 relative"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono font-bold text-[#1C1B18]">
-                    Ảnh #{index + 1}
-                  </span>
-                  {images.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeImageField(img.id)}
-                      className="text-xs font-mono text-rose-600 hover:text-rose-800 cursor-pointer"
-                    >
-                      ✕ Bỏ ảnh này
-                    </button>
-                  )}
-                </div>
-
-                <ImageUploadInput
-                  label="URL hoặc file ảnh"
-                  value={img.url}
-                  onChange={(url) => updateImageField(img.id, { url })}
-                  aspectRatio="photo"
-                />
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                  <div className="space-y-1">
-                    <label className="block text-[10px] font-mono uppercase tracking-wider text-[#78756E]">
-                      Chú thích ảnh (Caption)
-                    </label>
-                    <input
-                      type="text"
-                      value={img.caption}
-                      onChange={(e) =>
-                        updateImageField(img.id, { caption: e.target.value })
-                      }
-                      placeholder="VD: Ánh nắng buổi sớm trên mái chùa"
-                      className="w-full bg-white border border-[#E6E2DA] focus:border-[#B93829] rounded-xl px-3 py-2 text-xs font-sans text-[#1C1B18] outline-hidden shadow-xs"
-                    />
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="block text-[10px] font-mono uppercase tracking-wider text-[#78756E]">
-                      Phân loại nguồn ảnh
-                    </label>
-                    <div className="flex items-center gap-2 pt-0.5">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          updateImageField(img.id, { isRealPhoto: true })
-                        }
-                        className={`flex-1 py-1.5 px-2 rounded-lg text-[11px] font-mono transition-all cursor-pointer text-center ${
-                          img.isRealPhoto
-                            ? 'bg-emerald-100 text-emerald-800 font-bold border border-emerald-300'
-                            : 'bg-white text-stone-500 border border-stone-200'
-                        }`}
-                      >
-                        ● Ảnh Sony A6400
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          updateImageField(img.id, { isRealPhoto: false })
-                        }
-                        className={`flex-1 py-1.5 px-2 rounded-lg text-[11px] font-mono transition-all cursor-pointer text-center ${
-                          !img.isRealPhoto
-                            ? 'bg-sky-100 text-sky-800 font-bold border border-sky-300'
-                            : 'bg-white text-stone-500 border border-stone-200'
-                        }`}
-                      >
-                        ○ Ảnh tham khảo web
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {img.isRealPhoto && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                    <div className="space-y-1">
-                      <label className="block text-[10px] font-mono uppercase tracking-wider text-[#78756E]">
-                        Thiết bị máy ảnh & Lens
-                      </label>
-                      <input
-                        type="text"
-                        value={img.cameraGear}
-                        onChange={(e) =>
-                          updateImageField(img.id, { cameraGear: e.target.value })
-                        }
-                        placeholder="Sony A6400 • 18-135mm"
-                        className="w-full bg-white border border-[#E6E2DA] focus:border-[#B93829] rounded-xl px-3 py-1.5 text-xs font-mono text-[#1C1B18] outline-hidden shadow-xs"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="block text-[10px] font-mono uppercase tracking-wider text-[#78756E]">
-                        Thông số EXIF
-                      </label>
-                      <input
-                        type="text"
-                        value={img.exifInfo}
-                        onChange={(e) =>
-                          updateImageField(img.id, { exifInfo: e.target.value })
-                        }
-                        placeholder="35mm • f/4.0 • 1/250s • ISO 100"
-                        className="w-full bg-white border border-[#E6E2DA] focus:border-[#B93829] rounded-xl px-3 py-1.5 text-xs font-mono text-[#1C1B18] outline-hidden shadow-xs"
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
+        {/* Attach Photos via TimelinePhotosManager */}
+        <TimelinePhotosManager
+          images={images}
+          onChange={setImages}
+          city={city}
+        />
 
         {/* Action Buttons */}
         <div className="pt-4 border-t border-[#F0ECE4] flex flex-wrap items-center justify-between gap-4">

@@ -183,28 +183,45 @@ export const ItineraryService = {
     }
 
     if (imagesData && imagesData.length > 0) {
-      const imagesToInsert = imagesData.map((img) => ({
-        cloudinary_url: img.cloudinary_url,
-        caption: img.caption || null,
-        city: img.city || eventData.city,
-        camera_gear: img.camera_gear || 'Sony A6400 • 18-135mm',
-        exif_info: img.exif_info || null,
-        timeline_event_id: event.id,
-        is_featured: img.is_featured || false,
-        is_real_photo: img.is_real_photo !== undefined ? img.is_real_photo : true,
-        taken_at: img.taken_at || eventData.trip_date,
-      }));
+      const imagesToInsert = imagesData.map((img) => {
+        let combinedGear = img.camera_gear || 'Sony A6400 • 18-135mm';
+        if (img.exif_info && !combinedGear.includes(img.exif_info)) {
+          combinedGear = `${combinedGear} (${img.exif_info})`;
+        }
+        return {
+          cloudinary_url: img.cloudinary_url,
+          caption: img.caption || null,
+          city: img.city || eventData.city || 'Kyoto',
+          camera_gear: combinedGear,
+          timeline_event_id: event.id,
+          is_featured: img.is_featured || false,
+          is_real_photo: img.is_real_photo !== undefined ? img.is_real_photo : true,
+          taken_at: img.taken_at || eventData.trip_date || new Date().toISOString(),
+        };
+      });
 
       const { error: imgError } = await supabase
         .from('images')
         .insert(imagesToInsert);
 
       if (imgError) {
-        console.warn('Lỗi khi chèn ảnh sự kiện:', imgError.message);
+        console.error('Lỗi khi chèn ảnh sự kiện:', imgError);
+        throw imgError;
       }
     }
 
-    return event as TimelineEvent;
+    // Nạp lại chi tiết sự kiện kèm danh sách ảnh
+    const { data: fullEvent, error: fullError } = await supabase
+      .from('timeline_events')
+      .select('*, images (*)')
+      .eq('id', event.id)
+      .single();
+
+    if (fullError) {
+      console.warn('Không thể nạp lại sự kiện sau khi tạo:', fullError.message);
+    }
+
+    return (fullEvent || event) as TimelineEvent;
   },
 
   // Cập nhật mốc sự kiện timeline (kèm đồng bộ danh sách ảnh)
@@ -242,28 +259,35 @@ export const ItineraryService = {
         .eq('timeline_event_id', id);
 
       if (delError) {
-        console.warn('Lỗi khi xóa ảnh cũ của sự kiện:', delError.message);
+        console.error('Lỗi khi xóa ảnh cũ của sự kiện:', delError);
+        throw delError;
       }
 
       if (imagesData.length > 0) {
-        const imagesToInsert = imagesData.map((img) => ({
-          cloudinary_url: img.cloudinary_url,
-          caption: img.caption || null,
-          city: img.city || eventData.city || 'Kyoto',
-          camera_gear: img.camera_gear || 'Sony A6400 • 18-135mm',
-          exif_info: img.exif_info || null,
-          timeline_event_id: id,
-          is_featured: img.is_featured || false,
-          is_real_photo: img.is_real_photo !== undefined ? img.is_real_photo : true,
-          taken_at: img.taken_at || eventData.trip_date || new Date().toISOString(),
-        }));
+        const imagesToInsert = imagesData.map((img) => {
+          let combinedGear = img.camera_gear || 'Sony A6400 • 18-135mm';
+          if (img.exif_info && !combinedGear.includes(img.exif_info)) {
+            combinedGear = `${combinedGear} (${img.exif_info})`;
+          }
+          return {
+            cloudinary_url: img.cloudinary_url,
+            caption: img.caption || null,
+            city: img.city || eventData.city || 'Kyoto',
+            camera_gear: combinedGear,
+            timeline_event_id: id,
+            is_featured: img.is_featured || false,
+            is_real_photo: img.is_real_photo !== undefined ? img.is_real_photo : true,
+            taken_at: img.taken_at || eventData.trip_date || new Date().toISOString(),
+          };
+        });
 
         const { error: insertError } = await supabase
           .from('images')
           .insert(imagesToInsert);
 
         if (insertError) {
-          console.warn('Lỗi khi chèn lại ảnh sự kiện:', insertError.message);
+          console.error('Lỗi khi chèn lại ảnh sự kiện:', insertError);
+          throw insertError;
         }
       }
     }
@@ -279,7 +303,26 @@ export const ItineraryService = {
       console.warn('Không thể nạp lại chi tiết sự kiện sau cập nhật:', fullError.message);
     }
 
-    return (fullEvent || updatedEvent) as TimelineEvent;
+    const result = (fullEvent || updatedEvent) as TimelineEvent;
+    if (!result.images || result.images.length === 0) {
+      if (imagesData && imagesData.length > 0) {
+        result.images = imagesData.map((img, idx) => ({
+          id: Date.now() + idx,
+          cloudinary_url: img.cloudinary_url,
+          caption: img.caption || null,
+          city: img.city || eventData.city || null,
+          camera_gear: img.camera_gear || null,
+          exif_info: img.exif_info || null,
+          timeline_event_id: id,
+          is_featured: img.is_featured || false,
+          is_real_photo: img.is_real_photo !== undefined ? img.is_real_photo : true,
+          taken_at: img.taken_at || '',
+          collection_id: null,
+        }));
+      }
+    }
+
+    return result;
   },
 
   // Xóa mốc sự kiện timeline
