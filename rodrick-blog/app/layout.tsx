@@ -1,25 +1,21 @@
 import type { Metadata } from 'next';
-import { Noto_Serif, Manrope, Space_Grotesk } from 'next/font/google';
+import { Plus_Jakarta_Sans, Inter } from 'next/font/google';
 import './globals.css';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 
-const notoSerif = Noto_Serif({
+const plusJakarta = Plus_Jakarta_Sans({
   subsets: ['latin', 'vietnamese'],
+  weight: ['400', '500', '600', '700', '800'],
   style: ['normal', 'italic'],
-  variable: '--font-noto-serif',
+  variable: '--font-plus-jakarta',
   display: 'swap',
 });
 
-const manrope = Manrope({
+const inter = Inter({
   subsets: ['latin', 'vietnamese'],
-  variable: '--font-manrope',
-  display: 'swap',
-});
-
-const spaceGrotesk = Space_Grotesk({
-  subsets: ['latin', 'vietnamese'],
-  variable: '--font-space-grotesk',
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-inter',
   display: 'swap',
 });
 
@@ -36,11 +32,11 @@ export default function RootLayout({
   return (
     <html
       lang="vi"
-      className={`${manrope.variable} ${notoSerif.variable} ${spaceGrotesk.variable} scroll-smooth`}
+      className={`${plusJakarta.variable} ${inter.variable} scroll-smooth`}
       style={{ backgroundColor: '#FAF8F5' }}
     >
-      {/* Cập nhật màu text Neutral #1A1A1A và màu selection Primary #D9383A */}
-      <body className="bg-[#FAF8F5] text-[#1A1A1A] font-sans antialiased selection:bg-[#D9383A]/15 selection:text-[#D9383A] min-h-screen flex flex-col">
+      {/* Cập nhật màu chữ Neutral #1A1A1A và màu bôi đen Primary #B61C25 */}
+      <body className="bg-[#FAF8F5] text-[#1A1A1A] font-sans antialiased selection:bg-[#B61C25]/15 selection:text-[#B61C25] min-h-screen flex flex-col">
         <Navbar />
         <div className="flex-1 bg-[#FAF8F5]">
           {children}
