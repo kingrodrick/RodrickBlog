@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ItineraryService, TripWithDetails } from '@/services/itinerary.service';
+import { Trip } from '@/types/database.type';
+import { EditTripModal } from './EditTripModal';
 
 interface TripsManagerProps {
   onSelectTripToAddEvent: (tripId: number) => void;
@@ -15,6 +17,7 @@ export function TripsManager({
 }: TripsManagerProps) {
   const [trips, setTrips] = useState<TripWithDetails[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [editingTrip, setEditingTrip] = useState<TripWithDetails | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -61,6 +64,20 @@ export function TripsManager({
     } finally {
       setDeletingId(null);
     }
+  };
+
+  const handleTripUpdated = (updated: Trip) => {
+    setTrips((prev) =>
+      prev.map((t) => (t.id === updated.id ? { ...t, ...updated } : t))
+    );
+    setMessage(`Đã cập nhật chuyến đi "${updated.title}" thành công.`);
+    setEditingTrip(null);
+  };
+
+  const handleTripDeletedFromModal = (deletedId: number) => {
+    setTrips((prev) => prev.filter((t) => t.id !== deletedId));
+    setMessage('Đã xóa chuyến đi thành công.');
+    setEditingTrip(null);
   };
 
   const formatDate = (dateStr?: string) => {
@@ -183,6 +200,15 @@ export function TripsManager({
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
+                      onClick={() => setEditingTrip(trip)}
+                      className="bg-[#FAF8F5] hover:bg-[#1C1B18] text-[#1C1B18] hover:text-white border border-[#E6E2DA] text-xs font-mono font-semibold px-3 py-1.5 rounded-xl transition-all cursor-pointer flex items-center gap-1 shadow-2xs"
+                      title="Chỉnh sửa thông tin chuyến đi"
+                    >
+                      <span>✏️ Sửa</span>
+                    </button>
+
+                    <button
+                      type="button"
                       onClick={() => onSelectTripToAddEvent(trip.id)}
                       className="bg-white hover:bg-stone-100 text-[#B93829] hover:text-[#1C1B18] border border-rose-200 text-xs font-mono font-semibold px-3 py-1.5 rounded-xl transition-colors cursor-pointer"
                     >
@@ -213,6 +239,18 @@ export function TripsManager({
             );
           })}
         </div>
+      )}
+
+      {/* Edit Trip Modal */}
+      {editingTrip && (
+        <EditTripModal
+          trip={editingTrip}
+          isOpen={!!editingTrip}
+          onClose={() => setEditingTrip(null)}
+          onTripUpdated={handleTripUpdated}
+          onTripDeleted={handleTripDeletedFromModal}
+          onOpenSqlModal={onOpenSqlModal}
+        />
       )}
     </div>
   );

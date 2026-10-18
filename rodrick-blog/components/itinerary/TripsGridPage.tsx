@@ -3,9 +3,11 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { TripWithDetails } from '@/services/itinerary.service';
+import { Trip } from '@/types/database.type';
 import { TripCard } from './TripCard';
 import { useAuth } from '@/components/auth/AuthContext';
 import { CreateTripModal } from '@/components/editor/CreateTripModal';
+import { EditTripModal } from '@/components/editor/EditTripModal';
 import { SqlInstructionModal } from '@/components/editor/SqlInstructionModal';
 
 interface TripsGridPageProps {
@@ -15,8 +17,21 @@ interface TripsGridPageProps {
 export function TripsGridPage({ initialTrips }: TripsGridPageProps) {
   const { isLoggedIn } = useAuth();
   const [trips, setTrips] = useState<TripWithDetails[]>(initialTrips);
+  const [editingTrip, setEditingTrip] = useState<TripWithDetails | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isSqlModalOpen, setIsSqlModalOpen] = useState(false);
+
+  const handleTripUpdated = (updated: Trip) => {
+    setTrips((prev) =>
+      prev.map((t) => (t.id === updated.id ? { ...t, ...updated } : t))
+    );
+    setEditingTrip(null);
+  };
+
+  const handleTripDeleted = (deletedId: number) => {
+    setTrips((prev) => prev.filter((t) => t.id !== deletedId));
+    setEditingTrip(null);
+  };
 
   return (
     <div className="w-full bg-[#FAF8F5] text-[#1C1B18] min-h-screen">
@@ -88,7 +103,11 @@ export function TripsGridPage({ initialTrips }: TripsGridPageProps) {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {trips.map((trip) => (
-              <TripCard key={trip.id} trip={trip} />
+              <TripCard
+                key={trip.id}
+                trip={trip}
+                onEdit={isLoggedIn ? () => setEditingTrip(trip) : undefined}
+              />
             ))}
           </div>
         )}
@@ -100,6 +119,18 @@ export function TripsGridPage({ initialTrips }: TripsGridPageProps) {
         onClose={() => setIsCreateModalOpen(false)}
         onOpenSqlModal={() => setIsSqlModalOpen(true)}
       />
+
+      {/* Modal edit trip */}
+      {editingTrip && (
+        <EditTripModal
+          trip={editingTrip}
+          isOpen={!!editingTrip}
+          onClose={() => setEditingTrip(null)}
+          onTripUpdated={handleTripUpdated}
+          onTripDeleted={handleTripDeleted}
+          onOpenSqlModal={() => setIsSqlModalOpen(true)}
+        />
+      )}
 
       {/* SQL Instruction Modal */}
       <SqlInstructionModal

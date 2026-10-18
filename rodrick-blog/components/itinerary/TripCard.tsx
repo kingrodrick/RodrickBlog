@@ -5,9 +5,10 @@ import { optimizeCloudinaryUrl } from '@/lib/cloudinary';
 
 interface TripCardProps {
   trip: TripWithDetails;
+  onEdit?: () => void;
 }
 
-export function TripCard({ trip }: TripCardProps) {
+export function TripCard({ trip, onEdit }: TripCardProps) {
   // Ưu tiên ảnh bìa trực tiếp từ cột cover_image của chuyến đi
   let coverUrl = trip.cover_image || '';
 
@@ -59,13 +60,30 @@ export function TripCard({ trip }: TripCardProps) {
         />
 
         {/* Overlay Badges */}
-        <div className="absolute top-3.5 left-3.5 flex items-center gap-2">
-          <span className={`text-[10px] font-mono uppercase tracking-wider px-2.5 py-1 rounded-full border font-semibold backdrop-blur-xs ${statusBadge.color}`}>
-            ● {statusBadge.label}
-          </span>
-          <span className="bg-black/60 backdrop-blur-xs text-white text-[10px] font-mono uppercase tracking-wider px-2.5 py-1 rounded-full">
-            📍 {trip.cities}
-          </span>
+        <div className="absolute top-3.5 left-3.5 right-3.5 flex items-center justify-between pointer-events-none">
+          <div className="flex items-center gap-2">
+            <span className={`text-[10px] font-mono uppercase tracking-wider px-2.5 py-1 rounded-full border font-semibold backdrop-blur-xs ${statusBadge.color}`}>
+              ● {statusBadge.label}
+            </span>
+            <span className="bg-black/60 backdrop-blur-xs text-white text-[10px] font-mono uppercase tracking-wider px-2.5 py-1 rounded-full">
+              📍 {trip.cities}
+            </span>
+          </div>
+
+          {onEdit && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onEdit();
+              }}
+              className="pointer-events-auto bg-white/95 hover:bg-[#B93829] text-stone-900 hover:text-white backdrop-blur-md px-2.5 py-1 rounded-lg font-mono text-[11px] font-semibold shadow-md border border-white/50 flex items-center gap-1 transition-all cursor-pointer"
+              title="Chỉnh sửa chuyến đi"
+            >
+              <span>✏️ Sửa</span>
+            </button>
+          )}
         </div>
 
         {/* Date Tag */}
