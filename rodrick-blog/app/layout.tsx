@@ -1,25 +1,25 @@
 import type { Metadata } from 'next';
-import { Inter, Newsreader, JetBrains_Mono } from 'next/font/google';
+import { Noto_Serif, Manrope, Space_Grotesk } from 'next/font/google';
 import './globals.css';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 
-const sans = Inter({
-  subsets: ['latin', 'vietnamese'],
-  variable: '--font-inter-vi', // 🌟 Đổi tên biến để phá cache Vercel
-  display: 'swap',
-});
-
-const serif = Newsreader({
+const notoSerif = Noto_Serif({
   subsets: ['latin', 'vietnamese'],
   style: ['normal', 'italic'],
-  variable: '--font-newsreader-vi', // 🌟 Phá cache Vercel
+  variable: '--font-noto-serif',
   display: 'swap',
 });
 
-const mono = JetBrains_Mono({
+const manrope = Manrope({
   subsets: ['latin', 'vietnamese'],
-  variable: '--font-jetbrains-vi', // 🌟 Phá cache Vercel
+  variable: '--font-manrope',
+  display: 'swap',
+});
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ['latin', 'vietnamese'],
+  variable: '--font-space-grotesk',
   display: 'swap',
 });
 
@@ -36,10 +36,11 @@ export default function RootLayout({
   return (
     <html
       lang="vi"
-      className={`${sans.variable} ${serif.variable} ${mono.variable} scroll-smooth`}
+      className={`${manrope.variable} ${notoSerif.variable} ${spaceGrotesk.variable} scroll-smooth`}
       style={{ backgroundColor: '#FAF8F5' }}
     >
-      <body className="bg-[#FAF8F5] text-[#1C1B18] font-sans antialiased selection:bg-[#B93829]/15 selection:text-[#B93829] min-h-screen flex flex-col">
+      {/* Cập nhật màu text Neutral #1A1A1A và màu selection Primary #D9383A */}
+      <body className="bg-[#FAF8F5] text-[#1A1A1A] font-sans antialiased selection:bg-[#D9383A]/15 selection:text-[#D9383A] min-h-screen flex flex-col">
         <Navbar />
         <div className="flex-1 bg-[#FAF8F5]">
           {children}
