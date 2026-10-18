@@ -140,7 +140,7 @@ export default async function TripDetailPage({ params }: TripDetailPageProps) {
         </header>
 
         {/* Detailed Timeline View */}
-        <ItinerarySinglePageView events={events} />
+        <ItinerarySinglePageView events={events} tripId={trip.id} tripTitle={trip.title} />
       </main>
     </div>
   );

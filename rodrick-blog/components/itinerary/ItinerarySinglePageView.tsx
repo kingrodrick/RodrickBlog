@@ -1,53 +1,84 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { TimelineEvent, GalleryImage } from '@/types/database.type';
 import { DayFilterTabs } from './DayFilterTabs';
 import { TimelineItemCard } from './TimelineItemCard';
 import { ImageLightboxModal } from '@/components/gallery/ImageLightboxModal';
+import { useAuth } from '@/components/auth/AuthContext';
+import { AddTimelineEventModal } from '@/components/editor/AddTimelineEventModal';
+import { EditTimelineEventModal } from '@/components/editor/EditTimelineEventModal';
+import { SqlInstructionModal } from '@/components/editor/SqlInstructionModal';
 
 interface ItinerarySinglePageViewProps {
   events: TimelineEvent[];
+  tripId?: number;
+  tripTitle?: string;
 }
 
-export function ItinerarySinglePageView({ events }: ItinerarySinglePageViewProps) {
+export function ItinerarySinglePageView({ events, tripId, tripTitle }: ItinerarySinglePageViewProps) {
+  const { isLoggedIn } = useAuth();
+  const [eventList, setEventList] = useState<TimelineEvent[]>(events);
+  const [isAddEventModalOpen, setIsAddEventModalOpen] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<TimelineEvent | null>(null);
+  const [isSqlModalOpen, setIsSqlModalOpen] = useState(false);
   const [selectedDay, setSelectedDay] = useState<number | 'all'>('all');
   const [selectedCity, setSelectedCity] = useState<string>('all');
   const [activeImage, setActiveImage] = useState<GalleryImage | null>(null);
 
+  useEffect(() => {
+    setEventList(events);
+  }, [events]);
+
+  const handleEventCreated = (newEvent: TimelineEvent) => {
+    setEventList((prev) => [...prev, newEvent]);
+  };
+
+  const handleEventUpdated = (updatedEvent: TimelineEvent) => {
+    setEventList((prev) =>
+      prev.map((ev) => (ev.id === updatedEvent.id ? updatedEvent : ev))
+    );
+    setEditingEvent(null);
+  };
+
+  const handleEventDeleted = (deletedEventId: number) => {
+    setEventList((prev) => prev.filter((ev) => ev.id !== deletedEventId));
+    setEditingEvent(null);
+  };
+
   // Extract distinct days & cities
   const days = useMemo(() => {
     const daySet = new Set<number>();
-    events.forEach((e) => daySet.add(e.day_number));
+    eventList.forEach((e) => daySet.add(e.day_number));
     return Array.from(daySet).sort((a, b) => a - b);
-  }, [events]);
+  }, [eventList]);
 
   const datesByDay = useMemo(() => {
     const map: Record<number, string> = {};
-    events.forEach((e) => {
+    eventList.forEach((e) => {
       if (e.day_number && e.trip_date) {
         map[e.day_number] = e.trip_date;
       }
     });
     return map;
-  }, [events]);
+  }, [eventList]);
 
   const cities = useMemo(() => {
     const citySet = new Set<string>();
-    events.forEach((e) => {
+    eventList.forEach((e) => {
       if (e.city) citySet.add(e.city);
     });
     return Array.from(citySet).sort();
-  }, [events]);
+  }, [eventList]);
 
   // Filter events by day and city
   const filteredEvents = useMemo(() => {
-    return events.filter((e) => {
+    return eventList.filter((e) => {
       const matchDay = selectedDay === 'all' || e.day_number === selectedDay;
       const matchCity = selectedCity === 'all' || e.city.toLowerCase() === selectedCity.toLowerCase();
       return matchDay && matchCity;
     });
-  }, [events, selectedDay, selectedCity]);
+  }, [eventList, selectedDay, selectedCity]);
 
   // Count real photos vs reference photos
   const { realCount, refCount } = useMemo(() => {
@@ -126,8 +157,8 @@ export function ItinerarySinglePageView({ events }: ItinerarySinglePageViewProps
           </p>
         </div>
 
-        {/* Breakdown Badges: Total, Real Photos, Reference Photos */}
-        <div className="flex flex-wrap items-center gap-2">
+        {/* Breakdown Badges: Total, Real Photos, Reference Photos & Add Event Button */}
+        <div className="flex flex-wrap items-center gap-2.5">
           <span className="font-mono text-[10px] bg-white border border-[#E6E2DA] px-3 py-1.5 rounded-full text-[#57544E]">
             ⏱ {filteredEvents.length} mốc thời gian
           </span>
@@ -140,6 +171,18 @@ export function ItinerarySinglePageView({ events }: ItinerarySinglePageViewProps
             <span className="font-mono text-[10px] bg-sky-50 border border-sky-300 text-sky-800 px-3 py-1.5 rounded-full font-semibold">
               🌐 {refCount} ảnh tham khảo web
             </span>
+          )}
+
+          {/* Add Timeline Event Button (Only visible when logged in) */}
+          {isLoggedIn && tripId && (
+            <button
+              type="button"
+              onClick={() => setIsAddEventModalOpen(true)}
+              className="bg-[#B93829] hover:bg-[#1C1B18] text-white text-xs font-mono uppercase tracking-wider font-semibold px-4 py-1.5 rounded-xl transition-all shadow-md shadow-[#B93829]/20 flex items-center gap-1.5 cursor-pointer ml-auto"
+            >
+              <span>+</span>
+              <span>THÊM SỰ KIỆN TIMELINE</span>
+            </button>
           )}
         </div>
       </div>
@@ -178,6 +221,18 @@ export function ItinerarySinglePageView({ events }: ItinerarySinglePageViewProps
               Đặt lại bộ lọc
             </button>
           )}
+
+          {isLoggedIn && tripId && (
+            <div className="pt-3">
+              <button
+                type="button"
+                onClick={() => setIsAddEventModalOpen(true)}
+                className="bg-[#B93829] hover:bg-[#1C1B18] text-white text-xs font-mono uppercase tracking-wider font-semibold px-5 py-2.5 rounded-xl transition-all shadow-xs cursor-pointer inline-flex items-center gap-1.5"
+              >
+                <span>+ Thêm sự kiện đầu tiên cho hành trình này</span>
+              </button>
+            </div>
+          )}
         </div>
       ) : (
         <div className="space-y-12">
@@ -214,6 +269,7 @@ export function ItinerarySinglePageView({ events }: ItinerarySinglePageViewProps
                         item={item}
                         index={itemSequenceCounter}
                         onOpenImage={(img) => setActiveImage(img)}
+                        onEdit={(itemToEdit) => setEditingEvent(itemToEdit)}
                       />
                     );
                   })}
@@ -298,6 +354,33 @@ export function ItinerarySinglePageView({ events }: ItinerarySinglePageViewProps
       <ImageLightboxModal
         image={activeImage}
         onClose={() => setActiveImage(null)}
+      />
+
+      {/* Add Timeline Event Modal (Logged In Editor Only) */}
+      {tripId && (
+        <AddTimelineEventModal
+          isOpen={isAddEventModalOpen}
+          onClose={() => setIsAddEventModalOpen(false)}
+          tripId={tripId}
+          onEventCreated={handleEventCreated}
+          onOpenSqlModal={() => setIsSqlModalOpen(true)}
+        />
+      )}
+
+      {/* Edit Timeline Event Modal (Logged In Editor Only) */}
+      <EditTimelineEventModal
+        event={editingEvent}
+        isOpen={!!editingEvent}
+        onClose={() => setEditingEvent(null)}
+        onEventUpdated={handleEventUpdated}
+        onEventDeleted={handleEventDeleted}
+        onOpenSqlModal={() => setIsSqlModalOpen(true)}
+      />
+
+      {/* SQL Instruction Modal */}
+      <SqlInstructionModal
+        isOpen={isSqlModalOpen}
+        onClose={() => setIsSqlModalOpen(false)}
       />
     </section>
   );

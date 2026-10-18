@@ -1,0 +1,600 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { TimelineEvent } from '@/types/database.type';
+import { ItineraryService } from '@/services/itinerary.service';
+import { ImageUploadInput } from './ImageUploadInput';
+
+interface EditTimelineEventModalProps {
+  event: TimelineEvent | null;
+  isOpen: boolean;
+  onClose: () => void;
+  onEventUpdated: (updatedEvent: TimelineEvent) => void;
+  onEventDeleted?: (deletedEventId: number) => void;
+  onOpenSqlModal?: () => void;
+}
+
+interface ImageInputItem {
+  id: string;
+  url: string;
+  caption: string;
+  isRealPhoto: boolean;
+  cameraGear: string;
+  exifInfo: string;
+}
+
+export function EditTimelineEventModal({
+  event,
+  isOpen,
+  onClose,
+  onEventUpdated,
+  onEventDeleted,
+  onOpenSqlModal,
+}: EditTimelineEventModalProps) {
+  const [mounted, setMounted] = useState(false);
+
+  // Form states
+  const [dayNumber, setDayNumber] = useState<number>(1);
+  const [tripDate, setTripDate] = useState<string>('');
+  const [timeSlot, setTimeSlot] = useState<string>('');
+  const [locationName, setLocationName] = useState<string>('');
+  const [city, setCity] = useState<string>('Kyoto');
+  const [categoryTag, setCategoryTag] = useState<string>('SIGHTSEEING');
+  const [notes, setNotes] = useState<string>('');
+  const [images, setImages] = useState<ImageInputItem[]>([]);
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Pre-fill form when event changes
+  useEffect(() => {
+    if (event) {
+      setDayNumber(event.day_number);
+      setTripDate(event.trip_date);
+      setTimeSlot(event.time_slot);
+      setLocationName(event.location_name);
+      setCity(event.city || 'Kyoto');
+      setCategoryTag(event.category_tag || 'SIGHTSEEING');
+      setNotes(event.notes || '');
+
+      const initialImages: ImageInputItem[] = (event.images || []).map((img, idx) => ({
+        id: `img-${img.id || idx}`,
+        url: img.cloudinary_url || '',
+        caption: img.caption || '',
+        isRealPhoto: img.is_real_photo !== false,
+        cameraGear: img.camera_gear || 'Sony A6400 • 18-135mm',
+        exifInfo: img.exif_info || '',
+      }));
+
+      setImages(
+        initialImages.length > 0
+          ? initialImages
+          : [
+              {
+                id: `img-${Date.now()}`,
+                url: '',
+                caption: '',
+                isRealPhoto: true,
+                cameraGear: 'Sony A6400 • 18-135mm',
+                exifInfo: '35mm • f/4.0 • 1/250s • ISO 100',
+              },
+            ]
+      );
+      setErrorMessage(null);
+    }
+  }, [event]);
+
+  // Body scroll lock
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
+  // Handle Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
+  if (!isOpen || !mounted || !event) return null;
+
+  const addImageField = () => {
+    setImages((prev) => [
+      ...prev,
+      {
+        id: `img-${Date.now()}`,
+        url: '',
+        caption: '',
+        isRealPhoto: true,
+        cameraGear: 'Sony A6400 • 18-135mm',
+        exifInfo: '35mm • f/4.0 • 1/250s • ISO 100',
+      },
+    ]);
+  };
+
+  const removeImageField = (id: string) => {
+    setImages((prev) => prev.filter((img) => img.id !== id));
+  };
+
+  const updateImageField = (id: string, updates: Partial<ImageInputItem>) => {
+    setImages((prev) =>
+      prev.map((img) => (img.id === id ? { ...img, ...updates } : img))
+    );
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMessage(null);
+
+    if (!locationName.trim()) {
+      setErrorMessage('Vui lòng nhập tên địa điểm hoặc hoạt động.');
+      return;
+    }
+    if (!timeSlot.trim()) {
+      setErrorMessage('Vui lòng nhập khung giờ diễn ra.');
+      return;
+    }
+
+    const validImages = images
+      .filter((img) => img.url.trim())
+      .map((img) => ({
+        cloudinary_url: img.url.trim(),
+        caption: img.caption.trim() || null,
+        city,
+        camera_gear: img.cameraGear.trim() || null,
+        exif_info: img.exifInfo.trim() || null,
+        is_real_photo: img.isRealPhoto,
+        is_featured: false,
+        taken_at: tripDate,
+      }));
+
+    try {
+      setIsSubmitting(true);
+      const updatedEvent = await ItineraryService.updateTimelineEvent(
+        event.id,
+        {
+          day_number: Number(dayNumber),
+          trip_date: tripDate,
+          time_slot: timeSlot.trim(),
+          location_name: locationName.trim(),
+          city: city.trim(),
+          category_tag: categoryTag,
+          notes: notes.trim() || null,
+        },
+        validImages
+      );
+
+      onEventUpdated(updatedEvent);
+      onClose();
+    } catch (err: any) {
+      console.error('Lỗi khi cập nhật sự kiện timeline:', err);
+      if (err?.code === '42501' || err?.message?.includes('row-level security')) {
+        setErrorMessage(
+          'Supabase đang chặn quyền ghi dữ liệu (Row-Level Security). Vui lòng nhấn vào "Cấu hình SQL Supabase" để mở quyền.'
+        );
+        if (onOpenSqlModal) {
+          onOpenSqlModal();
+        }
+      } else {
+        setErrorMessage(err?.message || 'Không thể lưu thay đổi. Vui lòng kiểm tra lại kết nối.');
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    const confirmed = window.confirm(
+      `Bạn có chắc chắn muốn xóa mốc sự kiện "${event.location_name}" khỏi timeline không?`
+    );
+    if (!confirmed) return;
+
+    try {
+      setIsDeleting(true);
+      await ItineraryService.deleteTimelineEvent(event.id);
+      if (onEventDeleted) {
+        onEventDeleted(event.id);
+      }
+      onClose();
+    } catch (err: any) {
+      console.error('Lỗi khi xóa sự kiện timeline:', err);
+      if (err?.code === '42501' || err?.message?.includes('row-level security')) {
+        setErrorMessage(
+          'Supabase đang chặn quyền xóa dữ liệu (RLS). Vui lòng kiểm tra quyền trong Supabase.'
+        );
+        if (onOpenSqlModal) {
+          onOpenSqlModal();
+        }
+      } else {
+        setErrorMessage(err?.message || 'Không thể xóa sự kiện này.');
+      }
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  return createPortal(
+    <div
+      role="dialog"
+      aria-modal="true"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/65 backdrop-blur-xs animate-in fade-in duration-200"
+    >
+      {/* Click outside backdrop */}
+      <div
+        className="fixed inset-0"
+        onClick={onClose}
+        aria-hidden="true"
+      />
+
+      {/* Modal Dialog Card with Max Height & Internal Scroll */}
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-3xl max-h-[88vh] bg-white border border-[#E6E2DA] rounded-3xl shadow-2xl z-10 flex flex-col overflow-hidden animate-in zoom-in-95 duration-150"
+      >
+        {/* Fixed Header */}
+        <div className="flex items-center justify-between px-6 py-4 sm:px-8 sm:py-5 border-b border-[#F0ECE4] bg-white shrink-0">
+          <div>
+            <span className="inline-block text-[10px] font-mono uppercase tracking-widest text-[#B93829] font-bold">
+              BIÊN TẬP LỊCH TRÌNH
+            </span>
+            <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#1C1B18] mt-0.5 truncate max-w-md">
+              Chỉnh Sửa Mốc Sự Kiện: {event.location_name}
+            </h2>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {onOpenSqlModal && (
+              <button
+                type="button"
+                onClick={onOpenSqlModal}
+                className="hidden sm:flex text-xs font-mono text-[#B93829] hover:text-[#1C1B18] bg-rose-50 hover:bg-rose-100 border border-rose-200 px-3 py-1.5 rounded-xl transition-all items-center gap-1.5 cursor-pointer"
+              >
+                <span>⚡ SQL Supabase</span>
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-8 h-8 rounded-full bg-[#FAF8F5] hover:bg-stone-200 text-stone-600 hover:text-black flex items-center justify-center shadow-xs border border-[#E6E2DA] cursor-pointer text-sm font-bold transition-all hover:scale-105"
+              title="Đóng (Esc)"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+
+        {/* Scrollable Body Content */}
+        <div className="flex-1 overflow-y-auto px-6 py-6 sm:px-8 sm:py-6">
+          {errorMessage && (
+            <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-950 text-xs font-sans space-y-1 mb-6 animate-in fade-in duration-150">
+              <span className="font-bold text-rose-800">⚠️ Lỗi:</span>
+              <p>{errorMessage}</p>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Day Number, Date, Time Slot (3 columns) */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="space-y-1.5">
+                <label className="block text-xs font-mono uppercase tracking-wider font-semibold text-[#1C1B18]">
+                  Ngày thứ mấy <span className="text-[#B93829]">*</span>
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-mono text-[#78756E]">
+                    Ngày
+                  </span>
+                  <input
+                    type="number"
+                    min={1}
+                    max={30}
+                    required
+                    value={dayNumber}
+                    onChange={(e) => setDayNumber(Number(e.target.value))}
+                    className="w-full bg-[#FAF8F5] focus:bg-white border border-[#E6E2DA] focus:border-[#B93829] rounded-xl pl-16 pr-4 py-2.5 text-xs font-mono text-[#1C1B18] outline-hidden shadow-xs transition-colors"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-xs font-mono uppercase tracking-wider font-semibold text-[#1C1B18]">
+                  Ngày thực tế <span className="text-[#B93829]">*</span>
+                </label>
+                <input
+                  type="date"
+                  required
+                  value={tripDate}
+                  onChange={(e) => setTripDate(e.target.value)}
+                  className="w-full bg-[#FAF8F5] focus:bg-white border border-[#E6E2DA] focus:border-[#B93829] rounded-xl px-4 py-2.5 text-xs font-mono text-[#1C1B18] outline-hidden shadow-xs transition-colors"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-xs font-mono uppercase tracking-wider font-semibold text-[#1C1B18]">
+                  Khung giờ <span className="text-[#B93829]">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={timeSlot}
+                  onChange={(e) => setTimeSlot(e.target.value)}
+                  placeholder="VD: 08:30 - 10:30 hoặc 14:00"
+                  className="w-full bg-[#FAF8F5] focus:bg-white border border-[#E6E2DA] focus:border-[#B93829] rounded-xl px-4 py-2.5 text-xs font-mono text-[#1C1B18] outline-hidden shadow-xs transition-colors"
+                />
+              </div>
+            </div>
+
+            {/* Location Name & City (2 columns) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="block text-xs font-mono uppercase tracking-wider font-semibold text-[#1C1B18]">
+                  Tên địa điểm / Sự kiện <span className="text-[#B93829]">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={locationName}
+                  onChange={(e) => setLocationName(e.target.value)}
+                  placeholder="VD: Chùa Kinkaku-ji (Gác Vàng)..."
+                  className="w-full bg-[#FAF8F5] focus:bg-white border border-[#E6E2DA] focus:border-[#B93829] rounded-xl px-4 py-2.5 text-sm font-sans text-[#1C1B18] outline-hidden shadow-xs transition-colors"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-xs font-mono uppercase tracking-wider font-semibold text-[#1C1B18]">
+                  Thành phố <span className="text-[#B93829]">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  placeholder="VD: Kyoto, Tokyo, Osaka..."
+                  className="w-full bg-[#FAF8F5] focus:bg-white border border-[#E6E2DA] focus:border-[#B93829] rounded-xl px-4 py-2.5 text-xs font-mono text-[#1C1B18] outline-hidden shadow-xs transition-colors"
+                />
+              </div>
+            </div>
+
+            {/* Category Tag Selection */}
+            <div className="space-y-2">
+              <label className="block text-xs font-mono uppercase tracking-wider font-semibold text-[#1C1B18]">
+                Phân loại hoạt động (Category)
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                {[
+                  { key: 'SIGHTSEEING', label: '⛩️ Tham Quan' },
+                  { key: 'FOOD', label: '🍜 Ẩm Thực' },
+                  { key: 'TRANSIT', label: '🚄 Di Chuyển' },
+                  { key: 'HOTEL', label: '🏨 Khách Sạn' },
+                  { key: 'PHOTOGRAPHY', label: '📷 Chụp Ảnh' },
+                ].map((cat) => (
+                  <button
+                    key={cat.key}
+                    type="button"
+                    onClick={() => setCategoryTag(cat.key)}
+                    className={`py-2 px-3 rounded-xl border text-xs font-mono transition-all cursor-pointer text-center ${
+                      categoryTag === cat.key
+                        ? 'border-[#B93829] bg-rose-50 text-[#B93829] font-bold shadow-xs'
+                        : 'border-[#E6E2DA] hover:border-stone-400 bg-white text-[#57544E]'
+                    }`}
+                  >
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Notes & Tips */}
+            <div className="space-y-1.5">
+              <label className="block text-xs font-mono uppercase tracking-wider font-semibold text-[#1C1B18]">
+                Ghi chú chi tiết, góc chụp & kinh nghiệm thực tế
+              </label>
+              <textarea
+                rows={3}
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="VD: Nên đến trước 9h sáng..."
+                className="w-full bg-[#FAF8F5] focus:bg-white border border-[#E6E2DA] focus:border-[#B93829] rounded-xl p-4 text-xs font-sans text-[#1C1B18] outline-hidden shadow-xs transition-colors resize-y leading-relaxed"
+              />
+            </div>
+
+            {/* Attach Photos */}
+            <div className="space-y-4 pt-4 border-t border-[#F0ECE4]">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-serif text-base font-bold text-[#1C1B18]">
+                    Bộ sưu tập ảnh đính kèm mốc này
+                  </h4>
+                  <p className="font-mono text-[11px] text-[#78756E]">
+                    Sửa đổi, thêm ảnh mới hoặc đổi phân loại ảnh thực tế Sony A6400.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={addImageField}
+                  className="bg-white hover:bg-stone-50 border border-[#E6E2DA] text-[#1C1B18] hover:text-[#B93829] text-xs font-mono font-semibold px-3 py-1.5 rounded-xl transition-colors cursor-pointer flex items-center gap-1 shadow-2xs"
+                >
+                  <span>+ Thêm ảnh khác</span>
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                {images.map((img, index) => (
+                  <div
+                    key={img.id}
+                    className="p-4 rounded-2xl bg-[#FAF8F5] border border-[#E6E2DA] space-y-3 relative"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-mono font-bold text-[#1C1B18]">
+                        Ảnh #{index + 1}
+                      </span>
+                      {images.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeImageField(img.id)}
+                          className="text-xs font-mono text-rose-600 hover:text-rose-800 cursor-pointer"
+                        >
+                          ✕ Bỏ ảnh này
+                        </button>
+                      )}
+                    </div>
+
+                    <ImageUploadInput
+                      label="URL hoặc file ảnh"
+                      value={img.url}
+                      onChange={(url) => updateImageField(img.id, { url })}
+                      aspectRatio="photo"
+                    />
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                      <div className="space-y-1">
+                        <label className="block text-[10px] font-mono uppercase tracking-wider text-[#78756E]">
+                          Chú thích ảnh (Caption)
+                        </label>
+                        <input
+                          type="text"
+                          value={img.caption}
+                          onChange={(e) =>
+                            updateImageField(img.id, { caption: e.target.value })
+                          }
+                          placeholder="VD: Cổng Torii trong làn sương sớm"
+                          className="w-full bg-white border border-[#E6E2DA] focus:border-[#B93829] rounded-xl px-3 py-2 text-xs font-sans text-[#1C1B18] outline-hidden shadow-xs"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="block text-[10px] font-mono uppercase tracking-wider text-[#78756E]">
+                          Phân loại nguồn ảnh
+                        </label>
+                        <div className="flex items-center gap-2 pt-0.5">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              updateImageField(img.id, { isRealPhoto: true })
+                            }
+                            className={`flex-1 py-1.5 px-2 rounded-lg text-[11px] font-mono transition-all cursor-pointer text-center ${
+                              img.isRealPhoto
+                                ? 'bg-emerald-100 text-emerald-800 font-bold border border-emerald-300'
+                                : 'bg-white text-stone-500 border border-stone-200'
+                            }`}
+                          >
+                            ● Ảnh Sony A6400
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              updateImageField(img.id, { isRealPhoto: false })
+                            }
+                            className={`flex-1 py-1.5 px-2 rounded-lg text-[11px] font-mono transition-all cursor-pointer text-center ${
+                              !img.isRealPhoto
+                                ? 'bg-sky-100 text-sky-800 font-bold border border-sky-300'
+                                : 'bg-white text-stone-500 border border-stone-200'
+                            }`}
+                          >
+                            ○ Ảnh tham khảo web
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {img.isRealPhoto && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                        <div className="space-y-1">
+                          <label className="block text-[10px] font-mono uppercase tracking-wider text-[#78756E]">
+                            Thiết bị máy ảnh & Lens
+                          </label>
+                          <input
+                            type="text"
+                            value={img.cameraGear}
+                            onChange={(e) =>
+                              updateImageField(img.id, { cameraGear: e.target.value })
+                            }
+                            placeholder="Sony A6400 • 18-135mm"
+                            className="w-full bg-white border border-[#E6E2DA] focus:border-[#B93829] rounded-xl px-3 py-1.5 text-xs font-mono text-[#1C1B18] outline-hidden shadow-xs"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="block text-[10px] font-mono uppercase tracking-wider text-[#78756E]">
+                            Thông số EXIF
+                          </label>
+                          <input
+                            type="text"
+                            value={img.exifInfo}
+                            onChange={(e) =>
+                              updateImageField(img.id, { exifInfo: e.target.value })
+                            }
+                            placeholder="35mm • f/4.0 • 1/250s • ISO 100"
+                            className="w-full bg-white border border-[#E6E2DA] focus:border-[#B93829] rounded-xl px-3 py-1.5 text-xs font-mono text-[#1C1B18] outline-hidden shadow-xs"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Bottom Actions */}
+            <div className="pt-4 border-t border-[#F0ECE4] flex flex-wrap items-center justify-between gap-4">
+              <button
+                type="button"
+                disabled={isDeleting || isSubmitting}
+                onClick={handleDelete}
+                className="text-xs font-mono text-rose-700 hover:text-rose-900 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-4 py-2.5 rounded-xl transition-all cursor-pointer font-semibold disabled:opacity-50"
+              >
+                {isDeleting ? 'Đang xóa...' : '🗑️ Xóa sự kiện này'}
+              </button>
+
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="text-xs font-mono text-[#78756E] hover:text-[#1C1B18] px-4 py-2.5 rounded-xl border border-[#E6E2DA] hover:bg-[#FAF8F5] transition-all cursor-pointer"
+                >
+                  Hủy bỏ
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={isSubmitting || isDeleting}
+                  className="bg-[#B93829] hover:bg-[#1C1B18] text-white text-xs font-mono uppercase tracking-wider font-semibold px-6 py-2.5 rounded-xl transition-all shadow-md shadow-[#B93829]/20 flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Đang lưu thay đổi...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>✓ LƯU THAY ĐỔI</span>
+                      <span>→</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+}
+
+export default EditTimelineEventModal;

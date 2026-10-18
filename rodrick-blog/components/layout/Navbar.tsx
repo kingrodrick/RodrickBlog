@@ -1,13 +1,46 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useAuth } from '@/components/auth/AuthContext';
+import { LoginModal } from '@/components/auth/LoginModal';
 
 export function Navbar() {
+  const router = useRouter();
   const pathname = usePathname();
   const isTripPage = pathname.startsWith('/trips');
   const isHome = pathname === '/';
+  const { user, isLoggedIn, logout, setIsLoginModalOpen } = useAuth();
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close UserMenu on outside click or ESC key
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        userMenuRef.current &&
+        !userMenuRef.current.contains(event.target as Node)
+      ) {
+        setIsUserMenuOpen(false);
+      }
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setIsUserMenuOpen(false);
+      }
+    }
+
+    if (isUserMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isUserMenuOpen]);
 
   return (
     <header className="sticky top-0 z-40 bg-[#FAF8F5]/90 backdrop-blur-md border-b border-[#E6E2DA]">
@@ -25,14 +58,6 @@ export function Navbar() {
               Ký sự du lịch & nhiếp ảnh Sony A6400
             </span>
           </Link>
-
-          {isTripPage && (
-            <div className="hidden lg:flex items-center gap-1.5 pl-3 border-l border-[#E6E2DA] text-[11px] font-mono text-[#B93829]">
-              <span className="px-2 py-0.5 rounded bg-rose-50 border border-rose-200 font-semibold">
-                📍 CHI TIẾT HÀNH TRÌNH
-              </span>
-            </div>
-          )}
         </div>
 
         {/* Menu Links */}
@@ -98,11 +123,90 @@ export function Navbar() {
             </Link>
           )}
 
-          <div className="w-8 h-8 rounded-full bg-[#B93829] text-white flex items-center justify-center text-xs font-bold font-serif shadow-xs">
-            R
-          </div>
+          {/* User Auth: Login Button or Avatar if logged in */}
+          {!isLoggedIn ? (
+            <button
+              type="button"
+              onClick={() => setIsLoginModalOpen(true)}
+              title="Đăng nhập tài khoản quản trị"
+              className="bg-[#B93829] hover:bg-[#1C1B18] text-white text-xs font-mono uppercase tracking-wider font-semibold px-3.5 py-2 rounded-md transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+            >
+              <span>ĐĂNG NHẬP</span>
+            </button>
+          ) : (
+            <div className="relative" ref={userMenuRef}>
+              <button
+                type="button"
+                onClick={() => setIsUserMenuOpen((prev) => !prev)}
+                className="relative flex items-center focus:outline-hidden cursor-pointer group"
+                title={`Tài khoản: ${user?.name}`}
+                aria-expanded={isUserMenuOpen}
+                aria-haspopup="true"
+              >
+                <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-[#B93829] shadow-xs group-hover:scale-105 transition-transform bg-[#F3F0EA]">
+                  <img
+                    src={user?.avatar}
+                    alt={user?.name || 'User'}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white" />
+              </button>
+
+              {/* Dropdown Menu */}
+              {isUserMenuOpen && (
+                <div className="absolute right-0 mt-2.5 w-64 bg-white border border-[#E6E2DA] rounded-2xl shadow-xl p-3.5 z-50 space-y-3 animate-in fade-in zoom-in-95 duration-150">
+                  <div className="flex items-center gap-3 border-b border-[#F0ECE4] pb-3">
+                      <img
+                        src={user?.avatar}
+                        alt={user?.name}
+                        className="w-10 h-10 rounded-full object-cover border border-[#E6E2DA]"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <h4 className="font-serif text-sm font-bold text-[#1C1B18] truncate leading-tight">
+                          {user?.name}
+                        </h4>
+                        <p className="font-mono text-[10px] text-[#78756E] truncate mt-0.5">
+                          @{user?.username}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="text-[11px] font-mono text-[#57544E] space-y-1.5 bg-[#FAF8F5] p-2.5 rounded-xl border border-[#EFECE4]">
+                      <div className="flex items-center justify-between">
+                        <span>Vai trò:</span>
+                        <span className="font-semibold text-[#B93829]">Tác giả / Admin</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span>Quyền hạn:</span>
+                        <span className="text-emerald-700 font-semibold">Chỉnh sửa kế hoạch</span>
+                      </div>
+                    </div>
+
+                    <div className="pt-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsUserMenuOpen(false);
+                          logout();
+                          if (pathname.startsWith('/editor') || pathname.startsWith('/admin')) {
+                            router.replace('/');
+                          }
+                        }}
+                        className="w-full text-left px-3 py-2 rounded-xl text-xs font-mono text-rose-700 bg-rose-50 hover:bg-rose-200 transition-colors flex items-center justify-center cursor-pointer font-semibold"
+                      >
+                        <span>Đăng xuất</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
         </div>
       </div>
+
+      {/* Login Modal */}
+      <LoginModal />
     </header>
   );
 }

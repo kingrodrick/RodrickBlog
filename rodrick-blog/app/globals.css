@@ -36,3 +36,16 @@ body {
 h1, h2, h3, h4, h5, h6, .font-serif, .font-mono {
   font-family: var(--font-plus-jakarta), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
+
+@keyframes tripLoadingBar {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(250%);
+  }
+}
+
+.animate-trip-loading {
+  animation: tripLoadingBar 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}

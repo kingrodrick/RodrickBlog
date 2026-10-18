@@ -1,0 +1,118 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { useRouter } from 'next/navigation';
+import { TripForm } from './TripForm';
+import { Trip } from '@/types/database.type';
+
+interface CreateTripModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onOpenSqlModal?: () => void;
+}
+
+export function CreateTripModal({ isOpen, onClose, onOpenSqlModal }: CreateTripModalProps) {
+  const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Body scroll lock
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
+  // Handle Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
+  if (!isOpen || !mounted) return null;
+
+  const handleTripCreated = (newTrip: Trip) => {
+    onClose();
+    router.push(`/trips/${newTrip.slug}`);
+  };
+
+  return createPortal(
+    <div
+      role="dialog"
+      aria-modal="true"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/65 backdrop-blur-xs animate-in fade-in duration-200"
+    >
+      {/* Click outside backdrop */}
+      <div
+        className="fixed inset-0"
+        onClick={onClose}
+        aria-hidden="true"
+      />
+
+      {/* Modal Dialog Card with Max Height & Internal Scroll */}
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-3xl max-h-[88vh] bg-white border border-[#E6E2DA] rounded-3xl shadow-2xl z-10 flex flex-col overflow-hidden animate-in zoom-in-95 duration-150"
+      >
+        {/* Fixed Header */}
+        <div className="flex items-center justify-between px-6 py-4 sm:px-8 sm:py-5 border-b border-[#F0ECE4] bg-white shrink-0">
+          <div>
+            <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#1C1B18] mt-0.5">
+              Thêm Chuyến Du Lịch Mới
+            </h2>
+            <p className="font-sans text-xs text-[#78756E] mt-0.5">
+              Điền thông tin tổng quan, lịch trình từ ngày đến ngày và ảnh bìa đại diện.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {onOpenSqlModal && (
+              <button
+                type="button"
+                onClick={onOpenSqlModal}
+                className="hidden sm:flex text-xs font-mono text-[#B93829] hover:text-[#1C1B18] bg-rose-50 hover:bg-rose-100 border border-rose-200 px-3 py-1.5 rounded-xl transition-all items-center gap-1.5 cursor-pointer"
+              >
+                <span>⚡ SQL Supabase</span>
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-8 h-8 rounded-full bg-[#FAF8F5] hover:bg-stone-200 text-stone-600 hover:text-black flex items-center justify-center shadow-xs border border-[#E6E2DA] cursor-pointer text-sm font-bold transition-all hover:scale-105"
+              title="Đóng (Esc)"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+
+        {/* Scrollable Body Content */}
+        <div className="flex-1 overflow-y-auto px-6 py-6 sm:px-8 sm:py-6">
+          <TripForm
+            onTripCreated={handleTripCreated}
+            onOpenSqlModal={onOpenSqlModal}
+            modalMode={true}
+            hideHeader={true}
+          />
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+}
+
+export default CreateTripModal;

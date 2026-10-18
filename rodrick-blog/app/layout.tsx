@@ -3,6 +3,7 @@ import { Plus_Jakarta_Sans, Inter } from 'next/font/google';
 import './globals.css';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
+import { AuthProvider } from '@/components/auth/AuthContext';
 
 const plusJakarta = Plus_Jakarta_Sans({
   subsets: ['latin', 'vietnamese'],
@@ -17,13 +18,19 @@ const inter = Inter({
   subsets: ['latin', 'vietnamese'],
   // 🌟 Đẩy trọng số Body từ 300/400 lên các mức đậm đà hơn (400, 500, 600, 700)
   weight: ['400', '500', '600', '700'],
+  style: ['normal', 'italic'],
   variable: '--font-inter',
   display: 'swap',
 });
 
 export const metadata: Metadata = {
-  title: 'RODRICK • Ký Sự Du Lịch, Kiến Trúc Code & Tạp Bút',
-  description: 'Một khu vườn số lưu giữ những chặng hành trình xê dịch, những dòng code kiến tạo sản phẩm và những tản văn chiêm nghiệm.',
+  title: 'RODRICK BLOG',
+  description: 'Nơi tôi lưu trữ những kỉ niệm vui vẻ của mình',
+  icons: {
+    icon: '/icon.svg',
+    shortcut: '/icon.svg',
+    apple: '/icon.svg',
+  },
 };
 
 export default function RootLayout({
@@ -38,11 +45,13 @@ export default function RootLayout({
       style={{ backgroundColor: '#FAF8F5' }}
     >
       <body className="bg-[#FAF8F5] text-[#1A1A1A] font-sans font-medium antialiased selection:bg-[#B61C25]/15 selection:text-[#B61C25] min-h-screen flex flex-col">
-        <Navbar />
-        <div className="flex-1 bg-[#FAF8F5]">
-          {children}
-        </div>
-        <Footer />
+        <AuthProvider>
+          <Navbar />
+          <div className="flex-1 bg-[#FAF8F5]">
+            {children}
+          </div>
+          <Footer />
+        </AuthProvider>
       </body>
     </html>
   );
