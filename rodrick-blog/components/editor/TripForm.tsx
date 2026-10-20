@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { ItineraryService } from '@/services/itinerary.service';
 import { ImageUploadInput } from './ImageUploadInput';
+import { slugifyFolderName } from '@/lib/cloudinary';
 import { Trip } from '@/types/database.type';
 
 interface TripFormProps {
@@ -325,6 +326,7 @@ export function TripForm({
             onChange={setCoverImage}
             helperText="Ảnh bìa sẽ được hiển thị ở đầu trang chi tiết và thẻ chuyến đi trên trang chủ."
             aspectRatio="banner"
+            folder={slug.trim() || slugifyFolderName(title) || 'trips'}
           />
         </div>
 

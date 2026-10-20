@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { Trip } from '@/types/database.type';
 import { ItineraryService } from '@/services/itinerary.service';
 import { ImageUploadInput } from './ImageUploadInput';
+import { slugifyFolderName } from '@/lib/cloudinary';
 
 interface EditTripModalProps {
   trip: Trip | null;
@@ -385,6 +386,7 @@ export function EditTripModal({
                 onChange={setCoverImage}
                 helperText="Ảnh bìa sẽ hiển thị trên trang chủ và đầu trang chi tiết chuyến đi."
                 aspectRatio="banner"
+                folder={slug.trim() || trip?.slug || slugifyFolderName(title) || 'trips'}
               />
             </div>
           </form>

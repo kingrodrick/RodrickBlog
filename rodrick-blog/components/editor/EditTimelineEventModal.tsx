@@ -1,10 +1,15 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { TimelineEvent } from '@/types/database.type';
 import { ItineraryService } from '@/services/itinerary.service';
 import { TimelinePhotosManager, TimelineImageItem } from './TimelinePhotosManager';
+import {
+  parseTimeSlotRange,
+  formatTimeSlotRange,
+  calculateDayNumberFromDates,
+} from '@/lib/timeUtils';
 
 interface EditTimelineEventModalProps {
   event: TimelineEvent | null;
@@ -13,6 +18,9 @@ interface EditTimelineEventModalProps {
   onEventUpdated: (updatedEvent: TimelineEvent) => void;
   onEventDeleted?: (deletedEventId: number) => void;
   onOpenSqlModal?: () => void;
+  existingDates?: string[];
+  tripSlug?: string;
+  tripTitle?: string;
 }
 
 export function EditTimelineEventModal({
@@ -22,13 +30,18 @@ export function EditTimelineEventModal({
   onEventUpdated,
   onEventDeleted,
   onOpenSqlModal,
+  existingDates,
+  tripSlug,
+  tripTitle,
 }: EditTimelineEventModalProps) {
   const [mounted, setMounted] = useState(false);
 
   // Form states
-  const [dayNumber, setDayNumber] = useState<number>(1);
   const [tripDate, setTripDate] = useState<string>('');
-  const [timeSlot, setTimeSlot] = useState<string>('');
+  const [startTime, setStartTime] = useState<string>('09:00');
+  const [endTime, setEndTime] = useState<string>('11:00');
+  const [isOvernight, setIsOvernight] = useState<boolean>(false);
+  const [allTripDates, setAllTripDates] = useState<string[]>(existingDates || []);
   const [locationName, setLocationName] = useState<string>('');
   const [city, setCity] = useState<string>('Kyoto');
   const [categoryTag, setCategoryTag] = useState<string>('SIGHTSEEING');
@@ -43,12 +56,28 @@ export function EditTimelineEventModal({
     setMounted(true);
   }, []);
 
+  // Fetch all trip dates if not passed via props
+  useEffect(() => {
+    if (existingDates && existingDates.length > 0) {
+      setAllTripDates(existingDates);
+    } else if (event?.trip_id) {
+      ItineraryService.getTimelineWithImages(event.trip_id)
+        .then((events) => {
+          const dates = Array.from(new Set(events.map((e) => e.trip_date).filter(Boolean)));
+          setAllTripDates(dates);
+        })
+        .catch(console.error);
+    }
+  }, [existingDates, event?.trip_id]);
+
   // Pre-fill form when event changes
   useEffect(() => {
     if (event) {
-      setDayNumber(event.day_number);
-      setTripDate(event.trip_date);
-      setTimeSlot(event.time_slot);
+      setTripDate(event.trip_date || '');
+      const parsed = parseTimeSlotRange(event.time_slot);
+      setStartTime(parsed.startTime || '09:00');
+      setEndTime(parsed.endTime || '11:00');
+      setIsOvernight(parsed.isOvernight);
       setLocationName(event.location_name);
       setCity(event.city || 'Kyoto');
       setCategoryTag(event.category_tag || 'SIGHTSEEING');
@@ -104,6 +133,54 @@ export function EditTimelineEventModal({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
+  // Auto-calculated day number from tripDate and allTripDates
+  const effectiveDates = useMemo(() => {
+    const list = [...allTripDates];
+    if (tripDate && !list.includes(tripDate)) {
+      list.push(tripDate);
+    }
+    return list;
+  }, [allTripDates, tripDate]);
+
+  const calculatedDayNumber = useMemo(() => {
+    return calculateDayNumberFromDates(tripDate, effectiveDates);
+  }, [tripDate, effectiveDates]);
+
+  // Check if date is changed to a new date that is earlier than the earliest existing trip date
+  const earliestTripDate = useMemo(() => {
+    return allTripDates.length > 0 ? [...allTripDates].sort()[0] : null;
+  }, [allTripDates]);
+
+  // Chỉ cảnh báo khi người dùng thực sự thay đổi ngày của sự kiện này sang một ngày mới
+  // sớm hơn ngày đầu tiên hiện tại của toàn bộ chuyến đi
+  const isEarlierThanSchedule = Boolean(
+    earliestTripDate &&
+    tripDate &&
+    event?.trip_date &&
+    tripDate !== event.trip_date &&
+    tripDate < earliestTripDate &&
+    !allTripDates.includes(tripDate)
+  );
+
+  // Live formatted preview for the time slot
+  const timeSlotPreview = useMemo(() => {
+    return formatTimeSlotRange(startTime, endTime, tripDate, isOvernight);
+  }, [startTime, endTime, tripDate, isOvernight]);
+
+  const handleStartTimeChange = (val: string) => {
+    setStartTime(val);
+    if (val && endTime && val > endTime) {
+      setIsOvernight(true);
+    }
+  };
+
+  const handleEndTimeChange = (val: string) => {
+    setEndTime(val);
+    if (startTime && val && startTime > val) {
+      setIsOvernight(true);
+    }
+  };
+
   if (!isOpen || !mounted || !event) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -114,10 +191,12 @@ export function EditTimelineEventModal({
       setErrorMessage('Vui lòng nhập tên địa điểm hoặc hoạt động.');
       return;
     }
-    if (!timeSlot.trim()) {
-      setErrorMessage('Vui lòng nhập khung giờ diễn ra.');
+    if (!startTime.trim() || !endTime.trim()) {
+      setErrorMessage('Vui lòng chọn đầy đủ giờ bắt đầu và giờ kết thúc.');
       return;
     }
+
+    const finalTimeSlot = formatTimeSlotRange(startTime, endTime, tripDate, isOvernight);
 
     const validImages = images
       .filter((img) => img.url.trim())
@@ -137,9 +216,9 @@ export function EditTimelineEventModal({
       const updatedEvent = await ItineraryService.updateTimelineEvent(
         event.id,
         {
-          day_number: Number(dayNumber),
+          day_number: calculatedDayNumber,
           trip_date: tripDate,
-          time_slot: timeSlot.trim(),
+          time_slot: finalTimeSlot,
           location_name: locationName.trim(),
           city: city.trim(),
           category_tag: categoryTag,
@@ -257,28 +336,8 @@ export function EditTimelineEventModal({
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Day Number, Date, Time Slot (3 columns) */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="space-y-1.5">
-                <label className="block text-xs font-mono uppercase tracking-wider font-semibold text-[#1C1B18]">
-                  Ngày thứ mấy <span className="text-[#B93829]">*</span>
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-mono text-[#78756E]">
-                    Ngày
-                  </span>
-                  <input
-                    type="number"
-                    min={1}
-                    max={30}
-                    required
-                    value={dayNumber}
-                    onChange={(e) => setDayNumber(Number(e.target.value))}
-                    className="w-full bg-[#FAF8F5] focus:bg-white border border-[#E6E2DA] focus:border-[#B93829] rounded-xl pl-16 pr-4 py-2.5 text-xs font-mono text-[#1C1B18] outline-hidden shadow-xs transition-colors"
-                  />
-                </div>
-              </div>
-
+            {/* Real Date & Auto-calculated Day Number */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <label className="block text-xs font-mono uppercase tracking-wider font-semibold text-[#1C1B18]">
                   Ngày thực tế <span className="text-[#B93829]">*</span>
@@ -288,22 +347,90 @@ export function EditTimelineEventModal({
                   required
                   value={tripDate}
                   onChange={(e) => setTripDate(e.target.value)}
-                  className="w-full bg-[#FAF8F5] focus:bg-white border border-[#E6E2DA] focus:border-[#B93829] rounded-xl px-4 py-2.5 text-xs font-mono text-[#1C1B18] outline-hidden shadow-xs transition-colors"
+                  className="w-full bg-[#FAF8F5] focus:bg-white border border-[#E6E2DA] focus:border-[#B93829] rounded-xl px-4 py-2.5 text-xs font-mono text-[#1C1B18] outline-hidden shadow-xs transition-colors cursor-pointer"
                 />
               </div>
 
               <div className="space-y-1.5">
                 <label className="block text-xs font-mono uppercase tracking-wider font-semibold text-[#1C1B18]">
-                  Khung giờ <span className="text-[#B93829]">*</span>
+                  Thứ tự ngày <span className="text-stone-400 font-normal font-sans">(Tự động sắp xếp)</span>
                 </label>
-                <input
-                  type="text"
-                  required
-                  value={timeSlot}
-                  onChange={(e) => setTimeSlot(e.target.value)}
-                  placeholder="VD: 08:30 - 10:30 hoặc 14:00"
-                  className="w-full bg-[#FAF8F5] focus:bg-white border border-[#E6E2DA] focus:border-[#B93829] rounded-xl px-4 py-2.5 text-xs font-mono text-[#1C1B18] outline-hidden shadow-xs transition-colors"
-                />
+                <div className="flex items-center gap-2 h-[41px] px-4 rounded-xl bg-[#FAF8F5] border border-[#E6E2DA] text-xs font-mono font-bold text-[#1C1B18]">
+                  <span className="w-2 h-2 rounded-full bg-[#B93829]" />
+                  <span>Ngày {calculatedDayNumber}</span>
+                  <span className="text-[10px] font-normal text-stone-500 ml-auto font-sans">
+                    Đồng bộ tự động
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Smart Banner if this date is earlier than earliest trip date */}
+            {isEarlierThanSchedule && earliestTripDate && (
+              <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200 text-amber-950 text-xs font-sans space-y-1 animate-in fade-in duration-150">
+                <div className="flex items-center gap-1.5 font-bold text-amber-900">
+                  <span>💡</span>
+                  <span>Ngày mới chọn ({tripDate}) sớm hơn ngày đầu tiên hiện tại ({earliestTripDate}):</span>
+                </div>
+                <p className="text-[11px] text-amber-800 leading-relaxed">
+                  Sự kiện sẽ tự động trở thành <strong>Ngày 1</strong> của chuyến đi. Hệ thống sẽ tự động cập nhật ngày {earliestTripDate} thành <strong>Ngày 2</strong> và điều chỉnh các ngày sau tương ứng sau khi bạn lưu.
+                </p>
+              </div>
+            )}
+
+            {/* Structured Time Slot Selector (Start Time -> End Time, Overnight Support) */}
+            <div className="p-4 rounded-2xl bg-[#FAF8F5] border border-[#E6E2DA] space-y-3">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <label className="block text-xs font-mono uppercase tracking-wider font-semibold text-[#1C1B18]">
+                  Khung giờ hoạt động <span className="text-[#B93829]">*</span>
+                </label>
+                {timeSlotPreview && (
+                  <span className="text-[11px] font-mono font-bold text-[#B93829] bg-white px-2.5 py-0.5 rounded-lg border border-rose-200 shadow-2xs">
+                    ⏱️ {timeSlotPreview}
+                  </span>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <span className="text-[11px] font-mono text-[#78756E] block">Từ (Giờ bắt đầu)</span>
+                  <input
+                    type="time"
+                    required
+                    value={startTime}
+                    onChange={(e) => handleStartTimeChange(e.target.value)}
+                    className="w-full bg-white focus:bg-white border border-[#E6E2DA] focus:border-[#B93829] rounded-xl px-3 py-2 text-xs font-mono text-[#1C1B18] outline-hidden shadow-xs transition-colors"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <span className="text-[11px] font-mono text-[#78756E] block">Đến (Giờ kết thúc)</span>
+                  <input
+                    type="time"
+                    required
+                    value={endTime}
+                    onChange={(e) => handleEndTimeChange(e.target.value)}
+                    className="w-full bg-white focus:bg-white border border-[#E6E2DA] focus:border-[#B93829] rounded-xl px-3 py-2 text-xs font-mono text-[#1C1B18] outline-hidden shadow-xs transition-colors"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-1 flex items-center justify-between flex-wrap gap-2">
+                <label className="inline-flex items-center gap-2 cursor-pointer text-xs font-mono text-[#57534E] hover:text-[#1C1B18] select-none">
+                  <input
+                    type="checkbox"
+                    checked={isOvernight}
+                    onChange={(e) => setIsOvernight(e.target.checked)}
+                    className="rounded text-[#B93829] focus:ring-[#B93829] border-stone-300 w-4 h-4 cursor-pointer"
+                  />
+                  <span>Chặng qua đêm (sang ngày hôm sau / +1 ngày)</span>
+                </label>
+
+                {isOvernight && (
+                  <span className="text-[10px] font-mono text-[#B93829] bg-rose-50 px-2 py-0.5 rounded border border-rose-200 font-semibold">
+                    🌙 Chuyển tiếp qua ngày kế tiếp
+                  </span>
+                )}
               </div>
             </div>
 
@@ -386,6 +513,9 @@ export function EditTimelineEventModal({
               images={images}
               onChange={setImages}
               city={city}
+              tripSlug={tripSlug}
+              tripTitle={tripTitle}
+              tripDate={tripDate}
             />
 
             {/* Bottom Actions */}

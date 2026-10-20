@@ -11,6 +11,7 @@ interface AddTimelineEventModalProps {
   tripId: number;
   onEventCreated: (newEvent: TimelineEvent) => void;
   onOpenSqlModal?: () => void;
+  existingDates?: string[];
 }
 
 export function AddTimelineEventModal({
@@ -19,6 +20,7 @@ export function AddTimelineEventModal({
   tripId,
   onEventCreated,
   onOpenSqlModal,
+  existingDates,
 }: AddTimelineEventModalProps) {
   const [mounted, setMounted] = useState(false);
 
@@ -112,6 +114,7 @@ export function AddTimelineEventModal({
             onOpenSqlModal={onOpenSqlModal}
             hideHeader={true}
             hideTripSelector={true}
+            existingDates={existingDates}
           />
         </div>
       </div>

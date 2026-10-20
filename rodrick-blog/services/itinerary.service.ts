@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { TimelineEvent, Trip, GalleryImage } from '@/types/database.type';
+import { sortTimelineEvents } from '@/lib/timeUtils';
 
 export interface TripWithDetails extends Trip {
   timeline_events?: (TimelineEvent & {
@@ -35,7 +36,14 @@ export const ItineraryService = {
       throw new Error(`Lỗi truy vấn danh sách chuyến đi: ${error.message}`);
     }
 
-    return (data ?? []) as TripWithDetails[];
+    const trips = (data ?? []) as TripWithDetails[];
+    trips.forEach((trip) => {
+      if (trip.timeline_events) {
+        trip.timeline_events = sortTimelineEvents(trip.timeline_events);
+      }
+    });
+
+    return trips;
   },
 
   // Lấy chi tiết chuyến đi theo slug
@@ -54,6 +62,22 @@ export const ItineraryService = {
     return data as Trip;
   },
 
+  // Lấy chi tiết chuyến đi theo ID
+  async getTripById(id: number): Promise<Trip | null> {
+    const { data, error } = await supabase
+      .from('trips')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      console.warn(`Không tìm thấy chuyến đi id ${id}: ${error.message}`);
+      return null;
+    }
+
+    return data as Trip;
+  },
+
   // Lấy toàn bộ mốc thời gian kèm theo các bức ảnh thuộc mốc đó từ bảng images
   async getTimelineWithImages(tripId = 1): Promise<TimelineEvent[]> {
     const { data, error } = await supabase
@@ -65,14 +89,14 @@ export const ItineraryService = {
       `
       )
       .eq('trip_id', tripId)
-      .order('day_number', { ascending: true })
-      .order('time_slot', { ascending: true });
+      .order('trip_date', { ascending: true })
+      .order('day_number', { ascending: true });
 
     if (error) {
       throw new Error(`Lỗi truy vấn lịch trình: ${error.message}`);
     }
 
-    return (data ?? []) as TimelineEvent[];
+    return sortTimelineEvents((data ?? []) as TimelineEvent[]);
   },
 
   // ==========================================
@@ -217,8 +241,9 @@ export const ItineraryService = {
       .eq('id', event.id)
       .single();
 
-    if (fullError) {
-      console.warn('Không thể nạp lại sự kiện sau khi tạo:', fullError.message);
+    // Tự động đồng bộ lại day_number cho toàn bộ chuyến đi
+    if (event?.trip_id) {
+      await this.syncTripTimelineDayNumbers(event.trip_id);
     }
 
     return (fullEvent || event) as TimelineEvent;
@@ -322,11 +347,22 @@ export const ItineraryService = {
       }
     }
 
+    const tripIdToSync = updatedEvent.trip_id || result.trip_id;
+    if (tripIdToSync) {
+      await this.syncTripTimelineDayNumbers(tripIdToSync);
+    }
+
     return result;
   },
 
   // Xóa mốc sự kiện timeline
   async deleteTimelineEvent(id: number): Promise<void> {
+    const { data: event } = await supabase
+      .from('timeline_events')
+      .select('trip_id')
+      .eq('id', id)
+      .single();
+
     const { error } = await supabase
       .from('timeline_events')
       .delete()
@@ -334,6 +370,63 @@ export const ItineraryService = {
 
     if (error) {
       throw error;
+    }
+
+    if (event?.trip_id) {
+      await this.syncTripTimelineDayNumbers(event.trip_id);
+    }
+  },
+
+  // Tự động đồng bộ số thứ tự ngày (day_number) dựa trên ngày thực tế (trip_date)
+  async syncTripTimelineDayNumbers(tripId: number): Promise<void> {
+    try {
+      const { data: events, error } = await supabase
+        .from('timeline_events')
+        .select('id, day_number, trip_date')
+        .eq('trip_id', tripId);
+
+      if (error || !events || events.length === 0) return;
+
+      // Danh sách tất cả các ngày duy nhất được sắp xếp từ sớm nhất đến muộn nhất
+      const uniqueDates = Array.from(
+        new Set(events.map((e) => e.trip_date).filter(Boolean))
+      ).sort();
+
+      if (uniqueDates.length === 0) return;
+
+      // Map mỗi ngày thực tế tới số thứ tự ngày: Day 1, Day 2, Day 3...
+      const dateToDayMap: Record<string, number> = {};
+      uniqueDates.forEach((date, idx) => {
+        dateToDayMap[date] = idx + 1;
+      });
+
+      // Cập nhật lại day_number cho các event bị lệch
+      for (const ev of events) {
+        const correctDay = dateToDayMap[ev.trip_date];
+        if (correctDay && ev.day_number !== correctDay) {
+          await supabase
+            .from('timeline_events')
+            .update({ day_number: correctDay })
+            .eq('id', ev.id);
+        }
+      }
+
+      // Cập nhật start_date của chuyến đi nếu ngày sớm nhất sớm hơn
+      const earliestDate = uniqueDates[0];
+      const { data: trip } = await supabase
+        .from('trips')
+        .select('start_date')
+        .eq('id', tripId)
+        .single();
+
+      if (trip && earliestDate && (!trip.start_date || trip.start_date !== earliestDate)) {
+        await supabase
+          .from('trips')
+          .update({ start_date: earliestDate })
+          .eq('id', tripId);
+      }
+    } catch (err) {
+      console.warn('Lỗi khi tự động đồng bộ day_number của chuyến đi:', err);
     }
   },
 };

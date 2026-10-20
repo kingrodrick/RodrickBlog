@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { TimelineEvent, GalleryImage } from '@/types/database.type';
+import { TimelineEvent, GalleryImage, Trip } from '@/types/database.type';
 import { DayFilterTabs } from './DayFilterTabs';
 import { TimelineItemCard } from './TimelineItemCard';
 import { ImageLightboxModal } from '@/components/gallery/ImageLightboxModal';
@@ -9,16 +9,25 @@ import { useAuth } from '@/components/auth/AuthContext';
 import { AddTimelineEventModal } from '@/components/editor/AddTimelineEventModal';
 import { EditTimelineEventModal } from '@/components/editor/EditTimelineEventModal';
 import { SqlInstructionModal } from '@/components/editor/SqlInstructionModal';
+import { sortTimelineEvents } from '@/lib/timeUtils';
+import { ItineraryService } from '@/services/itinerary.service';
 
 interface ItinerarySinglePageViewProps {
   events: TimelineEvent[];
   tripId?: number;
   tripTitle?: string;
+  trip?: Trip;
 }
 
-export function ItinerarySinglePageView({ events, tripId, tripTitle }: ItinerarySinglePageViewProps) {
+export function ItinerarySinglePageView({
+  events,
+  tripId,
+  tripTitle,
+  trip,
+}: ItinerarySinglePageViewProps) {
   const { isLoggedIn } = useAuth();
-  const [eventList, setEventList] = useState<TimelineEvent[]>(events);
+  const [currentTrip, setCurrentTrip] = useState<Trip | null>(trip || null);
+  const [eventList, setEventList] = useState<TimelineEvent[]>(() => sortTimelineEvents(events));
   const [isAddEventModalOpen, setIsAddEventModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<TimelineEvent | null>(null);
   const [isSqlModalOpen, setIsSqlModalOpen] = useState(false);
@@ -27,23 +36,56 @@ export function ItinerarySinglePageView({ events, tripId, tripTitle }: Itinerary
   const [activeImage, setActiveImage] = useState<GalleryImage | null>(null);
 
   useEffect(() => {
-    setEventList(events);
+    setEventList(sortTimelineEvents(events));
   }, [events]);
 
+  // Sync trip when prop changes or load by tripId
+  useEffect(() => {
+    if (trip) {
+      setCurrentTrip(trip);
+    } else if (tripId) {
+      ItineraryService.getTripById(tripId)
+        .then((data) => {
+          if (data) setCurrentTrip(data);
+        })
+        .catch(console.error);
+    }
+  }, [trip, tripId]);
+
+  const refreshTimeline = async () => {
+    if (tripId) {
+      try {
+        const [freshEvents, freshTrip] = await Promise.all([
+          ItineraryService.getTimelineWithImages(tripId),
+          ItineraryService.getTripById(tripId),
+        ]);
+        setEventList(sortTimelineEvents(freshEvents));
+        if (freshTrip) {
+          setCurrentTrip(freshTrip);
+        }
+      } catch (err) {
+        console.error('Lỗi làm mới timeline:', err);
+      }
+    }
+  };
+
   const handleEventCreated = (newEvent: TimelineEvent) => {
-    setEventList((prev) => [...prev, newEvent]);
+    setEventList((prev) => sortTimelineEvents([...prev, newEvent]));
+    refreshTimeline();
   };
 
   const handleEventUpdated = (updatedEvent: TimelineEvent) => {
     setEventList((prev) =>
-      prev.map((ev) => (ev.id === updatedEvent.id ? updatedEvent : ev))
+      sortTimelineEvents(prev.map((ev) => (ev.id === updatedEvent.id ? updatedEvent : ev)))
     );
     setEditingEvent(null);
+    refreshTimeline();
   };
 
   const handleEventDeleted = (deletedEventId: number) => {
     setEventList((prev) => prev.filter((ev) => ev.id !== deletedEventId));
     setEditingEvent(null);
+    refreshTimeline();
   };
 
   // Extract distinct days & cities
@@ -63,6 +105,10 @@ export function ItinerarySinglePageView({ events, tripId, tripTitle }: Itinerary
     return map;
   }, [eventList]);
 
+  const existingDates = useMemo(() => {
+    return Array.from(new Set(eventList.map((e) => e.trip_date).filter(Boolean)));
+  }, [eventList]);
+
   const cities = useMemo(() => {
     const citySet = new Set<string>();
     eventList.forEach((e) => {
@@ -71,13 +117,14 @@ export function ItinerarySinglePageView({ events, tripId, tripTitle }: Itinerary
     return Array.from(citySet).sort();
   }, [eventList]);
 
-  // Filter events by day and city
+  // Filter events by day and city (always sorted chronologically)
   const filteredEvents = useMemo(() => {
-    return eventList.filter((e) => {
+    const list = eventList.filter((e) => {
       const matchDay = selectedDay === 'all' || e.day_number === selectedDay;
       const matchCity = selectedCity === 'all' || e.city.toLowerCase() === selectedCity.toLowerCase();
       return matchDay && matchCity;
     });
+    return sortTimelineEvents(list);
   }, [eventList, selectedDay, selectedCity]);
 
   // Count real photos vs reference photos
@@ -96,7 +143,7 @@ export function ItinerarySinglePageView({ events, tripId, tripTitle }: Itinerary
     return { realCount: real, refCount: ref };
   }, [filteredEvents]);
 
-  // Group filtered events by day
+  // Group filtered events by day (with items sorted chronologically)
   const eventsGroupedByDay = useMemo(() => {
     const groups: { dayNumber: number; city: string; items: TimelineEvent[] }[] = [];
     const map = new Map<number, TimelineEvent[]>();
@@ -110,7 +157,8 @@ export function ItinerarySinglePageView({ events, tripId, tripTitle }: Itinerary
     Array.from(map.keys())
       .sort((a, b) => a - b)
       .forEach((dayNum) => {
-        const items = map.get(dayNum) || [];
+        const rawItems = map.get(dayNum) || [];
+        const items = sortTimelineEvents(rawItems);
         const city = items[0]?.city || 'Tokyo';
         groups.push({ dayNumber: dayNum, city, items });
       });
@@ -118,27 +166,43 @@ export function ItinerarySinglePageView({ events, tripId, tripTitle }: Itinerary
     return groups;
   }, [filteredEvents]);
 
-  // Theme helper for each day
-  const getDayTheme = (dayNumber: number, city: string, firstLoc?: string) => {
-    switch (dayNumber) {
-      case 1:
-        return 'Khởi Hành: Narita → Khách Sạn Shinjuku';
-      case 2:
-        return 'Kiến Trúc Hiện Đại & Không Gian Shibuya Sky';
-      case 3:
-        return 'Văn Hóa Cổ Truyền: Asakusa, Ueno & Ginza';
-      case 4:
-        return 'Chuyển Đi Tới Kyoto: Arashiyama & Rừng Trúc Bạt Ngàn';
-      case 5:
-        return 'Đền Chùa & Phố Cổ: Fushimi Inari & Gion';
-      case 6:
-        return 'Kỷ Niệm Cố Đô & Khởi Hành Về Tokyo / Sân Bay';
-      default:
-        return firstLoc ? `Lịch Trình: ${firstLoc}` : `Khám Phá ${city}`;
+  // Dynamic trip title, dates, and gear from trips table
+  const tripDisplayTitle = useMemo(() => {
+    const title = currentTrip?.title || tripTitle;
+    if (!title) return 'Lịch Trình Chi Tiết Chuyến Đi';
+    if (title.toLowerCase().startsWith('lịch trình')) {
+      return title;
     }
-  };
+    return `${title}`;
+  }, [currentTrip, tripTitle]);
 
-  // Keep a running sequential index for all items across days
+  const { tripMonthYear, tripDuration } = useMemo(() => {
+    if (currentTrip?.start_date && currentTrip?.end_date) {
+      const startParts = currentTrip.start_date.split('-').map(Number);
+      const endParts = currentTrip.end_date.split('-').map(Number);
+
+      let durationDays = days.length;
+      if (startParts.length === 3 && endParts.length === 3) {
+        const startDateObj = new Date(startParts[0], startParts[1] - 1, startParts[2]);
+        const endDateObj = new Date(endParts[0], endParts[1] - 1, endParts[2]);
+        const diffDays = Math.round((endDateObj.getTime() - startDateObj.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+        if (!isNaN(diffDays) && diffDays > 0) {
+          durationDays = Math.max(durationDays, diffDays);
+        }
+      }
+
+      const monthYear = startParts.length === 3 ? `Tháng ${startParts[1]}/${startParts[0]}` : '';
+      const duration = durationDays > 0 ? `${durationDays} Ngày ${Math.max(0, durationDays - 1)} Đêm` : '';
+
+      return { tripMonthYear: monthYear, tripDuration: duration };
+    }
+
+    const duration = days.length > 0 ? `${days.length} Ngày ${Math.max(0, days.length - 1)} Đêm` : '';
+    return { tripMonthYear: '', tripDuration: duration };
+  }, [currentTrip, days]);
+
+  const tripCitiesLabel = currentTrip?.cities || cities.join(' & ') || 'Hành Trình';
+
   let itemSequenceCounter = 0;
 
   return (
@@ -149,11 +213,23 @@ export function ItinerarySinglePageView({ events, tripId, tripTitle }: Itinerary
           <span className="font-mono text-[10px] uppercase tracking-widest text-[#B93829]">
             — LỊCH TRÌNH CHI TIẾT DU LỊCH & NHIẾP ẢNH
           </span>
-          <h2 className="font-serif text-2xl sm:text-3xl font-semibold mt-1 text-[#1C1B18]">
-            Lịch Trình Chi Tiết Chuyến Đi Nhật Bản
+          <h2 className="font-serif text-2xl sm:text-3xl font-semibold mt-2 text-[#1C1B18]">
+            {tripDisplayTitle}
           </h2>
-          <p className="font-mono text-[11px] text-[#78756E] mt-1">
-            Tokyo & Kyoto (Tháng 12/2026 • 6 Ngày 7 Đêm) • Sony A6400 (18-135mm)
+          <p className="flex flex-wrap items-center font-mono text-[11px] text-[#78756E] mt-2">
+            <span>{tripCitiesLabel}</span>
+            {tripMonthYear && (
+              <>
+                <span className="mx-2.5">•</span>
+                <span>{tripMonthYear}</span>
+              </>
+            )}
+            {tripDuration && (
+              <>
+                <span className="mx-2.5">•</span>
+                <span>{tripDuration}</span>
+              </>
+            )}
           </p>
         </div>
 
@@ -162,7 +238,7 @@ export function ItinerarySinglePageView({ events, tripId, tripTitle }: Itinerary
           <span className="font-mono text-[10px] bg-white border border-[#E6E2DA] px-3 py-1.5 rounded-full text-[#57544E]">
             ⏱ {filteredEvents.length} mốc thời gian
           </span>
-          {realCount > 0 && (
+          {/* {realCount > 0 && (
             <span className="font-mono text-[10px] bg-emerald-50 border border-emerald-300 text-emerald-800 px-3 py-1.5 rounded-full font-semibold">
               📷 {realCount} ảnh chụp thực tế
             </span>
@@ -171,7 +247,7 @@ export function ItinerarySinglePageView({ events, tripId, tripTitle }: Itinerary
             <span className="font-mono text-[10px] bg-sky-50 border border-sky-300 text-sky-800 px-3 py-1.5 rounded-full font-semibold">
               🌐 {refCount} ảnh tham khảo web
             </span>
-          )}
+          )} */}
 
           {/* Add Timeline Event Button (Only visible when logged in) */}
           {isLoggedIn && tripId && (
@@ -207,7 +283,7 @@ export function ItinerarySinglePageView({ events, tripId, tripTitle }: Itinerary
             Chưa có chặng hành trình nào trong cơ sở dữ liệu
           </h4>
           <p className="text-xs text-[#78756E] max-w-md mx-auto leading-relaxed">
-            Các mốc lịch trình và kho ảnh tương ứng sẽ hiển thị sống động tại đây khi dữ liệu được đồng bộ từ Supabase.
+            Các mốc lịch trình và kho ảnh tương ứng sẽ hiển thị sống động tại đây khi dữ liệu được đồng bộ.
           </p>
           {(selectedDay !== 'all' || selectedCity !== 'all') && (
             <button
@@ -238,8 +314,6 @@ export function ItinerarySinglePageView({ events, tripId, tripTitle }: Itinerary
         <div className="space-y-12">
           {eventsGroupedByDay.map((group) => {
             const firstLoc = group.items[0]?.location_name;
-            const themeTitle = getDayTheme(group.dayNumber, group.city, firstLoc);
-
             return (
               <div key={group.dayNumber} className="space-y-6">
                 {/* Day Header Banner (As shown in screenshot) */}
@@ -249,14 +323,22 @@ export function ItinerarySinglePageView({ events, tripId, tripTitle }: Itinerary
                       <span className="text-[#B93829]">●</span>
                       DAY {group.dayNumber} — {group.city}
                     </span>
-                    <h3 className="font-serif text-lg sm:text-xl font-bold text-[#1C1B18]">
-                      {themeTitle}
-                    </h3>
                   </div>
 
-                  <span className="font-mono text-xs text-[#78756E]">
-                    {group.items.length} mốc • 🗓 {group.items[0]?.trip_date}
-                  </span>
+                  {(() => {
+                    const uniqueDates = Array.from(
+                      new Set(group.items.map((i) => i.trip_date).filter(Boolean))
+                    );
+                    const dateDisplay =
+                      uniqueDates.length > 1
+                        ? uniqueDates.join(' → ')
+                        : group.items[0]?.trip_date || '';
+                    return (
+                      <span className="font-mono text-xs text-[#78756E]">
+                        {group.items.length} mốc • 🗓 {dateDisplay}
+                      </span>
+                    );
+                  })()}
                 </div>
 
                 {/* Vertical Timeline container for this day */}
@@ -364,6 +446,7 @@ export function ItinerarySinglePageView({ events, tripId, tripTitle }: Itinerary
           tripId={tripId}
           onEventCreated={handleEventCreated}
           onOpenSqlModal={() => setIsSqlModalOpen(true)}
+          existingDates={existingDates}
         />
       )}
 
@@ -375,6 +458,9 @@ export function ItinerarySinglePageView({ events, tripId, tripTitle }: Itinerary
         onEventUpdated={handleEventUpdated}
         onEventDeleted={handleEventDeleted}
         onOpenSqlModal={() => setIsSqlModalOpen(true)}
+        existingDates={existingDates}
+        tripSlug={currentTrip?.slug}
+        tripTitle={currentTrip?.title}
       />
 
       {/* SQL Instruction Modal */}
