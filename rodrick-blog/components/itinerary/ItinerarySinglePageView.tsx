@@ -359,6 +359,19 @@ export function ItinerarySinglePageView({
               </div>
             );
           })}
+
+          {/* Nút Thêm sự kiện Timeline ở cuối danh sách (chỉ hiện khi đã đăng nhập Edit Mode) */}
+          {isLoggedIn && tripId && (
+            <div className="pt-2 flex justify-center">
+              <button
+                type="button"
+                onClick={() => setIsAddEventModalOpen(true)}
+                className="group w-full py-4 px-6 rounded-2xl border-2 border-dashed border-[#B93829]/40 hover:border-[#B93829] bg-white hover:bg-rose-50/50 text-[#B93829] font-mono text-xs uppercase tracking-wider font-bold transition-all flex items-center justify-center gap-2.5 shadow-xs hover:shadow-md cursor-pointer active:scale-[0.99]"
+              >
+                <span>THÊM SỰ KIỆN TIMELINE</span>
+              </button>
+            </div>
+          )}
         </div>
       )}
 
