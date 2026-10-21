@@ -77,7 +77,7 @@ export function TimelineRouteMap({
   return (
     <aside
       aria-label={`Bản đồ định vị cho ${locationName || 'điểm đến'}`}
-      className="relative group/comment-map w-full transition-all"
+      className="relative group/comment-map w-full h-full flex flex-col transition-all"
     >
       {/* 🌟 Đuôi nhọn của cửa sổ Comment trỏ sang Card Timeline bên trái (Desktop: lg+) */}
       <div
@@ -99,10 +99,10 @@ export function TimelineRouteMap({
         aria-hidden="true"
       />
 
-      {/* 🌟 Khung cửa sổ Comment Box chứa Map vuông vắn độc lập bên ngoài Card */}
-      <div className="w-full rounded-2xl overflow-hidden border border-[#E6E2DA] bg-white shadow-xs hover:shadow-md transition-shadow">
+      {/* 🌟 Khung cửa sổ Comment Box chứa Map vuông vắn độc lập bên ngoài Card - Chiều cao co giãn bằng Timeline */}
+      <div className="w-full h-full flex flex-col rounded-2xl overflow-hidden border border-[#E6E2DA] bg-white shadow-xs hover:shadow-md transition-shadow">
         {/* Header Comment Box */}
-        <div className="flex items-center justify-between gap-2 px-3.5 py-2.5 bg-[#FAF8F5] border-b border-[#EFECE4]">
+        <div className="flex items-center justify-between gap-2 px-3.5 py-2.5 bg-[#FAF8F5] border-b border-[#EFECE4] shrink-0">
           <div className="flex items-center gap-1.5 min-w-0 font-mono text-[11px] font-bold text-[#4A4742] truncate">
             <span>📍</span>
             <span className="truncate">{locationName || 'Bản đồ vị trí'}</span>
@@ -121,8 +121,8 @@ export function TimelineRouteMap({
           </a>
         </div>
 
-        {/* Khung bản đồ cân xứng với tỉ lệ 40% */}
-        <div className="w-full h-[240px] sm:h-[260px] lg:h-[280px] relative bg-[#F5F2EB]">
+        {/* Khung bản đồ cân xứng chiếm trọn chiều cao còn lại */}
+        <div className="w-full flex-1 min-h-[240px] relative bg-[#F5F2EB]">
           {embedSrc ? (
             <iframe
               title={`Bản đồ Google Maps cho: ${locationName || ''}`}
@@ -133,7 +133,7 @@ export function TimelineRouteMap({
               loading="lazy"
               allowFullScreen
               referrerPolicy="no-referrer-when-downgrade"
-              className="w-full h-full"
+              className="w-full h-full absolute inset-0"
             />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center gap-1 text-[11px] font-mono text-[#78756E]">

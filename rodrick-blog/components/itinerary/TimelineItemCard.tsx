@@ -78,7 +78,7 @@ export function TimelineItemCard({
       </div>
 
       {/* Container phân chia theo tỉ lệ 6/4 giữa Card Sự kiện (60%) và Hộp thoại Map (40%) */}
-      <div className="grid grid-cols-1 lg:grid-cols-10 gap-5 lg:gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-10 gap-5 lg:gap-6 items-stretch">
         {/* Card Content chính chiếm 6/10 (60%) */}
         <div className="w-full lg:col-span-6 bg-white border border-[#E6E2DA] rounded-2xl p-5 sm:p-6 shadow-xs hover:shadow-md hover:border-[#D0C9BD] transition-all space-y-4 min-w-0">
           {/* Header tags & Action buttons */}
@@ -182,7 +182,7 @@ export function TimelineItemCard({
 
       {/* Cột phải: Hộp thoại Map chiếm 4/10 (40%) - Luôn giữ chỗ trên desktop để đồng bộ */}
       {item.map_embed_url && item.map_embed_url.trim().length > 0 ? (
-        <div className="w-full lg:col-span-4 shrink-0 self-start pt-1 lg:pt-0">
+        <div className="w-full lg:col-span-4 shrink-0 h-full pt-1 lg:pt-0 flex flex-col">
           <TimelineRouteMap
             map_embed_url={item.map_embed_url}
             locationName={item.location_name}
