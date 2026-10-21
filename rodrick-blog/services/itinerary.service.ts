@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import { TimelineEvent, Trip, GalleryImage } from '@/types/database.type';
 import { sortTimelineEvents } from '@/lib/timeUtils';
+import { deleteFromCloudinary } from '@/lib/cloudinary';
 
 export interface TripWithDetails extends Trip {
   timeline_events?: (TimelineEvent & {
@@ -358,7 +359,7 @@ export const ItineraryService = {
     return result;
   },
 
-  // Xóa mốc sự kiện timeline
+  // Xóa mốc sự kiện timeline (đồng thời xóa toàn bộ ảnh liên quan trong bảng images và Cloudinary)
   async deleteTimelineEvent(id: number): Promise<void> {
     const { data: event } = await supabase
       .from('timeline_events')
@@ -366,6 +367,34 @@ export const ItineraryService = {
       .eq('id', id)
       .single();
 
+    // 1. Lấy danh sách ảnh thuộc sự kiện này trước khi xóa
+    const { data: eventImages } = await supabase
+      .from('images')
+      .select('id, cloudinary_url')
+      .eq('timeline_event_id', id);
+
+    // 2. Xóa các bản ghi ảnh liên quan trong bảng images của database
+    if (eventImages && eventImages.length > 0) {
+      const { error: imgDelError } = await supabase
+        .from('images')
+        .delete()
+        .eq('timeline_event_id', id);
+
+      if (imgDelError) {
+        console.warn('Lỗi khi xóa ảnh liên quan trong bảng images:', imgDelError.message);
+      }
+
+      // 3. Xóa các file ảnh tương ứng trên Cloudinary để giải phóng dung lượng
+      for (const img of eventImages) {
+        if (img.cloudinary_url) {
+          deleteFromCloudinary(img.cloudinary_url).catch((err) =>
+            console.warn('Lỗi khi xóa ảnh Cloudinary:', err)
+          );
+        }
+      }
+    }
+
+    // 4. Xóa mốc sự kiện trong bảng timeline_events
     const { error } = await supabase
       .from('timeline_events')
       .delete()

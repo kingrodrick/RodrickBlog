@@ -22,6 +22,19 @@ interface EditTimelineEventModalProps {
   existingDates?: string[];
   tripSlug?: string;
   tripTitle?: string;
+  availableCities?: string[];
+}
+
+function getTimePeriodLabel(timeStr: string): string {
+  if (!timeStr) return '';
+  const match = timeStr.match(/^(\d{1,2}):(\d{2})/);
+  if (!match) return '';
+  const h = parseInt(match[1], 10);
+  if (h >= 5 && h < 11) return '🌅 Sáng';
+  if (h >= 11 && h < 14) return '☀️ Trưa';
+  if (h >= 14 && h < 18) return '🌇 Chiều';
+  if (h >= 18 && h < 22) return '🌙 Tối';
+  return '🌌 Đêm / Rạng sáng';
 }
 
 export function EditTimelineEventModal({
@@ -34,6 +47,7 @@ export function EditTimelineEventModal({
   existingDates,
   tripSlug,
   tripTitle,
+  availableCities,
 }: EditTimelineEventModalProps) {
   const [mounted, setMounted] = useState(false);
 
@@ -257,8 +271,9 @@ export function EditTimelineEventModal({
   };
 
   const handleDelete = async () => {
+    if (!event) return;
     const confirmed = window.confirm(
-      `Bạn có chắc chắn muốn xóa mốc sự kiện "${event.location_name}" khỏi timeline không?`
+      `Bạn có chắc chắn muốn xóa mốc sự kiện "${event.location_name}" cùng toàn bộ ảnh liên quan khỏi cơ sở dữ liệu không?`
     );
     if (!confirmed) return;
 
@@ -474,7 +489,14 @@ export function EditTimelineEventModal({
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div className="space-y-1">
-                      <span className="text-[11px] font-mono text-[#78756E] block">Từ (Giờ bắt đầu)</span>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-mono text-[#78756E]">Từ (Giờ bắt đầu)</span>
+                        {startTime && (
+                          <span className="text-[10px] font-mono font-semibold text-[#B93829] bg-rose-50 px-1.5 py-0.5 rounded">
+                            {getTimePeriodLabel(startTime)}
+                          </span>
+                        )}
+                      </div>
                       <input
                         type="time"
                         required
@@ -485,7 +507,14 @@ export function EditTimelineEventModal({
                     </div>
 
                     <div className="space-y-1">
-                      <span className="text-[11px] font-mono text-[#78756E] block">Đến (Giờ kết thúc)</span>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-mono text-[#78756E]">Đến (Giờ kết thúc)</span>
+                        {endTime && (
+                          <span className="text-[10px] font-mono font-semibold text-[#B93829] bg-rose-50 px-1.5 py-0.5 rounded">
+                            {getTimePeriodLabel(endTime)}
+                          </span>
+                        )}
+                      </div>
                       <input
                         type="time"
                         required
@@ -495,6 +524,37 @@ export function EditTimelineEventModal({
                       />
                     </div>
                   </div>
+
+                  {/* Cảnh báo thông minh nếu chọn 00:xx */}
+                  {startTime.startsWith('00:') && (
+                    <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 text-xs font-mono animate-in fade-in">
+                      <span>
+                        💡 Bạn đang chọn <strong>{startTime}</strong> (0 giờ sáng / nửa đêm). Nếu là <strong>12:{startTime.slice(3)} trưa</strong>, hãy bấm nút:
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setStartTime(`12:${startTime.slice(3)}`)}
+                        className="px-2.5 py-1 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-xs cursor-pointer transition-all shrink-0"
+                      >
+                        ➔ Chuyển thành 12:{startTime.slice(3)} trưa
+                      </button>
+                    </div>
+                  )}
+
+                  {endTime.startsWith('00:') && (
+                    <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 text-xs font-mono animate-in fade-in">
+                      <span>
+                        💡 Bạn đang chọn kết thúc lúc <strong>{endTime}</strong> (0 giờ sáng / nửa đêm). Nếu là <strong>12:{endTime.slice(3)} trưa</strong>, hãy bấm nút:
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setEndTime(`12:${endTime.slice(3)}`)}
+                        className="px-2.5 py-1 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-xs cursor-pointer transition-all shrink-0"
+                      >
+                        ➔ Chuyển thành 12:{endTime.slice(3)} trưa
+                      </button>
+                    </div>
+                  )}
 
                   <div className="pt-1 flex items-center justify-between flex-wrap gap-2">
                     <label className="inline-flex items-center gap-2 cursor-pointer text-xs font-mono text-[#57534E] hover:text-[#1C1B18] select-none">
@@ -532,15 +592,37 @@ export function EditTimelineEventModal({
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="block text-xs font-mono uppercase tracking-wider font-semibold text-[#1C1B18]">
-                      Thành phố <span className="text-[#B93829]">*</span>
-                    </label>
+                    <div className="flex items-center justify-between">
+                      <label className="block text-xs font-mono uppercase tracking-wider font-semibold text-[#1C1B18]">
+                        Thành phố <span className="text-[#B93829]">*</span>
+                      </label>
+                      {/* Quick city selection pills */}
+                      <div className="flex items-center gap-1.5">
+                        {(availableCities && availableCities.length > 0
+                          ? availableCities
+                          : ['Tokyo', 'Kyoto', 'Osaka', 'Hà Nội']
+                        ).map((c) => (
+                          <button
+                            key={c}
+                            type="button"
+                            onClick={() => setCity(c)}
+                            className={`px-2 py-0.5 rounded-md text-[10px] font-mono transition-colors cursor-pointer border ${
+                              city.toLowerCase() === c.toLowerCase()
+                                ? 'bg-[#B93829] text-white border-[#B93829] font-bold'
+                                : 'bg-white text-stone-600 border-[#E6E2DA] hover:border-stone-400'
+                            }`}
+                          >
+                            {c}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                     <input
                       type="text"
                       required
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
-                      placeholder="VD: Kyoto, Tokyo, Osaka..."
+                      placeholder="VD: Tokyo, Kyoto, Osaka..."
                       className="w-full bg-[#FAF8F5] focus:bg-white border border-[#E6E2DA] focus:border-[#B93829] rounded-xl px-4 py-2.5 text-xs font-mono text-[#1C1B18] outline-hidden shadow-xs transition-colors"
                     />
                   </div>

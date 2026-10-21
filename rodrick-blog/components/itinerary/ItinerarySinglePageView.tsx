@@ -205,6 +205,23 @@ export function ItinerarySinglePageView({
 
   let itemSequenceCounter = 0;
 
+  // City & Date context based on current view/filter for adding events
+  const currentContextCity = useMemo(() => {
+    if (selectedCity !== 'all') return selectedCity;
+    if (selectedDay !== 'all') {
+      const dayEvents = eventList.filter((e) => e.day_number === selectedDay);
+      if (dayEvents.length > 0 && dayEvents[0].city) return dayEvents[0].city;
+    }
+    return cities[0] || 'Tokyo';
+  }, [selectedCity, selectedDay, eventList, cities]);
+
+  const currentContextDate = useMemo(() => {
+    if (selectedDay !== 'all' && datesByDay[selectedDay]) {
+      return datesByDay[selectedDay];
+    }
+    return undefined;
+  }, [selectedDay, datesByDay]);
+
   return (
     <section id="itinerary" className="space-y-10 scroll-mt-20">
       {/* Header section */}
@@ -460,6 +477,9 @@ export function ItinerarySinglePageView({
           onEventCreated={handleEventCreated}
           onOpenSqlModal={() => setIsSqlModalOpen(true)}
           existingDates={existingDates}
+          defaultCity={currentContextCity}
+          defaultDate={currentContextDate}
+          availableCities={cities}
         />
       )}
 
@@ -474,6 +494,7 @@ export function ItinerarySinglePageView({
         existingDates={existingDates}
         tripSlug={currentTrip?.slug}
         tripTitle={currentTrip?.title}
+        availableCities={cities}
       />
 
       {/* SQL Instruction Modal */}
