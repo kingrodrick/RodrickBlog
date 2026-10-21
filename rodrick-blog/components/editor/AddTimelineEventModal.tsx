@@ -74,7 +74,7 @@ export function AddTimelineEventModal({
       {/* Modal Dialog Card with Max Height & Internal Scroll */}
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-3xl max-h-[88vh] bg-white border border-[#E6E2DA] rounded-3xl shadow-2xl z-10 flex flex-col overflow-hidden animate-in zoom-in-95 duration-150"
+        className="relative w-full max-w-5xl max-h-[90vh] bg-white border border-[#E6E2DA] rounded-3xl shadow-2xl z-10 flex flex-col overflow-hidden animate-in zoom-in-95 duration-150"
       >
         {/* Fixed Header */}
         <div className="flex items-center justify-between px-6 py-4 sm:px-8 sm:py-5 border-b border-[#F0ECE4] bg-white shrink-0">

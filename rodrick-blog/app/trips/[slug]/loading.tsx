@@ -8,7 +8,7 @@ export default function TripDetailLoading() {
         <div className="h-full w-1/3 bg-gradient-to-r from-transparent via-[#B93829] to-transparent animate-trip-loading" />
       </div>
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-10 space-y-10 animate-in fade-in duration-200">
+      <main className="max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10 animate-in fade-in duration-200">
         {/* Breadcrumb Skeleton */}
         <div className="flex items-center gap-2">
           <div className="h-3.5 w-16 bg-[#E8E4DC] rounded-md animate-pulse" />

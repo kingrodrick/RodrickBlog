@@ -56,9 +56,15 @@ export function TimelineEventForm({
     },
   ]);
 
+  const [activeTab, setActiveTab] = useState<'info' | 'map' | 'photos'>('info');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successEvent, setSuccessEvent] = useState<TimelineEvent | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const validPhotoCount = useMemo(
+    () => images.filter((img) => img.url.trim().length > 0).length,
+    [images]
+  );
 
   // Load available trips
   useEffect(() => {
@@ -306,6 +312,85 @@ export function TimelineEventForm({
         </div>
       )}
 
+      {/* 🌟 PREMIUM UNDERLINE TAB NAVIGATION BAR */}
+      <nav aria-label="Các mục biên tập" className="flex items-center gap-6 sm:gap-8 px-4 sm:px-6 border-b border-[#E6E2DA] bg-[#FAF8F5]/90 rounded-2xl shrink-0 overflow-x-auto">
+        <button
+          type="button"
+          onClick={() => setActiveTab('info')}
+          className={`relative py-3.5 sm:py-4 text-xs sm:text-sm font-mono tracking-wide transition-all cursor-pointer flex items-center gap-2 shrink-0 group ${
+            activeTab === 'info'
+              ? 'text-[#B93829] font-bold'
+              : 'text-[#78756E] hover:text-[#1C1B18] font-medium'
+          }`}
+        >
+          <span className={`text-base transition-transform duration-200 ${activeTab === 'info' ? 'scale-110' : 'group-hover:scale-105'}`}>
+            📝
+          </span>
+          <span>Thông tin chung</span>
+
+          {/* Active Underline Indicator */}
+          {activeTab === 'info' ? (
+            <span className="absolute bottom-0 inset-x-0 h-[2.5px] bg-[#B93829] rounded-t-full shadow-2xs" />
+          ) : (
+            <span className="absolute bottom-0 inset-x-0 h-[2px] bg-transparent group-hover:bg-[#E6E2DA] transition-colors rounded-t-full" />
+          )}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('map')}
+          className={`relative py-3.5 sm:py-4 text-xs sm:text-sm font-mono tracking-wide transition-all cursor-pointer flex items-center gap-2 shrink-0 group ${
+            activeTab === 'map'
+              ? 'text-[#B93829] font-bold'
+              : 'text-[#78756E] hover:text-[#1C1B18] font-medium'
+          }`}
+        >
+          <span className={`text-base transition-transform duration-200 ${activeTab === 'map' ? 'scale-110' : 'group-hover:scale-105'}`}>
+            🗺️
+          </span>
+          <span>Bản đồ</span>
+          {mapEmbedUrl && mapEmbedUrl.trim().length > 0 && (
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" title="Đã gắn link bản đồ" />
+          )}
+
+          {activeTab === 'map' ? (
+            <span className="absolute bottom-0 inset-x-0 h-[2.5px] bg-[#B93829] rounded-t-full shadow-2xs" />
+          ) : (
+            <span className="absolute bottom-0 inset-x-0 h-[2px] bg-transparent group-hover:bg-[#E6E2DA] transition-colors rounded-t-full" />
+          )}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('photos')}
+          className={`relative py-3.5 sm:py-4 text-xs sm:text-sm font-mono tracking-wide transition-all cursor-pointer flex items-center gap-2 shrink-0 group ${
+            activeTab === 'photos'
+              ? 'text-[#B93829] font-bold'
+              : 'text-[#78756E] hover:text-[#1C1B18] font-medium'
+          }`}
+        >
+          <span className={`text-base transition-transform duration-200 ${activeTab === 'photos' ? 'scale-110' : 'group-hover:scale-105'}`}>
+            📷
+          </span>
+          <span>Bộ sưu tập ảnh</span>
+          {validPhotoCount > 0 && (
+            <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono transition-colors ${
+              activeTab === 'photos'
+                ? 'bg-rose-100 text-[#B93829] font-bold border border-rose-200'
+                : 'bg-[#EFECE4] text-stone-600 group-hover:bg-stone-200'
+            }`}>
+              {validPhotoCount}
+            </span>
+          )}
+
+          {activeTab === 'photos' ? (
+            <span className="absolute bottom-0 inset-x-0 h-[2.5px] bg-[#B93829] rounded-t-full shadow-2xs" />
+          ) : (
+            <span className="absolute bottom-0 inset-x-0 h-[2px] bg-transparent group-hover:bg-[#E6E2DA] transition-colors rounded-t-full" />
+          )}
+        </button>
+      </nav>
+
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Choose Trip (Hidden if already preselected) */}
         {!hideTripSelector && (
@@ -336,8 +421,11 @@ export function TimelineEventForm({
           </div>
         )}
 
-        {/* Real Date & Auto-calculated Day Number */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* TAB 1: THÔNG TIN CHUNG */}
+        {activeTab === 'info' && (
+          <div className="space-y-6 animate-in fade-in duration-150">
+            {/* Real Date & Auto-calculated Day Number */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <label className="block text-xs font-mono uppercase tracking-wider font-semibold text-[#1C1B18]">
               Ngày thực tế <span className="text-[#B93829]">*</span>
@@ -353,28 +441,20 @@ export function TimelineEventForm({
 
           <div className="space-y-1.5">
             <label className="block text-xs font-mono uppercase tracking-wider font-semibold text-[#1C1B18]">
-              Thứ tự ngày <span className="text-stone-400 font-normal font-sans">(Tự động sắp xếp)</span>
+              Thứ tự ngày
             </label>
             <div className="flex items-center gap-2 h-[41px] px-4 rounded-xl bg-[#FAF8F5] border border-[#E6E2DA] text-xs font-mono font-bold text-[#1C1B18]">
               <span className="w-2 h-2 rounded-full bg-[#B93829]" />
               <span>Ngày {calculatedDayNumber}</span>
-              <span className="text-[10px] font-normal text-stone-500 ml-auto font-sans">
-                Đồng bộ tự động
-              </span>
             </div>
           </div>
         </div>
 
         {/* Smart Banner if this date is earlier than earliest trip date */}
         {isEarlierThanSchedule && (
-          <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200 text-amber-950 text-xs font-sans space-y-1 animate-in fade-in duration-150">
-            <div className="flex items-center gap-1.5 font-bold text-amber-900">
-              <span>💡</span>
-              <span>Ngày này ({tripDate}) sớm hơn ngày đầu tiên hiện tại ({earliestDate}):</span>
-            </div>
-            <p className="text-[11px] text-amber-800 leading-relaxed">
-              Sự kiện sẽ tự động trở thành <strong>Ngày 1</strong> của chuyến đi. Hệ thống sẽ tự động cập nhật ngày {earliestDate} thành <strong>Ngày 2</strong> và điều chỉnh các ngày sau tương ứng sau khi bạn lưu.
-            </p>
+          <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-mono flex items-center gap-2">
+            <span>💡</span>
+            <span>Ngày {tripDate} sẽ được tự động xếp làm <strong>Ngày 1</strong> của chuyến đi.</span>
           </div>
         )}
 
@@ -507,53 +587,54 @@ export function TimelineEventForm({
             className="w-full bg-[#FAF8F5] focus:bg-white border border-[#E6E2DA] focus:border-[#B93829] rounded-xl p-4 text-xs font-sans text-[#1C1B18] outline-hidden shadow-xs transition-colors resize-y leading-relaxed"
           />
         </div>
+      </div>
+    )}
 
-        {/* Link Bản đồ Google Maps Embed (Tùy chọn) */}
-        <div className="space-y-1.5 pt-1">
-          <div className="flex items-center justify-between">
-            <label className="block text-xs font-mono uppercase tracking-wider font-semibold text-[#1C1B18]">
-              📍 Link Bản đồ Google Maps (Embed URL)
-            </label>
-            <span className="font-mono text-[11px] text-[#78756E]">Tùy chọn</span>
+        {/* TAB 2: BẢN ĐỒ */}
+        {activeTab === 'map' && (
+          <div className="space-y-6 animate-in fade-in duration-150">
+            {/* Link Bản đồ Google Maps Embed (Tùy chọn) */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-mono uppercase tracking-wider font-semibold text-[#1C1B18]">
+                  📍 Link Bản đồ Google Maps
+                </label>
+                <span className="font-mono text-[11px] text-[#78756E]">Tùy chọn</span>
+              </div>
+              <input
+                type="text"
+                value={mapEmbedUrl}
+                onChange={(e) => setMapEmbedUrl(e.target.value)}
+                placeholder="Dán link Google Maps hoặc mã <iframe>"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-[#E6E2DA] bg-[#FAF8F5] text-xs text-[#1C1B18] font-mono focus:bg-white focus:outline-none focus:border-[#B61C25] transition-all"
+              />
+            </div>
+
+            {/* Trình tạo & Xem trước Bản đồ Google Maps Embed */}
+            <div>
+              <AdminRoutePickerMap
+                initialCity={city}
+                locationName={locationName}
+                mapEmbedUrl={mapEmbedUrl}
+                onMapEmbedUrlChange={setMapEmbedUrl}
+              />
+            </div>
           </div>
-          <input
-            type="text"
-            value={mapEmbedUrl}
-            onChange={(e) => setMapEmbedUrl(e.target.value)}
-            placeholder="Dán link Google Maps hoặc mã <iframe> (Nếu để trống sẽ tự tìm theo Tên địa điểm)"
-            className="w-full px-3.5 py-2.5 rounded-xl border border-[#E6E2DA] bg-[#FAF8F5] text-xs text-[#1C1B18] font-mono focus:bg-white focus:outline-none focus:border-[#B61C25] transition-all"
-          />
-          <p className="text-[11px] text-[#78756E]">
-            Hệ thống hỗ trợ tự động tìm theo Tên địa điểm hoặc dán link Google Maps Embed / chia sẻ.
-          </p>
-        </div>
+        )}
 
-        {/* Trình tạo & Xem trước Bản đồ Google Maps Embed */}
-        <div className="space-y-2 pt-1">
-          <div className="flex items-center justify-between">
-            <label className="block text-xs font-mono uppercase tracking-wider font-semibold text-[#1C1B18]">
-              🗺️ Trình tạo & Xem trước Bản đồ (Google Maps)
-            </label>
-            <span className="font-mono text-[11px] text-[#78756E]">
-              {mapEmbedUrl ? 'Đã có link bản đồ' : 'Tự động tạo'}
-            </span>
+        {/* TAB 3: BỘ SƯU TẬP ẢNH */}
+        {activeTab === 'photos' && (
+          <div className="animate-in fade-in duration-150">
+            <TimelinePhotosManager
+              images={images}
+              onChange={setImages}
+              city={city}
+              tripSlug={selectedTrip?.slug}
+              tripTitle={selectedTrip?.title}
+              tripDate={tripDate}
+            />
           </div>
-          <AdminRoutePickerMap
-            initialCity={city}
-            mapEmbedUrl={mapEmbedUrl}
-            onMapEmbedUrlChange={setMapEmbedUrl}
-          />
-        </div>
-
-        {/* Attach Photos via TimelinePhotosManager */}
-        <TimelinePhotosManager
-          images={images}
-          onChange={setImages}
-          city={city}
-          tripSlug={selectedTrip?.slug}
-          tripTitle={selectedTrip?.title}
-          tripDate={tripDate}
-        />
+        )}
 
         {/* Action Buttons */}
         <div className="pt-4 border-t border-[#F0ECE4] flex flex-wrap items-center justify-between gap-4">

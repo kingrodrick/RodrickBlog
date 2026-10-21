@@ -77,72 +77,63 @@ export function TimelineItemCard({
         {index ?? item.day_number}
       </div>
 
-      {/* Card Content */}
-      <div className="bg-white border border-[#E6E2DA] rounded-2xl p-5 sm:p-6 shadow-xs hover:shadow-md hover:border-[#D0C9BD] transition-all space-y-4">
-        {/* Header tags & Action buttons */}
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#F0ECE4] pb-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="font-mono text-[10px] px-2 py-0.5 rounded bg-green-200 text-green-800 border border-green-800 uppercase tracking-wider">
-              📍 {item.city}
-            </span>
-            <span className="font-mono text-xs font-bold px-2.5 py-0.5 rounded bg-rose-50 text-[#B93829] border border-rose-200 uppercase tracking-wider">
-              {item.time_slot}
-            </span>
-            <span className={`font-mono text-[10px] px-2.5 py-0.5 rounded border uppercase tracking-wider font-semibold ${badge.color}`}>
-              {badge.icon} {badge.label}
-            </span>
+      {/* Container phân chia theo tỉ lệ 6/4 giữa Card Sự kiện (60%) và Hộp thoại Map (40%) */}
+      <div className="grid grid-cols-1 lg:grid-cols-10 gap-5 lg:gap-6 items-start">
+        {/* Card Content chính chiếm 6/10 (60%) */}
+        <div className="w-full lg:col-span-6 bg-white border border-[#E6E2DA] rounded-2xl p-5 sm:p-6 shadow-xs hover:shadow-md hover:border-[#D0C9BD] transition-all space-y-4 min-w-0">
+          {/* Header tags & Action buttons */}
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#F0ECE4] pb-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="font-mono text-[10px] px-2 py-0.5 rounded bg-green-200 text-green-800 border border-green-800 uppercase tracking-wider">
+                📍 {item.city}
+              </span>
+              <span className="font-mono text-xs font-bold px-2.5 py-0.5 rounded bg-rose-50 text-[#B93829] border border-rose-200 uppercase tracking-wider">
+                {item.time_slot}
+              </span>
+              <span className={`font-mono text-[10px] px-2.5 py-0.5 rounded border uppercase tracking-wider font-semibold ${badge.color}`}>
+                {badge.icon} {badge.label}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <span className="font-mono text-[11px] text-[#8C8881]">
+                🗓 {item.trip_date}
+              </span>
+
+              {/* Edit Button for Authenticated Editor */}
+              {isLoggedIn && onEdit && (
+                <button
+                  type="button"
+                  onClick={() => onEdit(item)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#FAF8F5] hover:bg-[#B93829] text-stone-700 hover:text-white border border-[#E6E2DA] hover:border-[#B93829] font-mono text-[11px] font-semibold transition-all cursor-pointer shadow-2xs group/btn"
+                  title="Chỉnh sửa thông tin và hình ảnh sự kiện này"
+                >
+                  <span className="text-xs group-hover/btn:scale-110 transition-transform">✏️</span>
+                  <span>Sửa mốc này</span>
+                </button>
+              )}
+            </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <span className="font-mono text-[11px] text-[#8C8881]">
-              🗓 {item.trip_date}
-            </span>
+          {/* Location Title */}
+          <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#1C1B18] tracking-tight leading-snug">
+            {item.location_name}
+          </h3>
 
-            {/* Edit Button for Authenticated Editor */}
-            {isLoggedIn && onEdit && (
-              <button
-                type="button"
-                onClick={() => onEdit(item)}
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#FAF8F5] hover:bg-[#B93829] text-stone-700 hover:text-white border border-[#E6E2DA] hover:border-[#B93829] font-mono text-[11px] font-semibold transition-all cursor-pointer shadow-2xs group/btn"
-                title="Chỉnh sửa thông tin và hình ảnh sự kiện này"
-              >
-                <span className="text-xs group-hover/btn:scale-110 transition-transform">✏️</span>
-                <span>Sửa mốc này</span>
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Location Title */}
-        <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#1C1B18] tracking-tight leading-snug">
-          {item.location_name}
-        </h3>
-
-        {/* Notes & Tips */}
-        {item.notes && (
-          <div className="text-xs sm:text-sm text-[#4A4742] font-normal italic leading-relaxed whitespace-pre-line font-sans bg-[#FAF8F5] p-4 rounded-xl border border-[#EFECE4]">
-            {item.notes}
-          </div>
-        )}
-
-        {/* Bản đồ Địa điểm & Tuyến đường Google Maps (Embed) */}
-        {(item.map_embed_url || item.location_name) && (
-          <div className="pt-1">
-            <TimelineRouteMap
-              map_embed_url={item.map_embed_url}
-              locationName={item.location_name}
-              city={item.city}
-            />
-          </div>
-        )}
+          {/* Notes & Tips */}
+          {item.notes && (
+            <div className="text-xs sm:text-sm text-[#4A4742] font-normal italic leading-relaxed whitespace-pre-line font-sans bg-[#FAF8F5] p-3.5 sm:p-4 rounded-xl border border-[#EFECE4]">
+              {item.notes}
+            </div>
+          )}
 
         {/* TÁCH BẠCH RÕ RÀNG: ẢNH CHỤP THỰC TẾ & ẢNH THAM KHẢO (PHOTO STACKS) */}
         {rawImages.length > 0 && (
           <div className="pt-2 space-y-4">
-            {/* TH1: Có cả ảnh thực tế và ảnh tham khảo -> 2 cột song song */}
-            {realPhotos.length > 0 && refPhotos.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-1">
-                {/* Cột 1: Tệp ảnh tư liệu tham khảo */}
+            {/* Luôn dùng grid 2 cột để kích thước của từng tệp ảnh luôn cố định đồng nhất */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-1">
+              {/* Cột 1: Tệp ảnh tư liệu tham khảo */}
+              {refPhotos.length > 0 && (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between px-1">
                     <span className="font-mono text-[11px] font-bold text-sky-800 uppercase tracking-wider flex items-center gap-1.5">
@@ -161,8 +152,10 @@ export function TimelineItemCard({
                     onOpenStack={(mode) => handleOpenGallery('ref', 0, mode)}
                   />
                 </div>
+              )}
 
-                {/* Cột 2: Tệp ảnh chụp thực tế */}
+              {/* Cột 2: Tệp ảnh chụp thực tế (Sony A6400) */}
+              {realPhotos.length > 0 && (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between px-1">
                     <span className="font-mono text-[11px] font-bold text-emerald-800 uppercase tracking-wider flex items-center gap-1.5">
@@ -181,51 +174,29 @@ export function TimelineItemCard({
                     onOpenStack={(mode) => handleOpenGallery('real', 0, mode)}
                   />
                 </div>
-              </div>
-            ) : realPhotos.length > 0 ? (
-              /* TH2: Chỉ có ảnh chụp thực tế */
-              <div className="max-w-xl space-y-2 pt-1">
-                <div className="flex items-center justify-between px-1">
-                  <span className="font-mono text-[11px] font-bold text-emerald-800 uppercase tracking-wider flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
-                    <span>ẢNH CHỤP THỰC TẾ (SONY A6400)</span>
-                  </span>
-                  <span className="font-mono text-[10px] text-stone-500 font-semibold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                    {realPhotos.length} ảnh
-                  </span>
-                </div>
-
-                <PhotoStackCard
-                  title="Ảnh chụp thực tế Sony A6400"
-                  badgeType="real"
-                  images={realPhotos}
-                  onOpenStack={(mode) => handleOpenGallery('real', 0, mode)}
-                />
-              </div>
-            ) : (
-              /* TH3: Chỉ có ảnh tham khảo */
-              <div className="max-w-xl space-y-2 pt-1">
-                <div className="flex items-center justify-between px-1">
-                  <span className="font-mono text-[11px] font-bold text-sky-800 uppercase tracking-wider flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-sky-600" />
-                    <span>ẢNH TƯ LIỆU THAM KHẢO</span>
-                  </span>
-                  <span className="font-mono text-[10px] text-stone-500 font-semibold bg-sky-50 px-2 py-0.5 rounded border border-sky-200">
-                    {refPhotos.length} ảnh
-                  </span>
-                </div>
-
-                <PhotoStackCard
-                  title="Ảnh tư liệu tham khảo"
-                  badgeType="ref"
-                  images={refPhotos}
-                  onOpenStack={(mode) => handleOpenGallery('ref', 0, mode)}
-                />
-              </div>
-            )}
+              )}
+            </div>
           </div>
         )}
       </div>
+
+      {/* Cột phải: Hộp thoại Map chiếm 4/10 (40%) - Luôn giữ chỗ trên desktop để đồng bộ */}
+      {item.map_embed_url && item.map_embed_url.trim().length > 0 ? (
+        <div className="w-full lg:col-span-4 shrink-0 self-start pt-1 lg:pt-0">
+          <TimelineRouteMap
+            map_embed_url={item.map_embed_url}
+            locationName={item.location_name}
+            city={item.city}
+          />
+        </div>
+      ) : (
+        /* Khi không có map, vẫn chừa sẵn chỗ trống 4/10 (40%) trên desktop để card không bị xê dịch */
+        <div
+          className="hidden lg:block lg:col-span-4 w-full pointer-events-none select-none"
+          aria-hidden="true"
+        />
+      )}
+    </div>
 
       {/* MODAL TOÀN DIỆN: XEM TOÀN BỘ ẢNH DẠNG LƯỚI HOẶC PHÓNG TO TỪNG ẢNH */}
       {isModalOpen && (

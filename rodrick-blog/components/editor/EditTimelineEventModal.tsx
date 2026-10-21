@@ -50,9 +50,15 @@ export function EditTimelineEventModal({
   const [mapEmbedUrl, setMapEmbedUrl] = useState<string>('');
   const [images, setImages] = useState<TimelineImageItem[]>([]);
 
+  const [activeTab, setActiveTab] = useState<'info' | 'map' | 'photos'>('info');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const validPhotoCount = useMemo(
+    () => images.filter((img) => img.url.trim().length > 0).length,
+    [images]
+  );
 
   useEffect(() => {
     setMounted(true);
@@ -296,16 +302,13 @@ export function EditTimelineEventModal({
       {/* Modal Dialog Card with Max Height & Internal Scroll */}
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-3xl max-h-[88vh] bg-white border border-[#E6E2DA] rounded-3xl shadow-2xl z-10 flex flex-col overflow-hidden animate-in zoom-in-95 duration-150"
+        className="relative w-full max-w-5xl max-h-[90vh] bg-white border border-[#E6E2DA] rounded-3xl shadow-2xl z-10 flex flex-col overflow-hidden animate-in zoom-in-95 duration-150"
       >
         {/* Fixed Header */}
         <div className="flex items-center justify-between px-6 py-4 sm:px-8 sm:py-5 border-b border-[#F0ECE4] bg-white shrink-0">
           <div>
-            <span className="inline-block text-[10px] font-mono uppercase tracking-widest text-[#B93829] font-bold">
-              BIÊN TẬP LỊCH TRÌNH
-            </span>
-            <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#1C1B18] mt-0.5 truncate max-w-md">
-              Chỉnh Sửa Mốc Sự Kiện: {event.location_name}
+            <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#1C1B18] truncate max-w-xl">
+              Chỉnh Sửa: {event.location_name}
             </h2>
           </div>
 
@@ -330,6 +333,85 @@ export function EditTimelineEventModal({
           </div>
         </div>
 
+        {/* 🌟 PREMIUM UNDERLINE TAB NAVIGATION BAR */}
+        <nav aria-label="Các mục biên tập" className="flex items-center gap-6 sm:gap-8 px-6 sm:px-8 border-b border-[#E6E2DA] bg-[#FAF8F5]/90 shrink-0 overflow-x-auto">
+          <button
+            type="button"
+            onClick={() => setActiveTab('info')}
+            className={`relative py-3.5 sm:py-4 text-xs sm:text-sm font-mono tracking-wide transition-all cursor-pointer flex items-center gap-2 shrink-0 group ${
+              activeTab === 'info'
+                ? 'text-[#B93829] font-bold'
+                : 'text-[#78756E] hover:text-[#1C1B18] font-medium'
+            }`}
+          >
+            <span className={`text-base transition-transform duration-200 ${activeTab === 'info' ? 'scale-110' : 'group-hover:scale-105'}`}>
+              📝
+            </span>
+            <span>Thông tin chung</span>
+
+            {/* Active Underline Indicator */}
+            {activeTab === 'info' ? (
+              <span className="absolute bottom-0 inset-x-0 h-[2.5px] bg-[#B93829] rounded-t-full shadow-2xs" />
+            ) : (
+              <span className="absolute bottom-0 inset-x-0 h-[2px] bg-transparent group-hover:bg-[#E6E2DA] transition-colors rounded-t-full" />
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('map')}
+            className={`relative py-3.5 sm:py-4 text-xs sm:text-sm font-mono tracking-wide transition-all cursor-pointer flex items-center gap-2 shrink-0 group ${
+              activeTab === 'map'
+                ? 'text-[#B93829] font-bold'
+                : 'text-[#78756E] hover:text-[#1C1B18] font-medium'
+            }`}
+          >
+            <span className={`text-base transition-transform duration-200 ${activeTab === 'map' ? 'scale-110' : 'group-hover:scale-105'}`}>
+              🗺️
+            </span>
+            <span>Bản đồ</span>
+            {mapEmbedUrl && mapEmbedUrl.trim().length > 0 && (
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" title="Đã gắn link bản đồ" />
+            )}
+
+            {activeTab === 'map' ? (
+              <span className="absolute bottom-0 inset-x-0 h-[2.5px] bg-[#B93829] rounded-t-full shadow-2xs" />
+            ) : (
+              <span className="absolute bottom-0 inset-x-0 h-[2px] bg-transparent group-hover:bg-[#E6E2DA] transition-colors rounded-t-full" />
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('photos')}
+            className={`relative py-3.5 sm:py-4 text-xs sm:text-sm font-mono tracking-wide transition-all cursor-pointer flex items-center gap-2 shrink-0 group ${
+              activeTab === 'photos'
+                ? 'text-[#B93829] font-bold'
+                : 'text-[#78756E] hover:text-[#1C1B18] font-medium'
+            }`}
+          >
+            <span className={`text-base transition-transform duration-200 ${activeTab === 'photos' ? 'scale-110' : 'group-hover:scale-105'}`}>
+              📷
+            </span>
+            <span>Bộ sưu tập ảnh</span>
+            {validPhotoCount > 0 && (
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono transition-colors ${
+                activeTab === 'photos'
+                  ? 'bg-rose-100 text-[#B93829] font-bold border border-rose-200'
+                  : 'bg-[#EFECE4] text-stone-600 group-hover:bg-stone-200'
+              }`}>
+                {validPhotoCount}
+              </span>
+            )}
+
+            {activeTab === 'photos' ? (
+              <span className="absolute bottom-0 inset-x-0 h-[2.5px] bg-[#B93829] rounded-t-full shadow-2xs" />
+            ) : (
+              <span className="absolute bottom-0 inset-x-0 h-[2px] bg-transparent group-hover:bg-[#E6E2DA] transition-colors rounded-t-full" />
+            )}
+          </button>
+        </nav>
+
         {/* Scrollable Body Content */}
         <div className="flex-1 overflow-y-auto px-6 py-6 sm:px-8 sm:py-6">
           {errorMessage && (
@@ -340,226 +422,222 @@ export function EditTimelineEventModal({
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Real Date & Auto-calculated Day Number */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="block text-xs font-mono uppercase tracking-wider font-semibold text-[#1C1B18]">
-                  Ngày thực tế <span className="text-[#B93829]">*</span>
-                </label>
-                <input
-                  type="date"
-                  required
-                  value={tripDate}
-                  onChange={(e) => setTripDate(e.target.value)}
-                  className="w-full bg-[#FAF8F5] focus:bg-white border border-[#E6E2DA] focus:border-[#B93829] rounded-xl px-4 py-2.5 text-xs font-mono text-[#1C1B18] outline-hidden shadow-xs transition-colors cursor-pointer"
-                />
-              </div>
+            {/* TAB 1: THÔNG TIN CHUNG */}
+            {activeTab === 'info' && (
+              <div className="space-y-6 animate-in fade-in duration-150">
+                {/* Real Date & Auto-calculated Day Number */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-mono uppercase tracking-wider font-semibold text-[#1C1B18]">
+                      Ngày thực tế <span className="text-[#B93829]">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      required
+                      value={tripDate}
+                      onChange={(e) => setTripDate(e.target.value)}
+                      className="w-full bg-[#FAF8F5] focus:bg-white border border-[#E6E2DA] focus:border-[#B93829] rounded-xl px-4 py-2.5 text-xs font-mono text-[#1C1B18] outline-hidden shadow-xs transition-colors cursor-pointer"
+                    />
+                  </div>
 
-              <div className="space-y-1.5">
-                <label className="block text-xs font-mono uppercase tracking-wider font-semibold text-[#1C1B18]">
-                  Thứ tự ngày <span className="text-stone-400 font-normal font-sans">(Tự động sắp xếp)</span>
-                </label>
-                <div className="flex items-center gap-2 h-[41px] px-4 rounded-xl bg-[#FAF8F5] border border-[#E6E2DA] text-xs font-mono font-bold text-[#1C1B18]">
-                  <span className="w-2 h-2 rounded-full bg-[#B93829]" />
-                  <span>Ngày {calculatedDayNumber}</span>
-                  <span className="text-[10px] font-normal text-stone-500 ml-auto font-sans">
-                    Đồng bộ tự động
-                  </span>
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-mono uppercase tracking-wider font-semibold text-[#1C1B18]">
+                      Thứ tự ngày
+                    </label>
+                    <div className="flex items-center gap-2 h-[41px] px-4 rounded-xl bg-[#FAF8F5] border border-[#E6E2DA] text-xs font-mono font-bold text-[#1C1B18]">
+                      <span className="w-2 h-2 rounded-full bg-[#B93829]" />
+                      <span>Ngày {calculatedDayNumber}</span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
 
-            {/* Smart Banner if this date is earlier than earliest trip date */}
-            {isEarlierThanSchedule && earliestTripDate && (
-              <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200 text-amber-950 text-xs font-sans space-y-1 animate-in fade-in duration-150">
-                <div className="flex items-center gap-1.5 font-bold text-amber-900">
-                  <span>💡</span>
-                  <span>Ngày mới chọn ({tripDate}) sớm hơn ngày đầu tiên hiện tại ({earliestTripDate}):</span>
+                {/* Smart Banner if this date is earlier than earliest trip date */}
+                {isEarlierThanSchedule && earliestTripDate && (
+                  <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-mono flex items-center gap-2">
+                    <span>💡</span>
+                    <span>Ngày {tripDate} sẽ được tự động xếp làm <strong>Ngày 1</strong> của chuyến đi.</span>
+                  </div>
+                )}
+
+                {/* Structured Time Slot Selector (Start Time -> End Time, Overnight Support) */}
+                <div className="p-4 rounded-2xl bg-[#FAF8F5] border border-[#E6E2DA] space-y-3">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <label className="block text-xs font-mono uppercase tracking-wider font-semibold text-[#1C1B18]">
+                      Khung giờ hoạt động <span className="text-[#B93829]">*</span>
+                    </label>
+                    {timeSlotPreview && (
+                      <span className="text-[11px] font-mono font-bold text-[#B93829] bg-white px-2.5 py-0.5 rounded-lg border border-rose-200 shadow-2xs">
+                        ⏱️ {timeSlotPreview}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <span className="text-[11px] font-mono text-[#78756E] block">Từ (Giờ bắt đầu)</span>
+                      <input
+                        type="time"
+                        required
+                        value={startTime}
+                        onChange={(e) => handleStartTimeChange(e.target.value)}
+                        className="w-full bg-white focus:bg-white border border-[#E6E2DA] focus:border-[#B93829] rounded-xl px-3 py-2 text-xs font-mono text-[#1C1B18] outline-hidden shadow-xs transition-colors"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <span className="text-[11px] font-mono text-[#78756E] block">Đến (Giờ kết thúc)</span>
+                      <input
+                        type="time"
+                        required
+                        value={endTime}
+                        onChange={(e) => handleEndTimeChange(e.target.value)}
+                        className="w-full bg-white focus:bg-white border border-[#E6E2DA] focus:border-[#B93829] rounded-xl px-3 py-2 text-xs font-mono text-[#1C1B18] outline-hidden shadow-xs transition-colors"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="pt-1 flex items-center justify-between flex-wrap gap-2">
+                    <label className="inline-flex items-center gap-2 cursor-pointer text-xs font-mono text-[#57534E] hover:text-[#1C1B18] select-none">
+                      <input
+                        type="checkbox"
+                        checked={isOvernight}
+                        onChange={(e) => setIsOvernight(e.target.checked)}
+                        className="rounded text-[#B93829] focus:ring-[#B93829] border-stone-300 w-4 h-4 cursor-pointer"
+                      />
+                      <span>Chặng qua đêm (sang ngày hôm sau / +1 ngày)</span>
+                    </label>
+
+                    {isOvernight && (
+                      <span className="text-[10px] font-mono text-[#B93829] bg-rose-50 px-2 py-0.5 rounded border border-rose-200 font-semibold">
+                        🌙 Chuyển tiếp qua ngày kế tiếp
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <p className="text-[11px] text-amber-800 leading-relaxed">
-                  Sự kiện sẽ tự động trở thành <strong>Ngày 1</strong> của chuyến đi. Hệ thống sẽ tự động cập nhật ngày {earliestTripDate} thành <strong>Ngày 2</strong> và điều chỉnh các ngày sau tương ứng sau khi bạn lưu.
-                </p>
+
+                {/* Location Name & City (2 columns) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-mono uppercase tracking-wider font-semibold text-[#1C1B18]">
+                      Tên địa điểm / Sự kiện <span className="text-[#B93829]">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={locationName}
+                      onChange={(e) => setLocationName(e.target.value)}
+                      placeholder="VD: Chùa Kinkaku-ji (Gác Vàng)..."
+                      className="w-full bg-[#FAF8F5] focus:bg-white border border-[#E6E2DA] focus:border-[#B93829] rounded-xl px-4 py-2.5 text-sm font-sans text-[#1C1B18] outline-hidden shadow-xs transition-colors"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-mono uppercase tracking-wider font-semibold text-[#1C1B18]">
+                      Thành phố <span className="text-[#B93829]">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      placeholder="VD: Kyoto, Tokyo, Osaka..."
+                      className="w-full bg-[#FAF8F5] focus:bg-white border border-[#E6E2DA] focus:border-[#B93829] rounded-xl px-4 py-2.5 text-xs font-mono text-[#1C1B18] outline-hidden shadow-xs transition-colors"
+                    />
+                  </div>
+                </div>
+
+                {/* Category Tag Selection */}
+                <div className="space-y-2">
+                  <label className="block text-xs font-mono uppercase tracking-wider font-semibold text-[#1C1B18]">
+                    Phân loại hoạt động (Category)
+                  </label>
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                    {[
+                      { key: 'SIGHTSEEING', label: '⛩️ Tham Quan' },
+                      { key: 'FOOD', label: '🍜 Ẩm Thực' },
+                      { key: 'TRANSIT', label: '🚄 Di Chuyển' },
+                      { key: 'HOTEL', label: '🏨 Khách Sạn' },
+                      { key: 'PHOTOGRAPHY', label: '📷 Chụp Ảnh' },
+                    ].map((cat) => (
+                      <button
+                        key={cat.key}
+                        type="button"
+                        onClick={() => setCategoryTag(cat.key)}
+                        className={`py-2 px-3 rounded-xl border text-xs font-mono transition-all cursor-pointer text-center ${
+                          categoryTag === cat.key
+                            ? 'border-[#B93829] bg-rose-50 text-[#B93829] font-bold shadow-xs'
+                            : 'border-[#E6E2DA] hover:border-stone-400 bg-white text-[#57544E]'
+                        }`}
+                      >
+                        {cat.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Notes & Tips */}
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-mono uppercase tracking-wider font-semibold text-[#1C1B18]">
+                    Ghi chú chi tiết, góc chụp & kinh nghiệm thực tế
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder="VD: Nên đến trước 9h sáng..."
+                    className="w-full bg-[#FAF8F5] focus:bg-white border border-[#E6E2DA] focus:border-[#B93829] rounded-xl p-4 text-xs font-sans text-[#1C1B18] outline-hidden shadow-xs transition-colors resize-y leading-relaxed"
+                  />
+                </div>
               </div>
             )}
 
-            {/* Structured Time Slot Selector (Start Time -> End Time, Overnight Support) */}
-            <div className="p-4 rounded-2xl bg-[#FAF8F5] border border-[#E6E2DA] space-y-3">
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <label className="block text-xs font-mono uppercase tracking-wider font-semibold text-[#1C1B18]">
-                  Khung giờ hoạt động <span className="text-[#B93829]">*</span>
-                </label>
-                {timeSlotPreview && (
-                  <span className="text-[11px] font-mono font-bold text-[#B93829] bg-white px-2.5 py-0.5 rounded-lg border border-rose-200 shadow-2xs">
-                    ⏱️ {timeSlotPreview}
-                  </span>
-                )}
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <span className="text-[11px] font-mono text-[#78756E] block">Từ (Giờ bắt đầu)</span>
+            {/* TAB 2: BẢN ĐỒ */}
+            {activeTab === 'map' && (
+              <div className="space-y-6 animate-in fade-in duration-150">
+                {/* Link Bản đồ Google Maps Embed (Tùy chọn) */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-mono uppercase tracking-wider font-semibold text-[#1C1B18]">
+                      📍 Link Bản đồ Google Maps
+                    </label>
+                    <span className="font-mono text-[11px] text-[#78756E]">Tùy chọn</span>
+                  </div>
                   <input
-                    type="time"
-                    required
-                    value={startTime}
-                    onChange={(e) => handleStartTimeChange(e.target.value)}
-                    className="w-full bg-white focus:bg-white border border-[#E6E2DA] focus:border-[#B93829] rounded-xl px-3 py-2 text-xs font-mono text-[#1C1B18] outline-hidden shadow-xs transition-colors"
+                    type="text"
+                    value={mapEmbedUrl}
+                    onChange={(e) => setMapEmbedUrl(e.target.value)}
+                    placeholder="Dán link Google Maps hoặc mã <iframe>"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-[#E6E2DA] bg-[#FAF8F5] text-xs text-[#1C1B18] font-mono focus:bg-white focus:outline-none focus:border-[#B61C25] transition-all"
                   />
                 </div>
 
-                <div className="space-y-1">
-                  <span className="text-[11px] font-mono text-[#78756E] block">Đến (Giờ kết thúc)</span>
-                  <input
-                    type="time"
-                    required
-                    value={endTime}
-                    onChange={(e) => handleEndTimeChange(e.target.value)}
-                    className="w-full bg-white focus:bg-white border border-[#E6E2DA] focus:border-[#B93829] rounded-xl px-3 py-2 text-xs font-mono text-[#1C1B18] outline-hidden shadow-xs transition-colors"
+                {/* Trình tạo & Xem trước Bản đồ Google Maps Embed */}
+                <div>
+                  <AdminRoutePickerMap
+                    initialCity={city}
+                    locationName={locationName}
+                    mapEmbedUrl={mapEmbedUrl}
+                    onMapEmbedUrlChange={setMapEmbedUrl}
                   />
                 </div>
               </div>
+            )}
 
-              <div className="pt-1 flex items-center justify-between flex-wrap gap-2">
-                <label className="inline-flex items-center gap-2 cursor-pointer text-xs font-mono text-[#57534E] hover:text-[#1C1B18] select-none">
-                  <input
-                    type="checkbox"
-                    checked={isOvernight}
-                    onChange={(e) => setIsOvernight(e.target.checked)}
-                    className="rounded text-[#B93829] focus:ring-[#B93829] border-stone-300 w-4 h-4 cursor-pointer"
-                  />
-                  <span>Chặng qua đêm (sang ngày hôm sau / +1 ngày)</span>
-                </label>
-
-                {isOvernight && (
-                  <span className="text-[10px] font-mono text-[#B93829] bg-rose-50 px-2 py-0.5 rounded border border-rose-200 font-semibold">
-                    🌙 Chuyển tiếp qua ngày kế tiếp
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* Location Name & City (2 columns) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="block text-xs font-mono uppercase tracking-wider font-semibold text-[#1C1B18]">
-                  Tên địa điểm / Sự kiện <span className="text-[#B93829]">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={locationName}
-                  onChange={(e) => setLocationName(e.target.value)}
-                  placeholder="VD: Chùa Kinkaku-ji (Gác Vàng)..."
-                  className="w-full bg-[#FAF8F5] focus:bg-white border border-[#E6E2DA] focus:border-[#B93829] rounded-xl px-4 py-2.5 text-sm font-sans text-[#1C1B18] outline-hidden shadow-xs transition-colors"
+            {/* TAB 3: BỘ SƯU TẬP ẢNH */}
+            {activeTab === 'photos' && (
+              <div className="animate-in fade-in duration-150">
+                <TimelinePhotosManager
+                  images={images}
+                  onChange={setImages}
+                  city={city}
+                  tripSlug={tripSlug}
+                  tripTitle={tripTitle}
+                  tripDate={tripDate}
                 />
               </div>
+            )}
 
-              <div className="space-y-1.5">
-                <label className="block text-xs font-mono uppercase tracking-wider font-semibold text-[#1C1B18]">
-                  Thành phố <span className="text-[#B93829]">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  placeholder="VD: Kyoto, Tokyo, Osaka..."
-                  className="w-full bg-[#FAF8F5] focus:bg-white border border-[#E6E2DA] focus:border-[#B93829] rounded-xl px-4 py-2.5 text-xs font-mono text-[#1C1B18] outline-hidden shadow-xs transition-colors"
-                />
-              </div>
-            </div>
-
-            {/* Category Tag Selection */}
-            <div className="space-y-2">
-              <label className="block text-xs font-mono uppercase tracking-wider font-semibold text-[#1C1B18]">
-                Phân loại hoạt động (Category)
-              </label>
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                {[
-                  { key: 'SIGHTSEEING', label: '⛩️ Tham Quan' },
-                  { key: 'FOOD', label: '🍜 Ẩm Thực' },
-                  { key: 'TRANSIT', label: '🚄 Di Chuyển' },
-                  { key: 'HOTEL', label: '🏨 Khách Sạn' },
-                  { key: 'PHOTOGRAPHY', label: '📷 Chụp Ảnh' },
-                ].map((cat) => (
-                  <button
-                    key={cat.key}
-                    type="button"
-                    onClick={() => setCategoryTag(cat.key)}
-                    className={`py-2 px-3 rounded-xl border text-xs font-mono transition-all cursor-pointer text-center ${
-                      categoryTag === cat.key
-                        ? 'border-[#B93829] bg-rose-50 text-[#B93829] font-bold shadow-xs'
-                        : 'border-[#E6E2DA] hover:border-stone-400 bg-white text-[#57544E]'
-                    }`}
-                  >
-                    {cat.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Notes & Tips */}
-            <div className="space-y-1.5">
-              <label className="block text-xs font-mono uppercase tracking-wider font-semibold text-[#1C1B18]">
-                Ghi chú chi tiết, góc chụp & kinh nghiệm thực tế
-              </label>
-              <textarea
-                rows={3}
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="VD: Nên đến trước 9h sáng..."
-                className="w-full bg-[#FAF8F5] focus:bg-white border border-[#E6E2DA] focus:border-[#B93829] rounded-xl p-4 text-xs font-sans text-[#1C1B18] outline-hidden shadow-xs transition-colors resize-y leading-relaxed"
-              />
-            </div>
-
-            {/* Link Bản đồ Google Maps Embed (Tùy chọn) */}
-            <div className="space-y-1.5 pt-1">
-              <div className="flex items-center justify-between">
-                <label className="block text-xs font-mono uppercase tracking-wider font-semibold text-[#1C1B18]">
-                  📍 Link Bản đồ Google Maps (Embed URL)
-                </label>
-                <span className="font-mono text-[11px] text-[#78756E]">Tùy chọn</span>
-              </div>
-              <input
-                type="text"
-                value={mapEmbedUrl}
-                onChange={(e) => setMapEmbedUrl(e.target.value)}
-                placeholder="Dán link Google Maps hoặc mã <iframe> (Nếu để trống sẽ tự tìm theo Tên địa điểm)"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-[#E6E2DA] bg-[#FAF8F5] text-xs text-[#1C1B18] font-mono focus:bg-white focus:outline-none focus:border-[#B61C25] transition-all"
-              />
-              <p className="text-[11px] text-[#78756E]">
-                Hệ thống hỗ trợ tự động tìm theo Tên địa điểm hoặc dán link Google Maps Embed / chia sẻ.
-              </p>
-            </div>
-
-            {/* Trình tạo & Xem trước Bản đồ Google Maps Embed */}
-            <div className="space-y-2 pt-1">
-              <div className="flex items-center justify-between">
-                <label className="block text-xs font-mono uppercase tracking-wider font-semibold text-[#1C1B18]">
-                  🗺️ Trình tạo & Xem trước Bản đồ (Google Maps)
-                </label>
-                <span className="font-mono text-[11px] text-[#78756E]">
-                  {mapEmbedUrl ? 'Đã có link bản đồ' : 'Tự động tạo'}
-                </span>
-              </div>
-              <AdminRoutePickerMap
-                initialCity={city}
-                mapEmbedUrl={mapEmbedUrl}
-                onMapEmbedUrlChange={setMapEmbedUrl}
-              />
-            </div>
-
-            {/* Attach Photos via TimelinePhotosManager */}
-            <TimelinePhotosManager
-              images={images}
-              onChange={setImages}
-              city={city}
-              tripSlug={tripSlug}
-              tripTitle={tripTitle}
-              tripDate={tripDate}
-            />
-
-            {/* Bottom Actions */}
+            {/* Bottom Actions - Luôn cố định bên dưới để lưu bất cứ lúc nào */}
             <div className="pt-4 border-t border-[#F0ECE4] flex flex-wrap items-center justify-between gap-4">
               <button
                 type="button"

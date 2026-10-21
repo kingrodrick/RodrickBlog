@@ -31,7 +31,7 @@ export default async function RodrickHomePage() {
 
   return (
     <div className="w-full bg-[#FAF8F5] text-[#1C1B18]">
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-10 space-y-16">
+      <main className="max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-16">
         {/* Khối giới thiệu mở đầu */}
         <HeroSection />
 

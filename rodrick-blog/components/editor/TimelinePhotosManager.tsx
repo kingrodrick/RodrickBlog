@@ -404,7 +404,7 @@ export function TimelinePhotosManager({
   const selectedCardIndex = images.findIndex((img) => img.id === selectedCardId);
 
   return (
-    <div className="space-y-4 pt-4 border-t border-[#F0ECE4]">
+    <div className="space-y-4">
       {/* Hidden inputs */}
       <input
         ref={multiFileInputRef}
@@ -423,123 +423,65 @@ export function TimelinePhotosManager({
       />
 
       {/* COMPACT & ELEGANT PHOTO TOOLBAR */}
-      <div className="bg-[#FAF8F5] border border-[#E6E2DA] rounded-2xl p-4 sm:p-5 shadow-2xs space-y-3.5">
+      <div className="bg-[#FAF8F5] border border-[#E6E2DA] rounded-2xl p-3.5 sm:p-4 shadow-2xs">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <div className="flex items-center gap-2">
-              <h4 className="font-serif text-base font-bold text-[#1C1B18]">
-                Bộ Sưu Tập Ảnh ({totalCount} ảnh)
-              </h4>
-              {realCount > 0 && (
-                <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-mono font-semibold">
-                  📷 {realCount} A6400
-                </span>
-              )}
-              {refCount > 0 && (
-                <span className="px-2 py-0.5 rounded-full bg-sky-50 text-sky-800 border border-sky-200 text-[10px] font-mono font-semibold">
-                  🌐 {refCount} Tham khảo
-                </span>
-              )}
-            </div>
-            <p className="font-mono text-[11px] text-[#78756E] mt-0.5">
-              Chọn dòng ảnh bên dưới rồi bấm <span className="text-[#B93829] font-bold">Ctrl + V</span> để dán ảnh trực tiếp từ bộ nhớ tạm. Tự động lưu lên Cloudinary.
-            </p>
+          <div className="flex items-center gap-2">
+            <h4 className="font-serif text-base font-bold text-[#1C1B18]">
+              Ảnh ({totalCount})
+            </h4>
+            {realCount > 0 && (
+              <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-mono font-semibold">
+                📷 {realCount} A6400
+              </span>
+            )}
+            {refCount > 0 && (
+              <span className="px-2 py-0.5 rounded-full bg-sky-50 text-sky-800 border border-sky-200 text-[10px] font-mono font-semibold">
+                🌐 {refCount} Tham khảo
+              </span>
+            )}
           </div>
 
-          {/* Add Photo Buttons (Thực Tế & Tham Khảo riêng biệt) */}
+          {/* Add Photo Buttons */}
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => handleAddEmptyImage(false)}
               disabled={isProcessingFiles}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-sky-700 hover:bg-sky-800 text-white font-mono text-xs font-bold transition-all shadow-xs cursor-pointer hover:scale-105 active:scale-95 disabled:opacity-50"
-              title="Thêm ảnh tham khảo từ web (tự động lưu vào thư mục ThamKhao)"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-700 hover:bg-sky-800 text-white font-mono text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-95 disabled:opacity-50"
             >
               <span>🌐</span>
-              <span>+ Thêm ảnh tham khảo</span>
+              <span>+ Ảnh tham khảo</span>
             </button>
             <button
               type="button"
               onClick={() => handleAddEmptyImage(true)}
               disabled={isProcessingFiles}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-mono text-xs font-bold transition-all shadow-xs cursor-pointer hover:scale-105 active:scale-95 disabled:opacity-50"
-              title="Thêm ảnh chụp thực tế A6400 (tự động lưu vào thư mục ThucTe)"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-mono text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-95 disabled:opacity-50"
             >
               <span>📷</span>
-              <span>+ Thêm ảnh thực tế</span>
+              <span>+ Ảnh thực tế</span>
             </button>
           </div>
         </div>
 
-        {/* Dynamic Highlight Target Notice */}
-        <div className="space-y-1.5 px-3.5 py-2.5 rounded-xl bg-white border border-[#E6E2DA] shadow-2xs">
-          <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-mono">
-            <div className="flex items-center gap-2 text-[#1C1B18]">
-              <span className="text-sm">🎯</span>
-              <span>
-                Đích dán phím tắt (Ctrl + V):{' '}
-                {selectedCardIndex >= 0 ? (
-                  <strong className="text-[#B93829] bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200">
-                    Ảnh #{selectedCardIndex + 1}
-                  </strong>
-                ) : (
-                  <span className="text-stone-400 italic">Chưa chọn dòng nào</span>
-                )}
-              </span>
-              <span className="hidden sm:inline text-stone-500 text-[11px]">
-                {selectedCardIndex >= 0
-                  ? '— Nhấn Ctrl+V để thay đổi ảnh dòng này'
-                  : '— Hãy bấm chọn một dòng bên dưới để dán ảnh'}
-              </span>
-            </div>
-
-            {selectedCardIndex >= 0 && (
-              <span className="inline-flex items-center gap-1.5 text-[10px] font-mono text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full font-bold">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Sẵn sàng dán (Ctrl+V)
-              </span>
-            )}
-          </div>
-
-          {/* Cloudinary Target Folder Preview */}
-          {selectedCardIndex >= 0 && (
-            <div className="text-[10px] font-mono text-stone-500 flex flex-wrap items-center gap-1.5 pt-1.5 border-t border-[#F0ECE4]">
-              <span>📁 Thư mục Cloudinary:</span>
-              <span className="text-[#B93829] bg-[#FAF8F5] px-1.5 py-0.5 rounded border border-[#E6E2DA] font-semibold">
-                {buildCloudinaryTimelineFolder(
-                  tripSlug || tripTitle,
-                  tripDate,
-                  images[selectedCardIndex]?.isRealPhoto !== false
-                )}
-              </span>
-            </div>
-          )}
-        </div>
-
         {/* Upload Status / Cloudinary Indicator */}
         {isProcessingFiles && (
-          <div className="flex items-center gap-2 text-xs font-mono text-[#B93829] bg-rose-50 border border-rose-200 px-3 py-2 rounded-xl animate-in fade-in duration-150">
+          <div className="mt-3 flex items-center gap-2 text-xs font-mono text-[#B93829] bg-rose-50 border border-rose-200 px-3 py-2 rounded-xl animate-in fade-in duration-150">
             <div className="w-4 h-4 border-2 border-[#B93829] border-t-transparent rounded-full animate-spin shrink-0" />
-            <span className="font-semibold">{uploadStatus || 'Đang tải ảnh lên Cloudinary...'}</span>
+            <span className="font-semibold">{uploadStatus || 'Đang tải ảnh...'}</span>
           </div>
         )}
 
-        {/* Cloudinary Configuration Warning Banner */}
+        {/* Cloudinary Configuration Warning Banner (Rút gọn) */}
         {cloudinaryError && !isProcessingFiles && (
-          <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-300 text-amber-950 text-xs font-sans space-y-1.5 animate-in fade-in duration-150 shadow-2xs">
-            <div className="flex items-center gap-2 font-bold text-amber-900">
-              <span className="text-base">⚠️</span>
-              <span>Chưa lưu được lên Cloudinary: {cloudinaryError}</span>
-            </div>
-            <p className="text-[11px] text-amber-800 leading-relaxed font-sans">
-              Ảnh tạm thời được lưu dưới dạng Base64 trên trình duyệt. Để ảnh tự động lưu link URL Cloudinary vào Supabase, bạn cần vào <strong>Cloudinary Dashboard → Settings → Upload → Upload presets</strong> và tạo một preset có tên chính xác là <code className="bg-amber-200/80 px-1.5 py-0.5 rounded font-mono font-bold text-amber-950">rodrick_blog</code> với chế độ <strong>Signing Mode = Unsigned</strong>.
-            </p>
+          <div className="mt-3 px-3 py-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-mono flex items-center justify-between gap-2">
+            <span>⚠️ {cloudinaryError} (Ảnh lưu tạm Base64)</span>
           </div>
         )}
       </div>
 
       {/* List of Photo Cards */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         {images.map((img, index) => {
           const isSelected = selectedCardId === img.id;
           const isJustPasted = justPastedId === img.id;
@@ -555,76 +497,29 @@ export function TimelinePhotosManager({
               }}
               className={`rounded-2xl transition-all cursor-pointer relative overflow-hidden ${
                 isSelected
-                  ? 'bg-white border-2 border-[#B93829] ring-4 ring-[#B93829]/15 shadow-md'
-                  : 'bg-white/85 border border-[#E6E2DA] hover:border-[#D0C9BD] hover:bg-white shadow-xs'
+                  ? 'bg-white border-2 border-[#B93829] shadow-sm'
+                  : 'bg-white/90 border border-[#E6E2DA] hover:border-[#D0C9BD] hover:bg-white shadow-2xs'
               }`}
             >
-              {/* PROMINENT TOP RIBBON FOR SELECTED CARD */}
-              {isSelected ? (
-                <div className="bg-gradient-to-r from-[#B93829] via-[#A83224] to-[#8C271C] text-white px-4 py-2 flex items-center justify-between shadow-xs">
-                  <div className="flex items-center gap-2">
-                    <span className="relative flex h-2.5 w-2.5">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
-                    </span>
-                    <span className="font-mono text-xs font-bold tracking-wide">
-                      🎯 ĐANG CHỌN ẢNH #{index + 1}
-                    </span>
-                    <span className="hidden sm:inline font-mono text-[11px] text-white/90">
-                      — Nhấn Ctrl + V ở bất kỳ đâu để thay ảnh dòng này
-                    </span>
-                  </div>
-                  <span className="font-mono text-[10px] bg-white/20 px-2.5 py-0.5 rounded-full font-bold backdrop-blur-xs">
-                    {isJustPasted ? '✅ Vừa dán ảnh!' : '⚡ Sẵn sàng Ctrl + V'}
-                  </span>
-                </div>
-              ) : null}
-
               {/* CARD CONTENT */}
-              <div className="p-4 sm:p-5 space-y-4">
-                {/* Top row: Selection Trigger Button, Source Type Toggle, Delete */}
-                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#F0ECE4] pb-3">
+              <div className="p-3.5 sm:p-4 space-y-3">
+                {/* Top row: Index Badge, Source Type Toggle, Delete */}
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#F0ECE4] pb-2.5">
                   <div className="flex flex-wrap items-center gap-2">
-                    {/* Explicit Selection Button */}
-                    {isSelected ? (
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedCardId(img.id);
-                        }}
-                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-mono font-bold bg-[#B93829] text-white border border-[#B93829] shadow-xs cursor-default"
-                      >
-                        <span className="w-3.5 h-3.5 rounded-full bg-white flex items-center justify-center">
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#B93829]" />
-                        </span>
-                        <span>Đang chọn dòng này</span>
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedCardId(img.id);
-                        }}
-                        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-mono font-semibold bg-[#FAF8F5] hover:bg-rose-50 text-stone-600 hover:text-[#B93829] border border-[#E6E2DA] hover:border-[#B93829]/40 transition-all cursor-pointer shadow-2xs group"
-                        title="Bấm để chọn dòng này nhận ảnh khi nhấn Ctrl + V"
-                      >
-                        <span className="w-3.5 h-3.5 rounded-full border-2 border-stone-300 group-hover:border-[#B93829] flex items-center justify-center transition-colors">
-                          <span className="w-1.5 h-1.5 rounded-full bg-transparent group-hover:bg-[#B93829]/50 transition-colors" />
-                        </span>
-                        <span>Chọn dòng này để dán (Ctrl + V)</span>
-                      </button>
-                    )}
-
-                    <span className="font-mono text-xs text-stone-400 font-semibold">
-                      Ảnh #{index + 1}
+                    <span
+                      className={`font-mono text-xs px-2.5 py-0.5 rounded-lg border font-semibold ${
+                        isSelected
+                          ? 'bg-[#B93829] text-white border-[#B93829]'
+                          : 'bg-[#FAF8F5] text-stone-600 border-[#E6E2DA]'
+                      }`}
+                    >
+                      {isSelected ? `✓ Ảnh #${index + 1}` : `Ảnh #${index + 1}`}
                     </span>
 
                     {/* Source Type Toggle */}
                     <div
                       onClick={(e) => e.stopPropagation()}
-                      className="flex items-center gap-1 bg-[#FAF8F5] p-0.5 rounded-lg border border-[#E6E2DA] ml-1"
+                      className="flex items-center gap-1 bg-[#FAF8F5] p-0.5 rounded-lg border border-[#E6E2DA]"
                     >
                       <button
                         type="button"
@@ -632,14 +527,14 @@ export function TimelinePhotosManager({
                           setSelectedCardId(img.id);
                           handleTogglePhotoType(img.id, true);
                         }}
-                        className={`px-2.5 py-1 rounded-md text-[10px] font-mono transition-all cursor-pointer flex items-center gap-1 ${
+                        className={`px-2 py-0.5 rounded-md text-[10px] font-mono transition-all cursor-pointer flex items-center gap-1 ${
                           img.isRealPhoto
                             ? 'bg-emerald-700 text-white font-bold shadow-xs'
                             : 'text-stone-600 hover:text-stone-900'
                         }`}
                       >
                         <span>📷</span>
-                        <span>Sony A6400 (Thực tế)</span>
+                        <span>A6400</span>
                       </button>
                       <button
                         type="button"
@@ -647,17 +542,18 @@ export function TimelinePhotosManager({
                           setSelectedCardId(img.id);
                           handleTogglePhotoType(img.id, false);
                         }}
-                        className={`px-2.5 py-1 rounded-md text-[10px] font-mono transition-all cursor-pointer flex items-center gap-1 ${
+                        className={`px-2 py-0.5 rounded-md text-[10px] font-mono transition-all cursor-pointer flex items-center gap-1 ${
                           !img.isRealPhoto
                             ? 'bg-sky-700 text-white font-bold shadow-xs'
                             : 'text-stone-600 hover:text-stone-900'
                         }`}
                       >
                         <span>🌐</span>
-                        <span>Tham khảo web</span>
+                        <span>Tham khảo</span>
                       </button>
                     </div>
                   </div>
+
 
                   {/* Delete button */}
                   <button
@@ -728,15 +624,6 @@ export function TimelinePhotosManager({
                           </span>
                         )}
 
-                        {/* Highlight badge on thumbnail when selected */}
-                        {isSelected && (
-                          <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/85 via-black/50 to-transparent p-1.5 text-center pointer-events-none">
-                            <span className="text-[10px] font-mono text-white font-bold flex items-center justify-center gap-1">
-                              <span>🎯</span> Dòng đang chọn (Ctrl+V)
-                            </span>
-                          </div>
-                        )}
-
                         {/* Hover Overlay */}
                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                           <button
@@ -748,7 +635,7 @@ export function TimelinePhotosManager({
                             }}
                             className="bg-white text-[#1C1B18] font-mono text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-md cursor-pointer hover:bg-rose-50 hover:text-[#B93829]"
                           >
-                            ✏️ Chọn ảnh khác
+                            ✏️ Đổi ảnh
                           </button>
                         </div>
                       </div>
@@ -774,29 +661,20 @@ export function TimelinePhotosManager({
                         tabIndex={0}
                         className={`h-32 w-full rounded-xl border-2 border-dashed flex flex-col items-center justify-center text-center p-2.5 cursor-pointer transition-all outline-hidden group select-none ${
                           isSelected
-                            ? 'border-[#B93829] bg-rose-50/70 shadow-inner ring-2 ring-[#B93829]/25'
-                            : 'border-stone-300 hover:border-[#B93829] bg-[#FAF8F5]/80 hover:bg-rose-50/20'
+                            ? 'border-[#B93829] bg-rose-50/50 shadow-inner'
+                            : 'border-stone-300 hover:border-[#B93829] bg-[#FAF8F5]/80'
                         }`}
-                        title="Bấm để chọn file hoặc Ctrl + V để dán vào dòng này"
+                        title="Bấm để chọn file hoặc Ctrl + V để dán"
                       >
                         <span className="text-xl group-hover:scale-110 transition-transform">
                           {img.isRealPhoto ? '📷' : '🌐'}
                         </span>
                         <span
-                          className={`text-xs font-mono font-bold mt-1 ${
+                          className={`text-xs font-mono font-bold mt-1.5 ${
                             isSelected ? 'text-[#B93829]' : 'text-stone-700'
                           }`}
                         >
-                          {isSelected ? 'Nhấn Ctrl + V để dán' : 'Bấm để chọn file'}
-                        </span>
-                        <span
-                          className={`text-[9px] font-mono font-semibold px-2 py-0.5 rounded-md mt-1 ${
-                            img.isRealPhoto
-                              ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
-                              : 'bg-sky-100 text-sky-800 border border-sky-200'
-                          }`}
-                        >
-                          📁 Vào: {img.isRealPhoto ? 'ThucTe' : 'ThamKhao'}
+                          {isSelected ? 'Ctrl + V để dán' : 'Chọn ảnh'}
                         </span>
                       </div>
                     )}
@@ -810,15 +688,15 @@ export function TimelinePhotosManager({
                           setSelectedCardId(img.id);
                           handleTriggerReplaceSinglePhoto(img.id);
                         }}
-                        className="w-full py-1.5 px-2 rounded-lg bg-[#FAF8F5] hover:bg-[#1C1B18] hover:text-white text-stone-700 border border-[#E6E2DA] transition-colors text-center cursor-pointer text-[10px] font-mono font-semibold"
+                        className="w-full py-1 px-2 rounded-lg bg-[#FAF8F5] hover:bg-[#1C1B18] hover:text-white text-stone-700 border border-[#E6E2DA] transition-colors text-center cursor-pointer text-[10px] font-mono font-medium"
                       >
-                        📁 Đổi ảnh từ máy
+                        Đổi ảnh từ máy
                       </button>
                     )}
                   </div>
 
                   {/* Right Form Inputs */}
-                  <div className="flex-1 w-full space-y-3">
+                  <div className="flex-1 w-full space-y-2.5">
                     {/* Caption Input */}
                     <div className="space-y-1">
                       <label className="block text-[10px] font-mono uppercase tracking-wider text-[#78756E] font-semibold">
@@ -835,8 +713,8 @@ export function TimelinePhotosManager({
                     </div>
 
                     {/* Camera Gear & EXIF inputs */}
-                    {img.isRealPhoto ? (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                    {img.isRealPhoto && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-0.5">
                         <div className="space-y-1">
                           <label className="block text-[10px] font-mono uppercase tracking-wider text-[#78756E] font-semibold">
                             Thiết bị & Lens
@@ -867,11 +745,6 @@ export function TimelinePhotosManager({
                             className="w-full bg-[#FAF8F5] focus:bg-white border border-[#E6E2DA] focus:border-[#B93829] rounded-xl px-3 py-1.5 text-xs font-mono text-[#1C1B18] outline-hidden"
                           />
                         </div>
-                      </div>
-                    ) : (
-                      <div className="p-2.5 bg-[#FAF8F5] border border-[#E6E2DA] rounded-xl text-[11px] font-mono text-stone-500 flex items-center gap-2">
-                        <span>🌐</span>
-                        <span>Ảnh được đánh dấu là ảnh minh họa / tư liệu tham khảo lịch trình.</span>
                       </div>
                     )}
                   </div>

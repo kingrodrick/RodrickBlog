@@ -53,99 +53,97 @@ export function TimelineRouteMap({
       return rawUrl;
     }
 
-    // 3. Nếu map_embed_url để trống, tự động tạo URL Google Maps Embed theo tên địa điểm & thành phố
-    if (locationName && locationName.trim().length > 0) {
-      return `https://maps.google.com/maps?q=${encodeURIComponent(fullSearchLocation)}&output=embed`;
-    }
-
     return null;
-  }, [rawUrl, locationName, fullSearchLocation]);
+  }, [rawUrl]);
 
   // URL chỉ đường trực tiếp mở ứng dụng Google Maps (Mobile / Desktop)
   const appDirectionsUrl = useMemo(() => {
-    // Nếu có locationName, mở tìm kiếm / dẫn đường tới địa điểm đó
-    if (locationName && locationName.trim().length > 0) {
-      return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullSearchLocation)}`;
+    if (rawUrl.startsWith('http')) {
+      return rawUrl.replace('&output=embed', '').replace('?output=embed', '');
     }
 
-    // Nếu người dùng cung cấp sẵn link gốc hợp lệ
-    if (rawUrl.startsWith('http')) {
-      // Nếu là link embed, chuyển sang link xem thông thường
-      return rawUrl.replace('&output=embed', '').replace('?output=embed', '');
+    if (locationName && locationName.trim().length > 0) {
+      return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullSearchLocation)}`;
     }
 
     return 'https://www.google.com/maps';
   }, [locationName, fullSearchLocation, rawUrl]);
 
-  // Nếu không có cả URL lẫn tên địa điểm thì không hiển thị
-  if (!embedSrc && !locationName) {
+  // Yêu cầu: Nếu không có map_embed_url thì không hiển thị hộp thoại bản đồ
+  if (!rawUrl || !embedSrc) {
     return null;
   }
 
   return (
-    <div className="w-full rounded-2xl overflow-hidden border border-[#EFECE4] bg-white shadow-xs mt-3.5 transition-all">
-      {/* Header bar: Hiển thị tên điểm mốc & Nút mở ứng dụng */}
-      <div className="flex flex-wrap items-center justify-between gap-2.5 px-4 py-2.5 bg-[#FAF8F5] border-b border-[#EFECE4]">
-        <div className="flex items-center gap-2 min-w-0">
-          <span className="flex h-2 w-2 rounded-full bg-[#B61C25] shrink-0 animate-pulse" />
-          <div className="flex items-center gap-1.5 truncate">
-            <span className="text-[11px] font-mono uppercase tracking-wider text-[#78756E] font-medium shrink-0">
-              Vị trí điểm đến:
-            </span>
-            <span className="font-serif font-bold text-xs sm:text-sm text-[#1C1B18] truncate">
-              📍 {locationName || 'Địa điểm trong lịch trình'}
-            </span>
+    <aside
+      aria-label={`Bản đồ định vị cho ${locationName || 'điểm đến'}`}
+      className="relative group/comment-map w-full transition-all"
+    >
+      {/* 🌟 Đuôi nhọn của cửa sổ Comment trỏ sang Card Timeline bên trái (Desktop: lg+) */}
+      <div
+        className="hidden lg:block absolute -left-[9px] top-6 w-0 h-0 border-y-[7px] border-y-transparent border-r-[9px] border-r-[#E6E2DA] z-20 pointer-events-none"
+        aria-hidden="true"
+      />
+      <div
+        className="hidden lg:block absolute -left-[7.5px] top-6 w-0 h-0 border-y-[7px] border-y-transparent border-r-[8px] border-r-[#FAF8F5] z-20 pointer-events-none"
+        aria-hidden="true"
+      />
+
+      {/* 🌟 Đuôi nhọn của cửa sổ Comment trỏ ngược lên Card Timeline bên trên (Mobile / Tablet: <lg) */}
+      <div
+        className="block lg:hidden absolute -top-[9px] left-8 w-0 h-0 border-x-[7px] border-x-transparent border-b-[9px] border-b-[#E6E2DA] z-20 pointer-events-none"
+        aria-hidden="true"
+      />
+      <div
+        className="block lg:hidden absolute -top-[7.5px] left-8 w-0 h-0 border-x-[7px] border-x-transparent border-b-[8px] border-b-[#FAF8F5] z-20 pointer-events-none"
+        aria-hidden="true"
+      />
+
+      {/* 🌟 Khung cửa sổ Comment Box chứa Map vuông vắn độc lập bên ngoài Card */}
+      <div className="w-full rounded-2xl overflow-hidden border border-[#E6E2DA] bg-white shadow-xs hover:shadow-md transition-shadow">
+        {/* Header Comment Box */}
+        <div className="flex items-center justify-between gap-2 px-3.5 py-2.5 bg-[#FAF8F5] border-b border-[#EFECE4]">
+          <div className="flex items-center gap-1.5 min-w-0 font-mono text-[11px] font-bold text-[#4A4742] truncate">
+            <span>📍</span>
+            <span className="truncate">{locationName || 'Bản đồ vị trí'}</span>
           </div>
+
+          {/* Nút bấm mở nhanh ứng dụng Google Maps */}
+          <a
+            href={appDirectionsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-[#B61C25] text-white hover:bg-[#98171E] active:scale-[0.98] transition-all shrink-0 shadow-2xs"
+            title="Mở chỉ đường trên ứng dụng Google Maps"
+          >
+            <span>Mở App</span>
+            <span className="text-[10px]">↗</span>
+          </a>
         </div>
 
-        {/* Nút bấm dẫn đường: Mở trực tiếp trên App Google Maps */}
-        <a
-          href={appDirectionsUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#B61C25] text-white hover:bg-[#98171E] active:scale-[0.98] transition-all shadow-xs shrink-0"
-          title={`Mở chỉ đường tới ${locationName || 'địa điểm'} trên ứng dụng Google Maps`}
-        >
-          <span>Mở Google Maps App</span>
-          <span className="text-[11px]">↗</span>
-        </a>
-      </div>
-
-      {/* Khung bản đồ Google Maps Embed */}
-      <div className="w-full h-[250px] sm:h-[270px] relative bg-[#F5F2EB]">
-        {embedSrc ? (
-          <iframe
-            title={`Bản đồ Google Maps cho mốc: ${locationName || ''}`}
-            src={embedSrc}
-            width="100%"
-            height="100%"
-            style={{ border: 0 }}
-            loading="lazy"
-            allowFullScreen
-            referrerPolicy="no-referrer-when-downgrade"
-            className="w-full h-full"
-          />
-        ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center gap-1 text-xs font-mono text-[#78756E]">
-            <span>🗺️</span>
-            <span>Chưa có thông tin bản đồ định vị</span>
-          </div>
-        )}
-      </div>
-
-      {/* Footer bar: Chú thích chi tiết mốc lịch trình & mẹo di chuyển */}
-      <div className="px-4 py-2 bg-[#FAF8F5] border-t border-[#EFECE4] flex flex-wrap items-center justify-between gap-2 text-[11px] font-sans text-[#78756E]">
-        <div className="flex items-center gap-1.5">
-          <span className="text-[#B61C25] font-semibold">🗾 Nhật Bản:</span>
-          <span className="text-[#4A4740] font-medium truncate max-w-[280px] sm:max-w-[420px]">
-            {locationName ? `${locationName} • ${city || 'Tokyo'}` : 'Lịch trình du lịch'}
-          </span>
+        {/* Khung bản đồ cân xứng với tỉ lệ 40% */}
+        <div className="w-full h-[240px] sm:h-[260px] lg:h-[280px] relative bg-[#F5F2EB]">
+          {embedSrc ? (
+            <iframe
+              title={`Bản đồ Google Maps cho: ${locationName || ''}`}
+              src={embedSrc}
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              loading="lazy"
+              allowFullScreen
+              referrerPolicy="no-referrer-when-downgrade"
+              className="w-full h-full"
+            />
+          ) : (
+            <div className="w-full h-full flex flex-col items-center justify-center gap-1 text-[11px] font-mono text-[#78756E]">
+              <span>🗺️</span>
+              <span>Chưa có bản đồ</span>
+            </div>
+          )}
         </div>
-        <span className="text-[#8C887B] text-[10px] font-mono hidden sm:inline">
-          Chạm vào bản đồ để xem chi tiết các tuyến tàu điện & đường đi
-        </span>
       </div>
-    </div>
+    </aside>
   );
 }
 

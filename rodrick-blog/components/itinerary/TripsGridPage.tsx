@@ -35,7 +35,7 @@ export function TripsGridPage({ initialTrips }: TripsGridPageProps) {
 
   return (
     <div className="w-full bg-[#FAF8F5] text-[#1C1B18] min-h-screen">
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-10 space-y-10">
+      <main className="max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
         {/* Breadcrumb Navigation */}
         <nav className="flex items-center gap-2 text-xs font-mono text-[#78756E]">
           <Link href="/" className="hover:text-[#B93829] transition-colors">

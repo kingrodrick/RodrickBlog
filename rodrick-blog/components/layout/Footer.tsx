@@ -4,7 +4,7 @@ import Link from 'next/link';
 export function Footer() {
   return (
     <footer id="footer" className="border-t border-[#E5E0D8] bg-[#F5F2EC] mt-16">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 grid grid-cols-1 md:grid-cols-12 gap-8">
+      <div className="max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-8 py-12 grid grid-cols-1 md:grid-cols-12 gap-8">
         <div className="md:col-span-5 space-y-3">
           <div className="flex items-center gap-1">
             <span className="font-serif text-lg font-bold">RODRICK</span>
@@ -78,7 +78,7 @@ export function Footer() {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 border-t border-[#E5E0D8] flex flex-col sm:flex-row items-center justify-between text-[11px] font-mono text-[#8C8881]">
+      <div className="max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-8 py-4 border-t border-[#E5E0D8] flex flex-col sm:flex-row items-center justify-between text-[11px] font-mono text-[#8C8881]">
         <span>© 2026 Rodrick. Crafted with Next.js & Supabase.</span>
         <span>HÀ NỘI • SÀI GÒN • TOKYO • KYOTO</span>
       </div>
