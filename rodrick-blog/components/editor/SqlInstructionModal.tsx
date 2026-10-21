@@ -45,7 +45,11 @@ export function SqlInstructionModal({ isOpen, onClose }: SqlInstructionModalProp
 ALTER TABLE trips DISABLE ROW LEVEL SECURITY;
 ALTER TABLE timeline_events DISABLE ROW LEVEL SECURITY;
 ALTER TABLE images DISABLE ROW LEVEL SECURITY;
-ALTER TABLE collections DISABLE ROW LEVEL SECURITY;`;
+ALTER TABLE collections DISABLE ROW LEVEL SECURITY;
+
+-- Loại bỏ cột route_coordinates cũ và thêm cột map_embed_url chuẩn Google Maps Embed
+ALTER TABLE timeline_events DROP COLUMN IF EXISTS route_coordinates;
+ALTER TABLE timeline_events ADD COLUMN IF NOT EXISTS map_embed_url TEXT;`;
 
   const handleCopy = async () => {
     try {

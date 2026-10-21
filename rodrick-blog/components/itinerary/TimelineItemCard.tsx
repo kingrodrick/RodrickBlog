@@ -4,6 +4,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { TimelineEvent, GalleryImage } from '@/types/database.type';
 import { optimizeCloudinaryUrl } from '@/lib/cloudinary';
 import { useAuth } from '@/components/auth/AuthContext';
+import { TimelineRouteMap } from './TimelineRouteMap';
 
 interface TimelineItemCardProps {
   item: TimelineEvent;
@@ -121,6 +122,17 @@ export function TimelineItemCard({
         {item.notes && (
           <div className="text-xs sm:text-sm text-[#4A4742] font-normal italic leading-relaxed whitespace-pre-line font-sans bg-[#FAF8F5] p-4 rounded-xl border border-[#EFECE4]">
             {item.notes}
+          </div>
+        )}
+
+        {/* Bản đồ Địa điểm & Tuyến đường Google Maps (Embed) */}
+        {(item.map_embed_url || item.location_name) && (
+          <div className="pt-1">
+            <TimelineRouteMap
+              map_embed_url={item.map_embed_url}
+              locationName={item.location_name}
+              city={item.city}
+            />
           </div>
         )}
 

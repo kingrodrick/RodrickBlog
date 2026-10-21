@@ -26,6 +26,7 @@ export const ItineraryService = {
           city,
           category_tag,
           notes,
+          map_embed_url,
           images (*)
         )
       `
@@ -175,6 +176,7 @@ export const ItineraryService = {
       city: string;
       category_tag: string;
       notes?: string | null;
+      map_embed_url?: string | null;
     },
     imagesData?: Array<{
       cloudinary_url: string;
@@ -198,6 +200,7 @@ export const ItineraryService = {
         city: eventData.city,
         category_tag: eventData.category_tag,
         notes: eventData.notes || null,
+        map_embed_url: eventData.map_embed_url || null,
       })
       .select()
       .single();

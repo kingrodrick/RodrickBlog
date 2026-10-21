@@ -35,6 +35,7 @@ export interface TimelineEvent {
   city: 'Tokyo' | 'Kyoto' | string;
   category_tag: 'TRANSIT' | 'FOOD' | 'SIGHTSEEING' | 'HOTEL' | string;
   notes: string | null;
+  map_embed_url?: string | null; // URL nhúng Google Maps iframe hoặc link bản đồ
   images?: GalleryImage[]; // Danh sách ảnh nối từ bảng images sang
 }
 

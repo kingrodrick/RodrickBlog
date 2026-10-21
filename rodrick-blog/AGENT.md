@@ -1,7 +1,7 @@
 # RODRICK BLOG — ARCHITECTURE & DEVELOPMENT GUIDE
 
-> Tài liệu đặc tả kỹ thuật, cấu trúc thư mục, thiết kế cơ sở dữ liệu và quy chuẩn giao diện cho dự án **Rodrick Travel & Photography Blog** (`rodrick-blog`).  
-> Mọi AI Agent (Antigravity / Copilot) khi tham gia viết code cho dự án này **bắt buộc** phải tuân thủ nghiêm ngặt các quy tắc dưới đây.
+> Tài liệu đặc tả kỹ thuật, cấu trúc thư mục, thiết kế cơ sở dữ liệu và quy chuẩn giao diện cho dự án **Rodrick Travel & Photography Blog** (`rodrick-blog`)[cite: 13].  
+> Mọi AI Agent (Antigravity / Copilot) khi tham gia viết code cho dự án này **bắt buộc** phải tuân thủ nghiêm ngặt các quy tắc dưới đây[cite: 13].
 
 ---
 
@@ -9,73 +9,95 @@
 
 ### 1.1. Ý tưởng sản phẩm
 
-Xây dựng một **Blog Cá Nhân chuyên về Lịch Trình Du Lịch & Bộ Sưu Tập Nhiếp Ảnh** hoạt động theo kiến trúc **Single Page / Hybrid SPA**:
+Xây dựng một **Blog Cá Nhân chuyên về Lịch Trình Du Lịch & Bộ Sưu Tập Nhiếp Ảnh** hoạt động theo kiến trúc **Single Page / Hybrid SPA**[cite: 13]:
 
-- **Trọng tâm 1 - Kế Hoạch & Nhật Ký Hành Trình (`trips` & `timeline_events`):** Hiển thị lịch trình chi tiết chuyến đi Nhật Bản (Tháng 12/2026 - 6 ngày 7 đêm tại **Tokyo & Kyoto**) theo từng mốc ngày/giờ, phương tiện di chuyển, quán ăn (Ramen, thịt nướng... không ăn sushi) và ghi chú thực tế.
-- **Trọng tâm 2 - Bộ Sưu Tập Nhiếp Ảnh (`collections` & `images`):** Lưu trữ và trưng bày các bức ảnh/video chụp từ máy **Sony A6400 (kèm lens 18-135mm)**. Bảng `images` đóng vai trò trung tâm: vừa hiển thị theo từng Album nghệ thuật (`collections`), vừa liên kết trực tiếp vào từng mốc địa điểm trong `timeline_events`.
+- **Trọng tâm 1 - Kế Hoạch & Nhật Ký Hành Trình (`trips` & `timeline_events`):** Hiển thị lịch trình chi tiết chuyến đi Nhật Bản (Tháng 12/2026 - 6 ngày 7 đêm tại **Tokyo & Kyoto**) theo từng mốc ngày/giờ, phương tiện di chuyển, quán ăn (Ramen, thịt nướng, cơm... không ăn sushi), ghi chú thực tế[cite: 13] và **Bản đồ tuyến đường di chuyển (Route Map)** trực quan.
+- **Trọng tâm 2 - Bộ Sưu Tập Nhiếp Ảnh (`collections` & `images`):** Lưu trữ và trưng bày các bức ảnh/video chụp từ máy **Sony A6400 (kèm lens 18-135mm)**[cite: 13]. Bảng `images` đóng vai trò trung tâm: vừa hiển thị theo từng Album nghệ thuật (`collections`), vừa liên kết trực tiếp vào từng mốc địa điểm trong `timeline_events`[cite: 13].
 
-### 1.2. Hệ thống thiết kế (Editorial Design System)
+### 1.2. Hệ thống thiết kế (Parchment & Vermilion Editorial Design System)
 
-- **Tông màu chủ đạo (Warm Paper & Crimson Accent):**
-  - Nền chính (Background Primary): `#FAF8F5`
-  - Nền phụ / Khối (Background Secondary / Card): `#F3F0EA` và `#FFFFFF`
-  - Chữ chính (Text Primary): `#1C1B18`
-  - Chữ phụ (Text Muted): `#57544E` / `#78756E`
-  - Màu nhấn thương hiệu (Primary Accent - Đỏ trầm): `#B93829`
-  - Đường viền (Border): `#E6E2DA` / `#E5E0D8`
-- **Typography (Khai báo trong `app/layout.tsx` & `app/globals.css`):**
-  - `font-serif` (**Newsreader**): Dùng cho tiêu đề lớn (H1, H2, H3) và câu trích dẫn nghiêng.
-  - `font-sans` (**Inter**): Dùng cho nội dung mô tả, ghi chú lịch trình.
-  - `font-mono` (**JetBrains Mono**): Dùng cho nhãn ngày giờ, thông số EXIF máy ảnh (`35mm • f/4.0`), tọa độ, badge.
+- **Tông màu chủ đạo (Parchment & Vermilion Editorial)[cite: 7]:**
+  - Nền chính (Paper / Background Primary): `#FAF8F5`[cite: 5, 13]
+  - Nền phụ / Khối (Card / Background Secondary): `#F3F0EA` và `#FFFFFF`[cite: 5, 13]
+  - Chữ chính (Neutral / Text Primary): `#1A1A1A`[cite: 5, 7]
+  - Chữ phụ (Text Muted): `#4A4742` / `#57544E` / `#78756E`[cite: 13]
+  - Màu nhấn thương hiệu (Primary Vermilion): `#B61C25`[cite: 7]
+  - Màu phụ (Secondary Slate): `#2D3436`[cite: 7]
+  - Màu nhấn phụ (Tertiary Gold): `#C59F60`[cite: 7]
+  - Đường viền (Border): `#EFECE4` / `#E6E2DA`[cite: 13]
+- **Typography Không Đuôi Đồng Nhất (Khai báo trong `app/layout.tsx` & `app/globals.css`):**
+  - **TUYỆT ĐỐI KHÔNG SỬ DỤNG FONT CÓ ĐUÔI (SERIF)** để tránh lỗi rớt dấu tiếng Việt và lệch hiển thị giữa Local và Production trên Vercel.
+  - **Headline & Label (`--font-serif`, `--font-mono`, `h1..h6`)**: Sử dụng **`Plus Jakarta Sans`** (`weight: ['500', '600', '700', '800']`)[cite: 7].
+  - **Body (`--font-sans`)**: Sử dụng **`Inter`** (`weight: ['400', '500', '600', '700']`)[cite: 7], thẻ `<body>` áp dụng mặc định class `font-sans font-medium` để nét chữ đanh và dày dặn.
+  - **Favicon (`app/icon.svg`)**: Biểu tượng nền vuông bo góc `#1A1A1A` với chữ **R** siêu đậm màu `#B61C25`[cite: 7, 8].
 
 ---
 
 ## 2. Cấu Trúc Cơ Sở Dữ Liệu (Supabase PostgreSQL - 4 Bảng Quan Hệ)
 
-Hệ thống Database tập trung hoàn toàn vào **Du lịch** và **Nhiếp ảnh** thông qua 4 bảng chuẩn hóa:
+Hệ thống Database tập trung hoàn toàn vào **Du lịch** và **Nhiếp ảnh** thông qua 4 bảng chuẩn hóa[cite: 13]:
 
-1. **`collections`**: Lưu các bộ sưu tập / album ảnh có hỗ trợ ảnh bìa (`id`, `slug`, `title`, `description`, `cover_image`, `location_tag`, `display_order`).
-2. **`trips`**: Lưu thông tin tổng quan chuyến đi có hỗ trợ ảnh banner/đại diện (`id`, `slug`, `title`, `summary`, `cover_image`, `start_date`, `end_date`, `cities`, `status`).
-3. **`timeline_events`**: Lưu các mốc thời gian chi tiết trong chuyến đi (`id`, `trip_id`, `day_number`, `trip_date`, `time_slot`, `location_name`, `city`, `category_tag`, `notes`).
-4. **`images`**: Bảng trung tâm lưu ảnh/video từ Cloudinary (`id`, `cloudinary_url`, `caption`, `city`, `camera_gear`, `exif_info`, `collection_id`, `timeline_event_id`, `is_featured`, `is_real_photo`, `taken_at`).
-   - `is_real_photo = true`: Ảnh chụp thực tế từ máy Sony A6400 (kèm thông số EXIF, nhãn xanh lục).
-   - `is_real_photo = false`: Ảnh minh họa / tư liệu tham khảo web cho kế hoạch lịch trình (nhãn xanh dương).
-   - Liên kết `timeline_event_id -> timeline_events(id)`: Giúp mỗi mốc lịch trình lấy được toàn bộ ảnh chụp tại địa điểm đó.
-   - Liên kết `collection_id -> collections(id)`: Giúp gom ảnh thành các bộ sưu tập trưng bày riêng trên web.
+1. **`collections`**: Lưu các bộ sưu tập / album ảnh có hỗ trợ ảnh bìa (`id`, `slug`, `title`, `description`, `cover_image`, `location_tag`, `display_order`)[cite: 13].
+2. **`trips`**: Lưu thông tin tổng quan chuyến đi có hỗ trợ ảnh banner/đại diện (`id`, `slug`, `title`, `summary`, `cover_image`, `start_date`, `end_date`, `cities`, `status`)[cite: 13].
+3. **`timeline_events`**: Lưu các mốc thời gian chi tiết trong chuyến đi (`id`, `trip_id`, `day_number`, `trip_date`, `time_slot`, `location_name`, `city`, `category_tag`, `notes`, `map_embed_url`)[cite: 13].
+   - `map_embed_url` (`TEXT`): Lưu URL nhúng Google Maps (`https://www.google.com/maps?q=...&output=embed` hoặc URL tùy chọn) hiển thị trực quan qua thẻ `<iframe>` và liên kết dẫn đường trực tiếp trên app.
+4. **`images`**: Bảng trung tâm lưu ảnh/video từ Cloudinary (`id`, `cloudinary_url`, `caption`, `city`, `camera_gear`, `exif_info`, `collection_id`, `timeline_event_id`, `is_featured`, `is_real_photo`, `taken_at`)[cite: 13].
+   - `is_real_photo = true`: Ảnh chụp thực tế từ máy Sony A6400 (kèm thông số EXIF, nhãn xanh lục)[cite: 13].
+   - `is_real_photo = false`: Ảnh minh họa / tư liệu tham khảo web cho kế hoạch lịch trình (nhãn xanh dương)[cite: 13].
+   - Liên kết `timeline_event_id -> timeline_events(id)`: Giúp mỗi mốc lịch trình lấy được toàn bộ ảnh chụp tại địa điểm đó[cite: 13].
+   - Liên kết `collection_id -> collections(id)`: Giúp gom ảnh thành các bộ sưu tập trưng bày riêng trên web[cite: 13].
+
+### Cấu hình Quyền Ghi Dữ Liệu (Supabase RLS & Schema Migration):
+
+Để cho phép thêm/sửa trực tiếp từ giao diện quản trị trên Blog mà không bị chặn bởi Row-Level Security mặc định của Supabase, chạy câu lệnh SQL sau trong Supabase SQL Editor[cite: 12]:
+
+```sql
+ALTER TABLE trips DISABLE ROW LEVEL SECURITY;
+ALTER TABLE timeline_events DISABLE ROW LEVEL SECURITY;
+ALTER TABLE images DISABLE ROW LEVEL SECURITY;
+ALTER TABLE collections DISABLE ROW LEVEL SECURITY;
+
+-- Loại bỏ cột route_coordinates cũ và thêm cột map_embed_url chuẩn Google Maps Embed
+ALTER TABLE timeline_events DROP COLUMN IF EXISTS route_coordinates;
+ALTER TABLE timeline_events ADD COLUMN IF NOT EXISTS map_embed_url TEXT;
+```
 
 ---
 
 ## 3. Cách Tổ Chức Thư Mục Dự Án (Project Directory Structure)
 
-Dự án **không sử dụng thư mục `src/`**, toàn bộ mã nguồn đặt tại thư mục gốc `rodrick-blog/` theo kiến trúc phân tầng rõ ràng:
+Dự án **không sử dụng thư mục `src/`**, toàn bộ mã nguồn đặt tại thư mục gốc `rodrick-blog/` theo kiến trúc phân tầng rõ ràng[cite: 13]:
 
 ```text
 RodrickBlog/                        <-- Git Repository Root
 └── rodrick-blog/                   <-- NEXT.JS ROOT DIRECTORY (Cấu hình trên Vercel)
     ├── app/                        <-- 1. TẦNG ROUTING & SERVER ENTRY
-    │   ├── globals.css             <-- Cấu hình Tailwind v4 (@import "tailwindcss"; & @theme)
-    │   ├── layout.tsx              <-- Cấu hình Fonts (Inter, Newsreader, JetBrains Mono) & Metadata
+    │   ├── icon.svg                <-- Favicon SVG chữ R đỏ (#B61C25) trên nền đen (#1A1A1A)
+    │   ├── globals.css             <-- Cấu hình Tailwind v4 (@import "tailwindcss"; & @theme inline)
+    │   ├── layout.tsx              <-- Cấu hình Fonts (Plus Jakarta Sans & Inter) & Metadata
     │   └── page.tsx                <-- Server Component: Gọi Services lấy dữ liệu & hiển thị Single Page
     │
     ├── components/                 <-- 2. TẦNG GIAO DIỆN (UI COMPONENTS)
     │   ├── layout/
-    │   │   ├── Navbar.tsx          <-- Thanh điều hướng (Hành trình | Bộ sưu tập | Về tôi)
+    │   │   ├── Navbar.tsx          <-- Thanh điều hướng (Trang chủ | Hành trình | Bộ sưu tập | Về tôi)
     │   │   └── Footer.tsx          <-- Chân trang
     │   ├── home/
     │   │   ├── HeroSection.tsx     <-- Khối giới thiệu mở đầu
-    │   │   └── StatsBar.tsx        <-- Thanh thống kê (Số ngày đi, số địa điểm, số bức ảnh Sony A6400)
-    │   ├── itinerary/              <-- MODULE 1: KẾ HOẠCH & TIMELINE DU LỊCH
-    │   │   ├── ItinerarySinglePageView.tsx  <-- Client Component ('use client') lọc theo Ngày (Day 1..6) & Thành phố
+    │   │   └── StatsBar.tsx        <-- Thanh thống kê (Số hành trình, số album, số bức ảnh Sony A6400)
+    │   ├── itinerary/              <-- MODULE 1: KẾ HOẠCH, TIMELINE & BẢN ĐỒ TUYẾN ĐƯỜNG
+    │   │   ├── ItinerarySinglePageView.tsx  <-- Client Component ('use client') lọc theo Ngày & Thành phố + Admin Modal
     │   │   ├── DayFilterTabs.tsx            <-- Thanh bấm chuyển Ngày tức thì (0ms)
-    │   │   └── TimelineItemCard.tsx         <-- Thẻ hiển thị mốc giờ, ghi chú và lưới ảnh lấy từ bảng `images`
+    │   │   ├── TimelineItemCard.tsx         <-- Thẻ hiển thị mốc giờ, ghi chú, bản đồ Google Maps Embed và lưới ảnh
+    │   │   ├── TimelineRouteMap.tsx         <-- Bản đồ Google Maps Embed & Dẫn đường trực tiếp (h-[240px])
+    │   │   └── AdminRoutePickerMap.tsx      <-- Bản đồ Tuyến đường Google Maps (Admin Edit, Dual-Mode)
     │   └── gallery/                <-- MODULE 2: BỘ SƯU TẬP NHIẾP ẢNH (COLLECTIONS & IMAGES)
     │       ├── CollectionGrid.tsx           <-- Hiển thị lưới các bộ sưu tập ảnh kèm cover_image
     │       ├── PhotoCard.tsx                <-- Thẻ ảnh kèm thông số EXIF (Sony A6400 • 18-135mm)
     │       └── ImageLightboxModal.tsx       <-- Popup phóng to ảnh chất lượng cao toàn màn hình khi click
     │
     ├── services/                   <-- 3. TẦNG XỬ LÝ DỮ LIỆU (DATA ACCESS LAYER)
-    │   ├── itinerary.service.ts    <-- Truy vấn `trips` và `timeline_events` (join sẵn bảng `images`)
-    │   └── gallery.service.ts      <-- Truy vấn `collections` và `images`
+    │   ├── itinerary.service.ts    <-- Truy vấn & cập nhật `trips` và `timeline_events` (kèm `map_embed_url` & `images`)
+    │   └── gallery.service.ts      <-- Truy vấn & cập nhật `collections` và `images`
     │
     ├── types/                      <-- 4. TẦNG MODELS / ENTITIES (TYPE DEFINITIONS)
     │   └── database.type.ts        <-- Khai báo Interfaces: Trip, TimelineEvent, Collection, GalleryImage
@@ -85,7 +107,7 @@ RodrickBlog/                        <-- Git Repository Root
     │   └── cloudinary.ts           <-- Hàm helper tự động chèn `f_auto,q_auto` tối ưu URL ảnh Cloudinary
     │
     ├── .env.local                  <-- Biến môi trường (Chỉ lưu ở máy Local)
-    ├── AGENTS.md                   <-- Tài liệu hướng dẫn cho AI Agent
+    ├── AGENT.md                    <-- Tài liệu hướng dẫn chuẩn cho AI Agent
     └── package.json
 ```
 
@@ -93,7 +115,7 @@ RodrickBlog/                        <-- Git Repository Root
 
 ## 4. Mẫu Code Chuẩn Cho Tầng Types & Services (Core Templates)
 
-### 4.1. Định nghĩa Model (`types/database.type.ts`)
+### 4.1. Định nghĩa Model (`types/database.type.ts`)[cite: 13]
 
 ```typescript
 export interface GalleryImage {
@@ -131,6 +153,7 @@ export interface TimelineEvent {
   city: "Tokyo" | "Kyoto" | string;
   category_tag: "TRANSIT" | "FOOD" | "SIGHTSEEING" | "HOTEL" | string;
   notes: string | null;
+  map_embed_url?: string | null; // 🌟 URL nhúng Google Maps iframe hoặc link bản đồ
   images?: GalleryImage[]; // Danh sách ảnh nối từ bảng images sang
 }
 
@@ -148,14 +171,14 @@ export interface Trip {
 }
 ```
 
-### 4.2. Truy vấn Lịch trình kèm Ảnh (`services/itinerary.service.ts`)
+### 4.2. Truy vấn Lịch trình kèm Ảnh & Tuyến đường (`services/itinerary.service.ts`)[cite: 13]
 
 ```typescript
 import { supabase } from "@/lib/supabase";
 import { TimelineEvent, Trip } from "@/types/database.type";
 
 export const ItineraryService = {
-  async getTripDetails(slug = "nhat-ban-thang-12-2026"): Promise<Trip | null> {
+  async getTripDetails(slug = "nhat-ban-thang-12-2026"): Promise<Trip null |> {
     const { data: trip, error: tripError } = await supabase
       .from("trips")
       .select("*")
@@ -186,7 +209,7 @@ export const ItineraryService = {
 };
 ```
 
-### 4.3. Truy vấn Bộ sưu tập ảnh (`services/gallery.service.ts`)
+### 4.3. Truy vấn Bộ sưu tập ảnh (`services/gallery.service.ts`)[cite: 13]
 
 ```typescript
 import { supabase } from "@/lib/supabase";
@@ -214,18 +237,29 @@ export const GalleryService = {
 
 ## 5. Các Lưu Ý Kỹ Thuật Quan Trọng (Critical Technical Notes)
 
-1. **Biến môi trường Supabase (`.env.local` & Vercel):**
-   - `NEXT_PUBLIC_SUPABASE_URL=[https://brnvhhehummrrixzkxen.supabase.co](https://brnvhhehummrrixzkxen.supabase.co)`
-   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...`
-   - Trong `lib/supabase.ts` luôn gọi đúng `process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!`.
-2. **Quy tắc Fetch dữ liệu trên Next.js 16.4.2 (`cacheComponents`):**
-   - **KHÔNG dùng:** `export const revalidate = 60;` (gây lỗi xung đột với `cacheComponents`).
-   - **Bắt buộc dùng:** Đặt `export const instant = false;` ở đầu file `app/page.tsx` (hoặc dùng `"use cache";` trong thân hàm async) để cho phép Server Component truy vấn Supabase.
-3. **Tối ưu ảnh từ Cloudinary:**
-   - Khi hiển thị ảnh dung lượng lớn từ máy Sony A6400, tự động chèn tham số `f_auto,q_auto/` ngay sau đoạn `/upload/` của URL Cloudinary để nén nhẹ xuống WebP/AVIF giữ nguyên chất lượng.
-4. **Lỗi thiếu gói Native Binary của Tailwind CSS v4 trên Windows:**
-   - Nếu gặp lỗi thiếu module `@tailwindcss/oxide-win32-x64-msvc` sau khi cài package mới, chạy lệnh:
-     `npm install @tailwindcss/oxide-win32-x64-msvc --save-optional`
-5. **Cấu hình Vercel Deployment:**
-   - **Root Directory:** `rodrick-blog`
-   - **Framework Preset:** `Next.js`
+1. **Quy tắc cấu hình Font với Tailwind CSS v4 (`app/globals.css`):**
+   - **BẮT BUỘC dùng `@theme inline`** thay vì `@theme` thông thường để tránh lỗi trình biên dịch trên Vercel làm đứt gãy biến CSS từ `next/font/google`.
+   - Khai báo đầy đủ mảng `weight` trong `app/layout.tsx` và không để bất kỳ font fallback có đuôi nào (`Georgia`, `Times New Roman`, `ui-serif`) trong `globals.css`.
+2. **Quy tắc tích hợp Bản đồ Google Maps (Pure Google Maps Embed / URL):**
+   - Sử dụng thẻ `<iframe>` chuẩn mực với URL `https://www.google.com/maps?q=...&output=embed` hoặc URL từ trường `map_embed_url` kết hợp nút bấm dẫn đường "Mở trên Google Maps App" (`https://www.google.com/maps/search/?api=1&query=...`).
+   - Không sử dụng Google Maps JavaScript API hoặc `@vis.gl/react-google-maps` để tránh hoàn toàn các lỗi `ApiTargetBlockedMapError`, `ERR_BLOCKED_BY_CLIENT` và không tốn chi phí API Key.
+3. **Biến môi trường Supabase (`.env.local` & Vercel)[cite: 13]:**
+   - `NEXT_PUBLIC_SUPABASE_URL=https://brnvhhehummrrixzkxen.supabase.co`[cite: 13]
+   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...`[cite: 13]
+   - Trong `lib/supabase.ts` luôn gọi đúng `process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!`[cite: 13].
+4. **Quy tắc Fetch dữ liệu trên Next.js 16.4.2 (`cacheComponents`)[cite: 13]:**
+   - **KHÔNG dùng:** `export const revalidate = 60;` (gây lỗi xung đột với `cacheComponents`)[cite: 13].
+   - **Bắt buộc dùng:** Đặt `export const instant = false;` ở đầu file `app/page.tsx` (hoặc dùng `"use cache";` trong thân hàm async) để cho phép Server Component truy vấn Supabase[cite: 13].
+5. **Tối ưu ảnh từ Cloudinary[cite: 13]:**
+   - Khi hiển thị ảnh dung lượng lớn từ máy Sony A6400, tự động chèn tham số `f_auto,q_auto/` ngay sau đoạn `/upload/` của URL Cloudinary để nén nhẹ xuống WebP/AVIF giữ nguyên chất lượng[cite: 13].
+6. **Lỗi thiếu gói Native Binary của Tailwind CSS v4 trên Windows[cite: 13]:**
+   - Nếu gặp lỗi thiếu module `@tailwindcss/oxide-win32-x64-msvc` sau khi cài package mới, chạy lệnh[cite: 13]:
+     `npm install @tailwindcss/oxide-win32-x64-msvc --save-optional`[cite: 13]
+7. **Quy trình Kiểm tra Build Production tại Local (trên Windows CMD) & Cấu hình Vercel:**
+   - **Vercel Root Directory:** `rodrick-blog` | **Framework Preset:** `Next.js`[cite: 13]
+   - Trước khi push lên Vercel, luôn xóa cache và kiểm tra bản build bằng cụm lệnh CMD:
+     ```cmd
+     rmdir /s /q .next
+     npm run build
+     npm run start
+     ```

@@ -10,6 +10,7 @@ import {
   formatTimeSlotRange,
   calculateDayNumberFromDates,
 } from '@/lib/timeUtils';
+import { AdminRoutePickerMap } from '@/components/itinerary/AdminRoutePickerMap';
 
 interface EditTimelineEventModalProps {
   event: TimelineEvent | null;
@@ -46,6 +47,7 @@ export function EditTimelineEventModal({
   const [city, setCity] = useState<string>('Kyoto');
   const [categoryTag, setCategoryTag] = useState<string>('SIGHTSEEING');
   const [notes, setNotes] = useState<string>('');
+  const [mapEmbedUrl, setMapEmbedUrl] = useState<string>('');
   const [images, setImages] = useState<TimelineImageItem[]>([]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -82,6 +84,7 @@ export function EditTimelineEventModal({
       setCity(event.city || 'Kyoto');
       setCategoryTag(event.category_tag || 'SIGHTSEEING');
       setNotes(event.notes || '');
+      setMapEmbedUrl(event.map_embed_url || '');
 
       const initialImages: TimelineImageItem[] = (event.images || []).map((img, idx) => ({
         id: `img-${img.id || idx}`,
@@ -223,6 +226,7 @@ export function EditTimelineEventModal({
           city: city.trim(),
           category_tag: categoryTag,
           notes: notes.trim() || null,
+          map_embed_url: mapEmbedUrl.trim() || null,
         },
         validImages
       );
@@ -505,6 +509,43 @@ export function EditTimelineEventModal({
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="VD: Nên đến trước 9h sáng..."
                 className="w-full bg-[#FAF8F5] focus:bg-white border border-[#E6E2DA] focus:border-[#B93829] rounded-xl p-4 text-xs font-sans text-[#1C1B18] outline-hidden shadow-xs transition-colors resize-y leading-relaxed"
+              />
+            </div>
+
+            {/* Link Bản đồ Google Maps Embed (Tùy chọn) */}
+            <div className="space-y-1.5 pt-1">
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-mono uppercase tracking-wider font-semibold text-[#1C1B18]">
+                  📍 Link Bản đồ Google Maps (Embed URL)
+                </label>
+                <span className="font-mono text-[11px] text-[#78756E]">Tùy chọn</span>
+              </div>
+              <input
+                type="text"
+                value={mapEmbedUrl}
+                onChange={(e) => setMapEmbedUrl(e.target.value)}
+                placeholder="Dán link Google Maps hoặc mã <iframe> (Nếu để trống sẽ tự tìm theo Tên địa điểm)"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-[#E6E2DA] bg-[#FAF8F5] text-xs text-[#1C1B18] font-mono focus:bg-white focus:outline-none focus:border-[#B61C25] transition-all"
+              />
+              <p className="text-[11px] text-[#78756E]">
+                Hệ thống hỗ trợ tự động tìm theo Tên địa điểm hoặc dán link Google Maps Embed / chia sẻ.
+              </p>
+            </div>
+
+            {/* Trình tạo & Xem trước Bản đồ Google Maps Embed */}
+            <div className="space-y-2 pt-1">
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-mono uppercase tracking-wider font-semibold text-[#1C1B18]">
+                  🗺️ Trình tạo & Xem trước Bản đồ (Google Maps)
+                </label>
+                <span className="font-mono text-[11px] text-[#78756E]">
+                  {mapEmbedUrl ? 'Đã có link bản đồ' : 'Tự động tạo'}
+                </span>
+              </div>
+              <AdminRoutePickerMap
+                initialCity={city}
+                mapEmbedUrl={mapEmbedUrl}
+                onMapEmbedUrlChange={setMapEmbedUrl}
               />
             </div>
 
