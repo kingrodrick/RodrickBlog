@@ -1,0 +1,1808 @@
+{
+ "url": "http://localhost:3100/trips/nhat-ban-thang-12-2026",
+ "at": "2026-10-25T11:17:14.834Z",
+ "allow": [],
+ "viewports": [
+  {
+   "width": 1440,
+   "height": 900,
+   "load": "load",
+   "screens": 11,
+   "filled": [
+    0.64,
+    0.4,
+    0.51,
+    0.71,
+    0.66,
+    0.56,
+    0.7,
+    0.56,
+    0.6,
+    0.81,
+    0.83
+   ],
+   "motion": {
+    "elements": 42,
+    "css": 42,
+    "transitions": 0,
+    "scripted": 0,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "page": {
+     "height": 9125,
+     "screens": 10.1,
+     "words": 1375,
+     "img": 18,
+     "video": 0,
+     "canvas": 0,
+     "svg": 0,
+     "sections": 1,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 18,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [
+      "1792520033337.png",
+      "1792520109649.png",
+      "1792597783221.png",
+      "1792520602541.png",
+      "1792602485462.png",
+      "1792603113642.png",
+      "1792604155810.png",
+      "1792604322761.png"
+     ],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [
+      "📷",
+      "📍",
+      "🗓",
+      "⛩",
+      "🚄",
+      "🗂",
+      "🔍",
+      "🌐",
+      "🏨",
+      "🍜"
+     ],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Kế hoạch chuyến đi Nhật Bản",
+     "words": 6,
+     "chars": 27,
+     "lines": 1,
+     "size": 48,
+     "vw": 3.3,
+     "font": "Plus Jakarta Sans",
+     "weight": 700,
+     "tracking": -0.025,
+     "leading": 1.2,
+     "upper": false,
+     "italic": false,
+     "mono": false,
+     "align": "left",
+     "position": "center",
+     "widthRatio": 0.92,
+     "top": 472,
+     "tag": "h1",
+     "kind": "heading"
+    },
+    "h1": {
+     "text": "Kế hoạch chuyến đi Nhật Bản",
+     "words": 6,
+     "lines": 1,
+     "size": 48,
+     "font": "Plus Jakarta Sans"
+    },
+    "headings": [
+     {
+      "text": "Kế hoạch chuyến đi Nhật Bản",
+      "words": 6,
+      "chars": 27,
+      "lines": 1,
+      "size": 48,
+      "vw": 3.3,
+      "font": "Plus Jakarta Sans",
+      "weight": 700,
+      "tracking": -0.025,
+      "leading": 1.2,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.92,
+      "top": 472,
+      "tag": "h1",
+      "kind": "heading"
+     },
+     {
+      "text": "Kế hoạch chuyến đi Nhật Bản",
+      "words": 6,
+      "chars": 27,
+      "lines": 1,
+      "size": 30,
+      "vw": 2.1,
+      "font": "Plus Jakarta Sans",
+      "weight": 600,
+      "tracking": 0,
+      "leading": 1.2,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.29,
+      "top": 803,
+      "tag": "h2",
+      "kind": "heading"
+     }
+    ],
+    "headingSummary": {
+     "count": 2,
+     "maxLines": 1,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 0,
+     "medianWords": 6,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Plus Jakarta Sans",
+       "share": 0.74,
+       "mono": false
+      },
+      {
+       "family": "Inter",
+       "share": 0.26,
+       "mono": false
+      }
+     ],
+     "familyCount": 2,
+     "sizes": [
+      9,
+      10,
+      11,
+      12,
+      14,
+      16,
+      18,
+      20,
+      24,
+      30,
+      48
+     ],
+     "sizeCount": 11,
+     "notLoaded": [],
+     "body": {
+      "font": "Inter",
+      "size": 14,
+      "leading": 1.63,
+      "weight": 400,
+      "tracking": 0,
+      "contrast": 8.7
+     },
+     "measureChars": 105,
+     "max": {
+      "size": 48,
+      "vw": 3.3,
+      "font": "Plus Jakarta Sans",
+      "text": "Kế hoạch chuyến đi Nhật Bản"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 73,
+     "microLabelShare": 0.191,
+     "microSamples": [
+      "● Đang Lên Kế Hoạch",
+      "📍 Tokyo • Kyoto",
+      "— LỊCH TRÌNH CHI TIẾT DU LỊCH & NHIẾP ẢN",
+      "LỌC THEO THÀNH PHỐ:",
+      "📍 Hà Nội",
+      "19:15 (11/12) - 07:35 (12/12)"
+     ],
+     "upperShare": 0.25,
+     "centerShare": 0.01,
+     "smallText": 131
+    },
+    "eyebrows": [
+     {
+      "text": "● Đang Lên Kế Hoạch",
+      "above": "Kế hoạch chuyến đi Nhật Bản",
+      "upper": true,
+      "tracked": true,
+      "mono": false,
+      "pill": true,
+      "size": 10,
+      "top": 435
+     },
+     {
+      "text": "— LỊCH TRÌNH CHI TIẾT DU LỊCH & NHIẾP ẢNH",
+      "above": "Kế hoạch chuyến đi Nhật Bản",
+      "upper": true,
+      "tracked": true,
+      "mono": false,
+      "pill": false,
+      "size": 10,
+      "top": 779
+     }
+    ],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#faf8f5",
+     "bodyBgHsl": {
+      "h": 36,
+      "s": 0.33,
+      "l": 0.97
+     },
+     "dark": false,
+     "sectionBgs": [
+      {
+       "color": "#faf8f5",
+       "top": 65,
+       "hsl": {
+        "h": 36,
+        "s": 0.33,
+        "l": 0.97
+       }
+      },
+      {
+       "color": "#ffffff",
+       "top": 169,
+       "hsl": {
+        "h": 0,
+        "s": 0,
+        "l": 1
+       }
+      },
+      {
+       "color": "#f3f0ea",
+       "top": 170,
+       "hsl": {
+        "h": 40,
+        "s": 0.27,
+        "l": 0.94
+       }
+      },
+      {
+       "color": "#f5f2ec",
+       "top": 8844,
+       "hsl": {
+        "h": 40,
+        "s": 0.31,
+        "l": 0.94
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#4a4742",
+       "share": 0.2
+      },
+      {
+       "color": "#d6d3d1",
+       "share": 0.13
+      },
+      {
+       "color": "#ffffff",
+       "share": 0.11
+      },
+      {
+       "color": "#1c1b18",
+       "share": 0.11
+      },
+      {
+       "color": "#8c8881",
+       "share": 0.07
+      }
+     ],
+     "button": {
+      "bg": "#1c1b18",
+      "hsl": {
+       "h": 45,
+       "s": 0.08,
+       "l": 0.1
+      },
+      "fg": "#57544e"
+     },
+     "lowContrast": [
+      {
+       "text": "LỌC THEO THÀNH PHỐ:",
+       "ratio": 3.3,
+       "need": 4.5,
+       "size": 10,
+       "fg": "#8c8881",
+       "bg": "#faf8f5"
+      },
+      {
+       "text": "Đang hiển thị: mốc hành trình",
+       "ratio": 3.3,
+       "need": 4.5,
+       "size": 11,
+       "fg": "#8c8881",
+       "bg": "#faf8f5"
+      },
+      {
+       "text": "🗓 2026-12-11",
+       "ratio": 3.5,
+       "need": 4.5,
+       "size": 11,
+       "fg": "#8c8881",
+       "bg": "#ffffff"
+      },
+      {
+       "text": "🗓 2026-12-12",
+       "ratio": 3.5,
+       "need": 4.5,
+       "size": 11,
+       "fg": "#8c8881",
+       "bg": "#ffffff"
+      },
+      {
+       "text": "🗓 2026-12-12",
+       "ratio": 3.5,
+       "need": 4.5,
+       "size": 11,
+       "fg": "#8c8881",
+       "bg": "#ffffff"
+      },
+      {
+       "text": "🗓 2026-12-12",
+       "ratio": 3.5,
+       "need": 4.5,
+       "size": 11,
+       "fg": "#8c8881",
+       "bg": "#ffffff"
+      }
+     ]
+    },
+    "buttons": {
+     "count": 6,
+     "inHero": 3,
+     "radius": 6,
+     "height": 30,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 5,
+     "heroLabels": [
+      "📷 SONY A6400",
+      "← CÁC CHUYẾN ĐI",
+      "ĐĂNG NHẬP"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 70,
+     "shadowOverlay": 1,
+     "shadowSamples": [
+      "header.relative.bg-white → rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0",
+      "button.px-3.5.py-1.5 → rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0",
+      "span.bg-[#1C1B18].text-white → rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0",
+      "div.w-full.lg:col-span-6 → rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0"
+     ],
+     "gradients": 1,
+     "scrims": 0,
+     "gradientSamples": [
+      "div.absolute.inset-0 → linear-gradient(to top, oklab(0 0 0 / 0.85) 0%, oklab(0 0 0 / 0.4) 50%, oklab(0 0 0 / 0.1) 100%)"
+     ],
+     "gradientText": 0,
+     "hairlines": 31,
+     "hairlineSamples": [
+      "header.sticky.top-0 1440px",
+      "div.pt-3.border-t 1310px",
+      "div.flex.flex-col 1376px",
+      "div.flex.items-center 1376px",
+      "div.flex.flex-wrap 729px"
+     ],
+     "outlinedBoxes": 21,
+     "dashed": 0,
+     "blurred": 32,
+     "roundedBoxes": 39,
+     "boxRadius": 16,
+     "squareMedia": 0,
+     "roundedMedia": 18,
+     "mediaRadius": 16,
+     "textShadow": 0,
+     "cardRows": []
+    },
+    "heroMedia": [
+     {
+      "type": "img",
+      "ratio": 0.41
+     }
+    ],
+    "nav": {
+     "links": 7,
+     "fixed": true,
+     "height": 65,
+     "floatingPill": false,
+     "blur": true
+    },
+    "fontsLoaded": [
+     "plus jakarta sans",
+     "plus jakarta sans fallback",
+     "inter",
+     "inter fallback"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "pageH": 9125,
+    "margins": {
+     "left": 32,
+     "right": 33
+    },
+    "sections": [
+     {
+      "sel": "div.flex-1.bg-[#FAF8F5]",
+      "tag": "div",
+      "top": 65,
+      "height": 8715,
+      "words": 1122,
+      "media": 24,
+      "middle": 0,
+      "heading": {
+       "text": "Kế hoạch chuyến đi Nhật Bản",
+       "size": 48,
+       "tag": "h1"
+      },
+      "left": 32,
+      "right": 32,
+      "textLeft": 32,
+      "textRight": 32,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "footer#footer.border-t.border-[#E5E0D8]",
+      "tag": "footer",
+      "top": 8844,
+      "height": 281,
+      "words": 106,
+      "media": 0,
+      "middle": 155,
+      "heading": {
+       "text": "CHUYÊN MỤC TRỌNG TÂM",
+       "size": 10,
+       "tag": "h4"
+      },
+      "left": 32,
+      "right": 32,
+      "textLeft": 32,
+      "textRight": 32,
+      "fullBleed": false,
+      "footer": true,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     }
+    ],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "Kế hoạch chuyến đi Nhật Bản",
+      "size": 48,
+      "top": 472,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 119,
+      "n": 13
+     },
+     {
+      "x": 57,
+      "n": 4
+     },
+     {
+      "x": 32,
+      "n": 1
+     }
+    ],
+    "leftBlocks": 18,
+    "bodySize": 14,
+    "stage": false,
+    "explains": true,
+    "slivers": [],
+    "voidShare": 0.13,
+    "voidBox": {
+     "x": 540,
+     "y": 660,
+     "w": 720,
+     "h": 240
+    }
+   },
+   "app": null,
+   "consoleErrors": []
+  },
+  {
+   "width": 768,
+   "height": 1024,
+   "load": "load",
+   "screens": 11,
+   "filled": [
+    0.75,
+    0.71,
+    0.82,
+    0.71,
+    0.77,
+    0.73,
+    0.75,
+    0.71,
+    0.8,
+    0.74,
+    0.83
+   ],
+   "motion": {
+    "elements": 82,
+    "css": 82,
+    "transitions": 0,
+    "scripted": 0,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "page": {
+     "height": 10575,
+     "screens": 10.3,
+     "words": 1375,
+     "img": 18,
+     "video": 0,
+     "canvas": 0,
+     "svg": 0,
+     "sections": 1,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 18,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [
+      "1792520033337.png",
+      "1792520109649.png",
+      "1792597783221.png",
+      "1792520602541.png",
+      "1792602485462.png",
+      "1792603113642.png",
+      "1792604155810.png",
+      "1792604322761.png"
+     ],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [
+      "📷",
+      "📍",
+      "🗓",
+      "⛩",
+      "🚄",
+      "🗂",
+      "🔍",
+      "🌐",
+      "🏨",
+      "🍜"
+     ],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Kế hoạch chuyến đi Nhật Bản",
+     "words": 6,
+     "chars": 27,
+     "lines": 1,
+     "size": 36,
+     "vw": 4.7,
+     "font": "Plus Jakarta Sans",
+     "weight": 700,
+     "tracking": -0.025,
+     "leading": 1.2,
+     "upper": false,
+     "italic": false,
+     "mono": false,
+     "align": "left",
+     "position": "center",
+     "widthRatio": 0.87,
+     "top": 487,
+     "tag": "h1",
+     "kind": "heading"
+    },
+    "h1": {
+     "text": "Kế hoạch chuyến đi Nhật Bản",
+     "words": 6,
+     "lines": 1,
+     "size": 36,
+     "font": "Plus Jakarta Sans"
+    },
+    "headings": [
+     {
+      "text": "Kế hoạch chuyến đi Nhật Bản",
+      "words": 6,
+      "chars": 27,
+      "lines": 1,
+      "size": 36,
+      "vw": 4.7,
+      "font": "Plus Jakarta Sans",
+      "weight": 700,
+      "tracking": -0.025,
+      "leading": 1.2,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.87,
+      "top": 487,
+      "tag": "h1",
+      "kind": "heading"
+     },
+     {
+      "text": "Kế hoạch chuyến đi Nhật Bản",
+      "words": 6,
+      "chars": 27,
+      "lines": 1,
+      "size": 30,
+      "vw": 3.9,
+      "font": "Plus Jakarta Sans",
+      "weight": 600,
+      "tracking": 0,
+      "leading": 1.2,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.54,
+      "top": 803,
+      "tag": "h2",
+      "kind": "heading"
+     }
+    ],
+    "headingSummary": {
+     "count": 2,
+     "maxLines": 1,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 0,
+     "medianWords": 6,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Plus Jakarta Sans",
+       "share": 0.74,
+       "mono": false
+      },
+      {
+       "family": "Inter",
+       "share": 0.26,
+       "mono": false
+      }
+     ],
+     "familyCount": 2,
+     "sizes": [
+      9,
+      10,
+      11,
+      12,
+      14,
+      16,
+      18,
+      20,
+      24,
+      30,
+      36
+     ],
+     "sizeCount": 11,
+     "notLoaded": [],
+     "body": {
+      "font": "Inter",
+      "size": 14,
+      "leading": 1.63,
+      "weight": 400,
+      "tracking": 0,
+      "contrast": 8.7
+     },
+     "measureChars": 51,
+     "max": {
+      "size": 36,
+      "vw": 4.7,
+      "font": "Plus Jakarta Sans",
+      "text": "Kế hoạch chuyến đi Nhật Bản"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 73,
+     "microLabelShare": 0.191,
+     "microSamples": [
+      "● Đang Lên Kế Hoạch",
+      "📍 Tokyo • Kyoto",
+      "— LỊCH TRÌNH CHI TIẾT DU LỊCH & NHIẾP ẢN",
+      "LỌC THEO THÀNH PHỐ:",
+      "📍 Hà Nội",
+      "19:15 (11/12) - 07:35 (12/12)"
+     ],
+     "upperShare": 0.25,
+     "centerShare": 0.01,
+     "smallText": 131
+    },
+    "eyebrows": [
+     {
+      "text": "● Đang Lên Kế Hoạch",
+      "above": "Kế hoạch chuyến đi Nhật Bản",
+      "upper": true,
+      "tracked": true,
+      "mono": false,
+      "pill": true,
+      "size": 10,
+      "top": 450
+     },
+     {
+      "text": "— LỊCH TRÌNH CHI TIẾT DU LỊCH & NHIẾP ẢNH",
+      "above": "Kế hoạch chuyến đi Nhật Bản",
+      "upper": true,
+      "tracked": true,
+      "mono": false,
+      "pill": false,
+      "size": 10,
+      "top": 779
+     }
+    ],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#faf8f5",
+     "bodyBgHsl": {
+      "h": 36,
+      "s": 0.33,
+      "l": 0.97
+     },
+     "dark": false,
+     "sectionBgs": [
+      {
+       "color": "#faf8f5",
+       "top": 65,
+       "hsl": {
+        "h": 36,
+        "s": 0.33,
+        "l": 0.97
+       }
+      },
+      {
+       "color": "#ffffff",
+       "top": 169,
+       "hsl": {
+        "h": 0,
+        "s": 0,
+        "l": 1
+       }
+      },
+      {
+       "color": "#f3f0ea",
+       "top": 170,
+       "hsl": {
+        "h": 40,
+        "s": 0.27,
+        "l": 0.94
+       }
+      },
+      {
+       "color": "#f5f2ec",
+       "top": 10246,
+       "hsl": {
+        "h": 40,
+        "s": 0.31,
+        "l": 0.94
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#4a4742",
+       "share": 0.2
+      },
+      {
+       "color": "#d6d3d1",
+       "share": 0.13
+      },
+      {
+       "color": "#ffffff",
+       "share": 0.11
+      },
+      {
+       "color": "#1c1b18",
+       "share": 0.11
+      },
+      {
+       "color": "#8c8881",
+       "share": 0.07
+      }
+     ],
+     "button": {
+      "bg": "#1c1b18",
+      "hsl": {
+       "h": 45,
+       "s": 0.08,
+       "l": 0.1
+      },
+      "fg": "#57544e"
+     },
+     "lowContrast": [
+      {
+       "text": "LỌC THEO THÀNH PHỐ:",
+       "ratio": 3.3,
+       "need": 4.5,
+       "size": 10,
+       "fg": "#8c8881",
+       "bg": "#faf8f5"
+      },
+      {
+       "text": "Đang hiển thị: mốc hành trình",
+       "ratio": 3.3,
+       "need": 4.5,
+       "size": 11,
+       "fg": "#8c8881",
+       "bg": "#faf8f5"
+      },
+      {
+       "text": "🗓 2026-12-11",
+       "ratio": 3.5,
+       "need": 4.5,
+       "size": 11,
+       "fg": "#8c8881",
+       "bg": "#ffffff"
+      },
+      {
+       "text": "🗓 2026-12-12",
+       "ratio": 3.5,
+       "need": 4.5,
+       "size": 11,
+       "fg": "#8c8881",
+       "bg": "#ffffff"
+      },
+      {
+       "text": "🗓 2026-12-12",
+       "ratio": 3.5,
+       "need": 4.5,
+       "size": 11,
+       "fg": "#8c8881",
+       "bg": "#ffffff"
+      },
+      {
+       "text": "🗓 2026-12-12",
+       "ratio": 3.5,
+       "need": 4.5,
+       "size": 11,
+       "fg": "#8c8881",
+       "bg": "#ffffff"
+      }
+     ]
+    },
+    "buttons": {
+     "count": 6,
+     "inHero": 6,
+     "radius": 6,
+     "height": 30,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 5,
+     "heroLabels": [
+      "📷 SONY A6400",
+      "← CÁC CHUYẾN ĐI",
+      "ĐĂNG NHẬP",
+      "TẤT CẢ CÁC NGÀY",
+      "NGÀY 1 (11/12)"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 70,
+     "shadowOverlay": 1,
+     "shadowSamples": [
+      "header.relative.bg-white → rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0",
+      "button.px-3.5.py-1.5 → rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0",
+      "span.bg-[#1C1B18].text-white → rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0",
+      "div.w-full.lg:col-span-6 → rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0"
+     ],
+     "gradients": 13,
+     "scrims": 0,
+     "gradientSamples": [
+      "div.absolute.inset-0 → linear-gradient(to top, oklab(0 0 0 / 0.85) 0%, oklab(0 0 0 / 0.4) 50%, oklab(0 0 0 / 0.1) 100%)",
+      "div.absolute.bottom-0 → linear-gradient(to top, oklab(0 0 0 / 0.95) 0%, oklab(0 0 0 / 0.6) 50%, rgba(0, 0, 0, 0) 100%)",
+      "div.absolute.bottom-0 → linear-gradient(to top, oklab(0 0 0 / 0.95) 0%, oklab(0 0 0 / 0.6) 50%, rgba(0, 0, 0, 0) 100%)",
+      "div.absolute.bottom-0 → linear-gradient(to top, oklab(0 0 0 / 0.95) 0%, oklab(0 0 0 / 0.6) 50%, rgba(0, 0, 0, 0) 100%)"
+     ],
+     "gradientText": 0,
+     "hairlines": 26,
+     "hairlineSamples": [
+      "header.sticky.top-0 768px",
+      "div.pt-3.border-t 654px",
+      "div.flex.flex-col 720px",
+      "div.flex.items-center 720px",
+      "div.flex.flex-wrap 608px"
+     ],
+     "outlinedBoxes": 21,
+     "dashed": 0,
+     "blurred": 32,
+     "roundedBoxes": 39,
+     "boxRadius": 16,
+     "squareMedia": 0,
+     "roundedMedia": 18,
+     "mediaRadius": 16,
+     "textShadow": 0,
+     "cardRows": []
+    },
+    "heroMedia": [
+     {
+      "type": "img",
+      "ratio": 0.35
+     }
+    ],
+    "nav": {
+     "links": 7,
+     "fixed": true,
+     "height": 65,
+     "floatingPill": false,
+     "blur": true
+    },
+    "fontsLoaded": [
+     "plus jakarta sans",
+     "plus jakarta sans fallback",
+     "inter",
+     "inter fallback"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "pageH": 10575,
+    "margins": {
+     "left": 24,
+     "right": 25
+    },
+    "sections": [
+     {
+      "sel": "div.flex-1.bg-[#FAF8F5]",
+      "tag": "div",
+      "top": 65,
+      "height": 10117,
+      "words": 1122,
+      "media": 24,
+      "middle": 0,
+      "heading": {
+       "text": "Kế hoạch chuyến đi Nhật Bản",
+       "size": 36,
+       "tag": "h1"
+      },
+      "left": 24,
+      "right": 24,
+      "textLeft": 24,
+      "textRight": 24,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "footer#footer.border-t.border-[#E5E0D8]",
+      "tag": "footer",
+      "top": 10246,
+      "height": 329,
+      "words": 106,
+      "media": 0,
+      "middle": 37,
+      "heading": {
+       "text": "CHUYÊN MỤC TRỌNG TÂM",
+       "size": 10,
+       "tag": "h4"
+      },
+      "left": 24,
+      "right": 24,
+      "textLeft": 24,
+      "textRight": 24,
+      "fullBleed": false,
+      "footer": true,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     }
+    ],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "Kế hoạch chuyến đi Nhật Bản",
+      "size": 36,
+      "top": 487,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 111,
+      "n": 13
+     },
+     {
+      "x": 49,
+      "n": 4
+     },
+     {
+      "x": 24,
+      "n": 1
+     }
+    ],
+    "leftBlocks": 18,
+    "bodySize": 14,
+    "stage": false,
+    "explains": true,
+    "slivers": [],
+    "voidShare": 0,
+    "voidBox": null
+   },
+   "app": null,
+   "consoleErrors": []
+  },
+  {
+   "width": 390,
+   "height": 844,
+   "load": "load",
+   "screens": 12,
+   "filled": [
+    0.68,
+    0.66,
+    0.69,
+    0.74,
+    0.68,
+    0.72,
+    0.78,
+    0.77,
+    0.78,
+    0.74,
+    0.74,
+    0.6
+   ],
+   "motion": {
+    "elements": 76,
+    "css": 76,
+    "transitions": 0,
+    "scripted": 0,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "page": {
+     "height": 11888,
+     "screens": 14.1,
+     "words": 1363,
+     "img": 18,
+     "video": 0,
+     "canvas": 0,
+     "svg": 0,
+     "sections": 1,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 18,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [
+      "1792520033337.png",
+      "1792520109649.png",
+      "1792597783221.png",
+      "1792520602541.png",
+      "1792602485462.png",
+      "1792603113642.png",
+      "1792604155810.png",
+      "1792604322761.png"
+     ],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [
+      "📍",
+      "🗓",
+      "📷",
+      "⛩",
+      "🚄",
+      "🗂",
+      "🔍",
+      "🌐",
+      "🏨",
+      "🍜"
+     ],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Kế hoạch chuyến đi Nhật Bản",
+     "words": 6,
+     "chars": 27,
+     "lines": 2,
+     "size": 30,
+     "vw": 7.7,
+     "font": "Plus Jakarta Sans",
+     "weight": 700,
+     "tracking": -0.025,
+     "leading": 1.2,
+     "upper": false,
+     "italic": false,
+     "mono": false,
+     "align": "left",
+     "position": "center",
+     "widthRatio": 0.79,
+     "top": 362,
+     "tag": "h1",
+     "kind": "heading"
+    },
+    "h1": {
+     "text": "Kế hoạch chuyến đi Nhật Bản",
+     "words": 6,
+     "lines": 2,
+     "size": 30,
+     "font": "Plus Jakarta Sans"
+    },
+    "headings": [
+     {
+      "text": "Kế hoạch chuyến đi Nhật Bản",
+      "words": 6,
+      "chars": 27,
+      "lines": 2,
+      "size": 30,
+      "vw": 7.7,
+      "font": "Plus Jakarta Sans",
+      "weight": 700,
+      "tracking": -0.025,
+      "leading": 1.2,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.79,
+      "top": 362,
+      "tag": "h1",
+      "kind": "heading"
+     },
+     {
+      "text": "Kế hoạch chuyến đi Nhật Bản",
+      "words": 6,
+      "chars": 27,
+      "lines": 1,
+      "size": 24,
+      "vw": 6.2,
+      "font": "Plus Jakarta Sans",
+      "weight": 600,
+      "tracking": 0,
+      "leading": 1.33,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.92,
+      "top": 751,
+      "tag": "h2",
+      "kind": "heading"
+     }
+    ],
+    "headingSummary": {
+     "count": 2,
+     "maxLines": 2,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 0,
+     "medianWords": 6,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Plus Jakarta Sans",
+       "share": 0.74,
+       "mono": false
+      },
+      {
+       "family": "Inter",
+       "share": 0.26,
+       "mono": false
+      }
+     ],
+     "familyCount": 2,
+     "sizes": [
+      9,
+      10,
+      11,
+      12,
+      16,
+      18,
+      20,
+      24,
+      30
+     ],
+     "sizeCount": 9,
+     "notLoaded": [],
+     "body": {
+      "font": "Inter",
+      "size": 12,
+      "leading": 1.63,
+      "weight": 400,
+      "tracking": 0,
+      "contrast": 8.7
+     },
+     "measureChars": 52,
+     "max": {
+      "size": 30,
+      "vw": 7.7,
+      "font": "Plus Jakarta Sans",
+      "text": "Kế hoạch chuyến đi Nhật Bản"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 73,
+     "microLabelShare": 0.192,
+     "microSamples": [
+      "● Đang Lên Kế Hoạch",
+      "📍 Tokyo • Kyoto",
+      "— LỊCH TRÌNH CHI TIẾT DU LỊCH & NHIẾP ẢN",
+      "LỌC THEO THÀNH PHỐ:",
+      "📍 Hà Nội",
+      "19:15 (11/12) - 07:35 (12/12)"
+     ],
+     "upperShare": 0.25,
+     "centerShare": 0.01,
+     "smallText": 157
+    },
+    "eyebrows": [
+     {
+      "text": "🗓 11/12/2026 — 18/12/2026",
+      "above": "Kế hoạch chuyến đi Nhật Bản",
+      "upper": false,
+      "tracked": false,
+      "mono": false,
+      "pill": true,
+      "size": 10,
+      "top": 327
+     },
+     {
+      "text": "— LỊCH TRÌNH CHI TIẾT DU LỊCH & NHIẾP ẢNH",
+      "above": "Kế hoạch chuyến đi Nhật Bản",
+      "upper": true,
+      "tracked": true,
+      "mono": false,
+      "pill": false,
+      "size": 10,
+      "top": 727
+     }
+    ],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#faf8f5",
+     "bodyBgHsl": {
+      "h": 36,
+      "s": 0.33,
+      "l": 0.97
+     },
+     "dark": false,
+     "sectionBgs": [
+      {
+       "color": "#faf8f5",
+       "top": 65,
+       "hsl": {
+        "h": 36,
+        "s": 0.33,
+        "l": 0.97
+       }
+      },
+      {
+       "color": "#ffffff",
+       "top": 169,
+       "hsl": {
+        "h": 0,
+        "s": 0,
+        "l": 1
+       }
+      },
+      {
+       "color": "#f3f0ea",
+       "top": 170,
+       "hsl": {
+        "h": 40,
+        "s": 0.27,
+        "l": 0.94
+       }
+      },
+      {
+       "color": "#1c1b18",
+       "top": 10428,
+       "hsl": {
+        "h": 45,
+        "s": 0.08,
+        "l": 0.1
+       }
+      },
+      {
+       "color": "#f5f2ec",
+       "top": 11306,
+       "hsl": {
+        "h": 40,
+        "s": 0.31,
+        "l": 0.94
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#4a4742",
+       "share": 0.2
+      },
+      {
+       "color": "#d6d3d1",
+       "share": 0.13
+      },
+      {
+       "color": "#ffffff",
+       "share": 0.11
+      },
+      {
+       "color": "#1c1b18",
+       "share": 0.1
+      },
+      {
+       "color": "#8c8881",
+       "share": 0.08
+      }
+     ],
+     "button": {
+      "bg": "#1c1b18",
+      "hsl": {
+       "h": 45,
+       "s": 0.08,
+       "l": 0.1
+      },
+      "fg": "#ffffff"
+     },
+     "lowContrast": [
+      {
+       "text": "LỌC THEO THÀNH PHỐ:",
+       "ratio": 3.3,
+       "need": 4.5,
+       "size": 10,
+       "fg": "#8c8881",
+       "bg": "#faf8f5"
+      },
+      {
+       "text": "Đang hiển thị: mốc hành trình",
+       "ratio": 3.3,
+       "need": 4.5,
+       "size": 11,
+       "fg": "#8c8881",
+       "bg": "#faf8f5"
+      },
+      {
+       "text": "🗓 2026-12-11",
+       "ratio": 3.5,
+       "need": 4.5,
+       "size": 11,
+       "fg": "#8c8881",
+       "bg": "#ffffff"
+      },
+      {
+       "text": "🗓 2026-12-12",
+       "ratio": 3.5,
+       "need": 4.5,
+       "size": 11,
+       "fg": "#8c8881",
+       "bg": "#ffffff"
+      },
+      {
+       "text": "🗓 2026-12-12",
+       "ratio": 3.5,
+       "need": 4.5,
+       "size": 11,
+       "fg": "#8c8881",
+       "bg": "#ffffff"
+      },
+      {
+       "text": "🗓 2026-12-12",
+       "ratio": 3.5,
+       "need": 4.5,
+       "size": 11,
+       "fg": "#8c8881",
+       "bg": "#ffffff"
+      }
+     ]
+    },
+    "buttons": {
+     "count": 5,
+     "inHero": 2,
+     "radius": 6,
+     "height": 30,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 5,
+     "heroLabels": [
+      "← CÁC CHUYẾN ĐI",
+      "ĐĂNG NHẬP"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 70,
+     "shadowOverlay": 1,
+     "shadowSamples": [
+      "header.relative.bg-white → rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0",
+      "button.px-3.5.py-1.5 → rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0",
+      "span.bg-[#1C1B18].text-white → rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0",
+      "div.w-full.lg:col-span-6 → rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0"
+     ],
+     "gradients": 13,
+     "scrims": 0,
+     "gradientSamples": [
+      "div.absolute.inset-0 → linear-gradient(to top, oklab(0 0 0 / 0.85) 0%, oklab(0 0 0 / 0.4) 50%, oklab(0 0 0 / 0.1) 100%)",
+      "div.absolute.bottom-0 → linear-gradient(to top, oklab(0 0 0 / 0.95) 0%, oklab(0 0 0 / 0.6) 50%, rgba(0, 0, 0, 0) 100%)",
+      "div.absolute.bottom-0 → linear-gradient(to top, oklab(0 0 0 / 0.95) 0%, oklab(0 0 0 / 0.6) 50%, rgba(0, 0, 0, 0) 100%)",
+      "div.absolute.bottom-0 → linear-gradient(to top, oklab(0 0 0 / 0.95) 0%, oklab(0 0 0 / 0.6) 50%, rgba(0, 0, 0, 0) 100%)"
+     ],
+     "gradientText": 0,
+     "hairlines": 31,
+     "hairlineSamples": [
+      "header.sticky.top-0 390px",
+      "div.pt-3.border-t 308px",
+      "div.flex.flex-col 358px",
+      "div.flex.items-center 358px",
+      "div.flex.flex-wrap 278px"
+     ],
+     "outlinedBoxes": 25,
+     "dashed": 0,
+     "blurred": 32,
+     "roundedBoxes": 43,
+     "boxRadius": 16,
+     "squareMedia": 0,
+     "roundedMedia": 18,
+     "mediaRadius": 16,
+     "textShadow": 0,
+     "cardRows": []
+    },
+    "heroMedia": [
+     {
+      "type": "img",
+      "ratio": 0.31
+     }
+    ],
+    "nav": {
+     "links": 2,
+     "fixed": true,
+     "height": 65,
+     "floatingPill": false,
+     "blur": true
+    },
+    "fontsLoaded": [
+     "plus jakarta sans",
+     "plus jakarta sans fallback",
+     "inter",
+     "inter fallback"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "pageH": 11888,
+    "margins": {
+     "left": 16,
+     "right": 17
+    },
+    "sections": [
+     {
+      "sel": "div.flex-1.bg-[#FAF8F5]",
+      "tag": "div",
+      "top": 65,
+      "height": 11177,
+      "words": 1122,
+      "media": 24,
+      "middle": 0,
+      "heading": {
+       "text": "Kế hoạch chuyến đi Nhật Bản",
+       "size": 30,
+       "tag": "h1"
+      },
+      "left": 16,
+      "right": 7,
+      "textLeft": 16,
+      "textRight": 16,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "footer#footer.border-t.border-[#E5E0D8]",
+      "tag": "footer",
+      "top": 11306,
+      "height": 582,
+      "words": 106,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "CHUYÊN MỤC TRỌNG TÂM",
+       "size": 10,
+       "tag": "h4"
+      },
+      "left": 16,
+      "right": 35,
+      "textLeft": 16,
+      "textRight": 35,
+      "fullBleed": false,
+      "footer": true,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     }
+    ],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "Kế hoạch chuyến đi Nhật Bản",
+      "size": 30,
+      "top": 362,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 75,
+      "n": 13
+     },
+     {
+      "x": 41,
+      "n": 2
+     },
+     {
+      "x": 16,
+      "n": 1
+     }
+    ],
+    "leftBlocks": 16,
+    "bodySize": 12,
+    "stage": false,
+    "explains": true,
+    "slivers": [],
+    "voidShare": 0,
+    "voidBox": null
+   },
+   "app": null,
+   "consoleErrors": []
+  }
+ ],
+ "findings": [
+  {
+   "level": "FAIL",
+   "id": "eyebrow",
+   "width": 1440,
+   "message": "2 eyebrow/kicker label(s) above headings: \"● Đang Lên Kế Hoạch\" (pill) above \"Kế hoạch chuyến đi Nhật Bản\"; \"— LỊCH TRÌNH CHI TIẾT DU LỊCH & NHIẾP ẢNH\" above \"Kế hoạch chuyến đi Nhật Bản\"",
+   "fix": "Delete them. If the label carried real information, fold it into the headline or the supporting sentence.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "FAIL",
+   "id": "micro-label",
+   "width": 1440,
+   "message": "73 tiny uppercase letter-spaced labels (e.g. \"● Đang Lên Kế Hoạch\", \"📍 Tokyo • Kyoto\", \"— LỊCH TRÌNH CHI TIẾT DU LỊCH & NHIẾP ẢN\", \"LỌC THEO THÀNH PHỐ:\").",
+   "fix": "Use sentence-case text at a readable size, or delete the label.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "FAIL",
+   "id": "emoji",
+   "width": 1440,
+   "message": "Emoji in the page: 📷 📍 🗓 ⛩ 🚄 🗂 🔍 🌐 🏨 🍜",
+   "fix": "Remove. Use words or real imagery.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "FAIL",
+   "id": "gradient",
+   "width": 1440,
+   "message": "1 gradient fill(s): div.absolute.inset-0 → linear-gradient(to top, oklab(0 0 0 / 0.85) 0%, oklab(0 0 0 / 0.4) 50%, oklab(0 0 0 / 0.1) 100%)",
+   "fix": "Use a flat colour or a real image. The only gradient allowed by default is a neutral scrim over a photo for legibility.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "FAIL",
+   "id": "shadow",
+   "width": 1440,
+   "message": "70 box-shadow(s) on elements at rest: header.relative.bg-white → rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0 | button.px-3.5.py-1.5 → rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0 | span.bg-[#1C1B18].text-white → rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0",
+   "fix": "Remove. Separate surfaces with a tone step or space. Shadows are for things that really float (menus, dialogs, sticky bars).",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "FAIL",
+   "id": "hairline",
+   "width": 1440,
+   "message": "31 thin rule(s)/divider line(s): header.sticky.top-0 1440px | div.pt-3.border-t 1310px | div.flex.flex-col 1376px | div.flex.items-center 1376px",
+   "fix": "Delete. Separate with space, a tone change, or scale. Lines are only for real tables and form fields.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "FAIL",
+   "id": "outlined-box",
+   "width": 1440,
+   "message": "21 boxes drawn with a 1px outline.",
+   "fix": "Define a surface by its fill (one tone step from the page) or leave the content unboxed.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "WARN",
+   "id": "glass",
+   "width": 1440,
+   "message": "32 backdrop-blur surfaces.",
+   "fix": "One blurred sticky bar at most; glass cards are a tell.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "WARN",
+   "id": "palette-cream",
+   "width": 1440,
+   "message": "Yellow-cream background (page background #faf8f5, section #faf8f5, section #f3f0ea).",
+   "fix": "Use the drawn palette. If you want warmth, take a low-chroma stone or bone, not a yellow cream.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "WARN",
+   "id": "contrast",
+   "width": 1440,
+   "message": "Low-contrast text: \"LỌC THEO THÀNH PHỐ:\" 3.3:1 needs 4.5:1; \"Đang hiển thị: mốc hành trình\" 3.3:1 needs 4.5:1; \"🗓 2026-12-11\" 3.5:1 needs 4.5:1; \"🗓 2026-12-12\" 3.5:1 needs 4.5:1",
+   "fix": "Darken or lighten the text colour.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "WARN",
+   "id": "size-count",
+   "width": 1440,
+   "message": "11 different font sizes (9, 10, 11, 12, 14, 16, 18, 20, 24, 30, 48).",
+   "fix": "A page needs about five: display, heading, lead, body, small.",
+   "alsoAt": [
+    768
+   ]
+  },
+  {
+   "level": "FAIL",
+   "id": "body-size",
+   "width": 1440,
+   "message": "Body text is 14px (the size most of the running text is set in).",
+   "fix": "Body copy 16–20px. Map small sizes from blueprints onto your body step.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "WARN",
+   "id": "no-footage",
+   "width": 1440,
+   "message": "No video anywhere on the page.",
+   "fix": "Look for one honest clip with scripts/assets.mjs --video (the place, the material, the process) and use it as a muted loop with a poster frame. Defend its absence only if no clip fits the subject."
+  },
+  {
+   "level": "WARN",
+   "id": "measure",
+   "width": 1440,
+   "message": "Longest paragraph runs about 105 characters per line.",
+   "fix": "Cap paragraphs at 45–75 characters (max-width: 60ch)."
+  },
+  {
+   "level": "FAIL",
+   "id": "small-text",
+   "width": 1440,
+   "message": "131 text blocks under 13px.",
+   "fix": "Nothing meant to be read goes below 13px.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  }
+ ],
+ "images": [
+  {
+   "viewport": "desktop",
+   "width": 1440,
+   "fold": "D:\\PersonalProjects\\RodrickBlog\\rodrick-blog\\.taste-skill\\before\\trip\\desktop-fold.jpg",
+   "pages": [
+    "D:\\PersonalProjects\\RodrickBlog\\rodrick-blog\\.taste-skill\\before\\trip\\desktop-page-01.jpg",
+    "D:\\PersonalProjects\\RodrickBlog\\rodrick-blog\\.taste-skill\\before\\trip\\desktop-page-02.jpg",
+    "D:\\PersonalProjects\\RodrickBlog\\rodrick-blog\\.taste-skill\\before\\trip\\desktop-page-03.jpg"
+   ],
+   "film": []
+  },
+  {
+   "viewport": "tablet",
+   "width": 768,
+   "fold": "D:\\PersonalProjects\\RodrickBlog\\rodrick-blog\\.taste-skill\\before\\trip\\tablet-fold.jpg",
+   "pages": [
+    "D:\\PersonalProjects\\RodrickBlog\\rodrick-blog\\.taste-skill\\before\\trip\\tablet-page-01.jpg",
+    "D:\\PersonalProjects\\RodrickBlog\\rodrick-blog\\.taste-skill\\before\\trip\\tablet-page-02.jpg"
+   ],
+   "film": []
+  },
+  {
+   "viewport": "mobile",
+   "width": 390,
+   "fold": "D:\\PersonalProjects\\RodrickBlog\\rodrick-blog\\.taste-skill\\before\\trip\\mobile-fold.jpg",
+   "pages": [
+    "D:\\PersonalProjects\\RodrickBlog\\rodrick-blog\\.taste-skill\\before\\trip\\mobile-page-01.jpg",
+    "D:\\PersonalProjects\\RodrickBlog\\rodrick-blog\\.taste-skill\\before\\trip\\mobile-page-02.jpg"
+   ],
+   "film": []
+  }
+ ]
+}
