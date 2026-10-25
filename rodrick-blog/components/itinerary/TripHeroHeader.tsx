@@ -2,22 +2,33 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Trip } from '@/types/database.type';
+import { Trip, TimelineEvent } from '@/types/database.type';
 import { optimizeCloudinaryUrl } from '@/lib/cloudinary';
 import { useAuth } from '@/components/auth/AuthContext';
 import { EditTripModal } from '@/components/editor/EditTripModal';
 import { SqlInstructionModal } from '@/components/editor/SqlInstructionModal';
+import { TripClock } from './TripClock';
+import { TicketPerf } from '@/components/ui/Ticket';
+import { formatDateRangeVN, formatDuration, tripDurationDays } from '@/lib/tripFormat';
 
 interface TripHeroHeaderProps {
   initialTrip: Trip;
   eventsCount: number;
   totalPhotos: number;
+  events?: TimelineEvent[];
+}
+
+function statusLabel(status?: string) {
+  if (status === 'PLANNING') return 'Đang lên kế hoạch';
+  if (status === 'ONGOING') return 'Đang diễn ra';
+  return 'Đã hoàn thành';
 }
 
 export function TripHeroHeader({
   initialTrip,
   eventsCount,
   totalPhotos,
+  events = [],
 }: TripHeroHeaderProps) {
   const router = useRouter();
   const { isLoggedIn } = useAuth();
@@ -25,21 +36,13 @@ export function TripHeroHeader({
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isSqlModalOpen, setIsSqlModalOpen] = useState(false);
 
-  const formatDate = (dateStr?: string) => {
-    if (!dateStr) return '';
-    const parts = dateStr.split('-');
-    if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
-    return dateStr;
-  };
+  // Ảnh bìa; nếu chuyến đi chưa có thì lấy ảnh đầu tiên trên timeline
+  const firstEventImage = events.find((e) => e.images?.length)?.images?.[0]?.cloudinary_url;
+  const coverSource = trip.cover_image || firstEventImage || null;
+  const coverUrl = coverSource ? optimizeCloudinaryUrl(coverSource) : null;
 
-  const statusBadge =
-    trip.status === 'PLANNING'
-      ? { label: 'Đang Lên Kế Hoạch', color: 'bg-emerald-50 text-emerald-800 border-emerald-200' }
-      : trip.status === 'ONGOING'
-      ? { label: 'Đang Diễn Ra', color: 'bg-rose-50 text-[#B93829] border-rose-200' }
-      : { label: 'Đã Hoàn Thành', color: 'bg-stone-100 text-stone-700 border-stone-200' };
-
-  const coverUrl = trip.cover_image ? optimizeCloudinaryUrl(trip.cover_image) : null;
+  const dayCount = new Set(events.map((e) => e.day_number)).size;
+  const duration = formatDuration(tripDurationDays(trip.start_date, trip.end_date, dayCount));
 
   const handleTripUpdated = (updatedTrip: Trip) => {
     setTrip(updatedTrip);
@@ -56,125 +59,103 @@ export function TripHeroHeader({
 
   return (
     <>
-      <header className="relative bg-white border border-[#E5E0D8] rounded-2xl overflow-hidden shadow-xs">
-        {coverUrl && (
-          <div className="relative h-72 sm:h-96 w-full overflow-hidden bg-[#F3F0EA]">
-            <img
-              src={coverUrl}
-              alt={trip.title}
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/10" />
-
-            {/* Top Right Edit Button for Logged-In Editor */}
-            {isLoggedIn && (
-              <div className="absolute top-4 right-4 z-20">
-                <button
-                  type="button"
-                  onClick={() => setIsEditModalOpen(true)}
-                  className="bg-white/90 hover:bg-[#B93829] text-stone-900 hover:text-white backdrop-blur-md px-3.5 py-2 rounded-xl font-mono text-xs font-semibold shadow-lg border border-white/40 flex items-center gap-1.5 transition-all cursor-pointer group"
-                >
-                  <span className="group-hover:scale-110 transition-transform">✏️</span>
-                  <span>Chỉnh sửa chuyến đi</span>
-                </button>
-              </div>
-            )}
-
-            {/* Title & Badges on top of cover */}
-            <div className="absolute bottom-6 left-6 right-6 text-white space-y-3">
-              <div className="flex flex-wrap items-center gap-2">
-                <span
-                  className={`text-[10px] font-mono uppercase tracking-wider px-2.5 py-1 rounded-full border font-semibold backdrop-blur-xs ${statusBadge.color}`}
-                >
-                  ● {statusBadge.label}
-                </span>
-                <span className="bg-black/60 backdrop-blur-xs text-white text-[10px] font-mono uppercase tracking-wider px-2.5 py-1 rounded-full">
-                  📍 {trip.cities}
-                </span>
-                <span className="bg-black/60 backdrop-blur-xs text-white text-[10px] font-mono px-2.5 py-1 rounded-full">
-                  🗓 {formatDate(trip.start_date)} — {formatDate(trip.end_date)}
-                </span>
-              </div>
-
-              <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white drop-shadow-sm leading-[1.2]">
+      <header className="frame grid gap-3 lg:grid-cols-2 lg:min-h-[min(calc(100svh-var(--bar-h)-3.5rem),52rem)]">
+        {/* Tấm vé của chuyến đi: phần chính và cuống vé (thông số, đồng hồ) */}
+        <div className="relative z-10 min-w-0 order-2 lg:order-1 -mt-6 lg:mt-0 mx-3 lg:mx-0 flex flex-col">
+          <div className="ticket-main flex-1 flex flex-col justify-center p-6 pb-10 sm:p-10 sm:pb-12 xl:p-14 xl:pb-14">
+            <div>
+              <h1
+                data-reveal
+                className="text-head leading-[0.95] tracking-[-0.03em]"
+              >
                 {trip.title}
               </h1>
-            </div>
-          </div>
-        )}
-
-        {/* Details below cover */}
-        <div className="p-6 sm:p-8 space-y-4 bg-white relative">
-          {!coverUrl && (
-            <div className="space-y-3">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="flex flex-wrap items-center gap-2.5">
-                  <span
-                    className={`text-[10px] font-mono uppercase tracking-wider px-2.5 py-1 rounded-full border font-semibold ${statusBadge.color}`}
-                  >
-                    ● {statusBadge.label}
-                  </span>
-                  <span className="bg-white border border-[#E2DDD5] text-[#57544E] text-[10px] font-mono uppercase tracking-wider px-2.5 py-1 rounded-full">
-                    📍 {trip.cities}
-                  </span>
-                  <span className="bg-white border border-[#E2DDD5] text-[#78756E] text-[10px] font-mono px-2.5 py-1 rounded-full">
-                    🗓 {formatDate(trip.start_date)} — {formatDate(trip.end_date)}
-                  </span>
-                </div>
-
+              {trip.summary && (
+                <p
+                  data-reveal
+                  style={{ '--d': '90ms' } as React.CSSProperties}
+                  className="mt-8 lg:mt-10 text-lead leading-[1.35] max-w-[36ch]"
+                >
+                  {trip.summary}
+                </p>
+              )}
+              <div
+                data-reveal
+                style={{ '--d': '170ms' } as React.CSSProperties}
+                className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4"
+              >
+                <a href="#itinerary" className="btn">
+                  Xem lịch trình từng giờ
+                </a>
                 {isLoggedIn && (
                   <button
                     type="button"
                     onClick={() => setIsEditModalOpen(true)}
-                    className="bg-[#FAF8F5] hover:bg-[#B93829] text-stone-800 hover:text-white px-3.5 py-1.5 rounded-xl font-mono text-xs font-semibold border border-[#E6E2DA] hover:border-[#B93829] flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
+                    className="text-link text-small font-semibold cursor-pointer"
                   >
-                    <span>✏️</span>
-                    <span>Chỉnh sửa chuyến đi</span>
+                    Chỉnh sửa chuyến đi
                   </button>
                 )}
               </div>
-
-              <h1 className="font-serif text-3xl sm:text-4xl font-bold text-[#1C1B18]">
-                {trip.title}
-              </h1>
             </div>
-          )}
+          </div>
 
-          {trip.summary && (
-            <p className="font-serif italic text-base sm:text-lg text-[#57544E] max-w-3xl leading-relaxed">
-              {trip.summary}
-            </p>
-          )}
+          <div className="ticket-stub px-6 pt-10 pb-12 sm:px-10 xl:px-14">
+            <TicketPerf />
+            <div data-reveal style={{ '--d': '240ms' } as React.CSSProperties} className="space-y-6">
+              <dl className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-4 text-small">
+                <div>
+                  <dt className="text-muted">Ngày đi</dt>
+                  <dd className="font-semibold tabular">{formatDateRangeVN(trip.start_date, trip.end_date)}</dd>
+                </div>
+                <div>
+                  <dt className="text-muted">Thành phố</dt>
+                  <dd className="font-semibold">{trip.cities}</dd>
+                </div>
+                <div>
+                  <dt className="text-muted">Độ dài</dt>
+                  <dd className="font-semibold">{duration || 'Chưa xác định'}</dd>
+                </div>
+                <div>
+                  <dt className="text-muted">Trạng thái</dt>
+                  <dd className="font-semibold">{statusLabel(trip.status)}</dd>
+                </div>
+                <div>
+                  <dt className="text-muted">Mốc thời gian</dt>
+                  <dd className="font-semibold tabular">{eventsCount} mốc chi tiết</dd>
+                </div>
+                <div>
+                  <dt className="text-muted">Ảnh</dt>
+                  <dd className="font-semibold tabular">{totalPhotos} bức ảnh</dd>
+                </div>
+              </dl>
 
-          {/* Quick stats on the hero */}
-          <div className="pt-3 border-t border-[#F0ECE4] flex flex-wrap items-center justify-between gap-4">
-            <div className="flex flex-wrap items-center gap-6 text-[11px] font-mono text-[#78756E]">
-              <span className="flex items-center gap-1.5">
-                <span>⏱</span>
-                <strong className="text-[#1C1B18]">{eventsCount}</strong> mốc thời gian chi tiết
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span>📷</span>
-                <strong className="text-[#1C1B18]">{totalPhotos}</strong> bức ảnh từ Sony A6400
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span>⛩️</span>
-                {trip.cities}
-              </span>
+              <div className="bg-ground p-5">
+                <TripClock
+                  events={events}
+                  startDate={trip.start_date}
+                  endDate={trip.end_date}
+                  cities={trip.cities}
+                />
+              </div>
             </div>
-
-            {/* If coverUrl is present, also show a subtle edit button in footer for convenience */}
-            {coverUrl && isLoggedIn && (
-              <button
-                type="button"
-                onClick={() => setIsEditModalOpen(true)}
-                className="text-xs font-mono text-stone-600 hover:text-[#B93829] hover:underline flex items-center gap-1 cursor-pointer"
-              >
-                <span>✏️ Sửa thông tin chuyến đi</span>
-              </button>
-            )}
           </div>
         </div>
+
+        {/* Ảnh bìa; khi chưa có ảnh thì là một mảng màu nhấn mang tên thành phố */}
+        <figure className="order-1 lg:order-2 relative h-[48svh] lg:h-auto overflow-hidden">
+          {coverUrl ? (
+            <img
+              src={coverUrl}
+              alt={trip.title}
+              className="drift absolute inset-0 w-full h-full object-cover"
+            />
+          ) : (
+            <div className="absolute inset-0 bg-accent text-accent-ink flex items-end p-8">
+              <p className="text-head">{trip.cities}</p>
+            </div>
+          )}
+        </figure>
       </header>
 
       {/* Edit Trip Modal */}

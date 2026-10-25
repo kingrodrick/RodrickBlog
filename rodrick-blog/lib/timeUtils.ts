@@ -68,10 +68,9 @@ export function parseTimeSlotRange(timeSlot?: string | null): {
 
     const startTime = `${startH}:${startM}`;
     const endTime = `${endH}:${endM}`;
-    const isOvernight =
-      timeSlot.includes('+1') ||
-      timeSlot.includes('(') ||
-      parseInt(startH, 10) > parseInt(endH, 10);
+    // Qua đêm khi có '+1' hoặc giờ kết thúc sớm hơn giờ bắt đầu. Không dựa vào dấu '(' vì
+    // nhãn ngày '(12/12)' có cả ở khung giờ trong ngày, mở ra lưu lại sẽ bị đẩy sang hôm sau
+    const isOvernight = timeSlot.includes('+1') || startTime > endTime;
 
     return { startTime, endTime, isOvernight };
   } else if (matches.length === 1) {

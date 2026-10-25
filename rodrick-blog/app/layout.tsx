@@ -1,27 +1,22 @@
 import type { Metadata } from 'next';
-import { Plus_Jakarta_Sans, Inter } from 'next/font/google';
+import { Archivo } from 'next/font/google';
 import './globals.css';
 import { Navbar } from '@/components/layout/Navbar';
-import { Footer } from '@/components/layout/Footer';
+import { Suspense } from 'react';
+import { Footer, FooterView } from '@/components/layout/Footer';
+import { MotionRoot } from '@/components/layout/MotionRoot';
 import { AuthProvider } from '@/components/auth/AuthContext';
 
-const plusJakarta = Plus_Jakarta_Sans({
+// Một họ chữ cho cả trang: Archivo, có bộ ký tự tiếng Việt
+const archivo = Archivo({
   subsets: ['latin', 'vietnamese'],
-  // 🌟 Đã tăng cường thêm các mức weight dày hơn cho Headline
-  weight: ['500', '600', '700', '800'],
-  style: ['normal', 'italic'],
-  variable: '--font-plus-jakarta',
+  weight: ['400', '600'],
+  variable: '--font-archivo',
   display: 'swap',
 });
 
-const inter = Inter({
-  subsets: ['latin', 'vietnamese'],
-  // 🌟 Đẩy trọng số Body từ 300/400 lên các mức đậm đà hơn (400, 500, 600, 700)
-  weight: ['400', '500', '600', '700'],
-  style: ['normal', 'italic'],
-  variable: '--font-inter',
-  display: 'swap',
-});
+// Bật lớp xuất hiện trước lần vẽ đầu; tự gỡ nếu React không khởi động trong 3 giây
+const motionBoot = `(function(){var d=document.documentElement;if(!window.matchMedia||window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;d.setAttribute('data-motion','');setTimeout(function(){if(!window.__motionReady)d.removeAttribute('data-motion')},3000)})();`;
 
 export const metadata: Metadata = {
   title: 'RODRICK BLOG',
@@ -41,17 +36,21 @@ export default function RootLayout({
   return (
     <html
       lang="vi"
-      className={`${plusJakarta.variable} ${inter.variable} scroll-smooth`}
-      style={{ backgroundColor: '#FAF8F5' }}
+      className={`${archivo.variable} scroll-smooth`}
+      suppressHydrationWarning
     >
-      <body className="bg-[#FAF8F5] text-[#1A1A1A] font-sans font-medium antialiased selection:bg-[#B61C25]/15 selection:text-[#B61C25] min-h-screen flex flex-col">
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: motionBoot }} />
+      </head>
+      <body className="bg-ground text-ink font-sans antialiased min-h-svh flex flex-col">
         <AuthProvider>
           <Navbar />
-          <div className="flex-1 bg-[#FAF8F5]">
-            {children}
-          </div>
-          <Footer />
+          <div className="flex-1">{children}</div>
+          <Suspense fallback={<FooterView nextTrip={null} />}>
+            <Footer />
+          </Suspense>
         </AuthProvider>
+        <MotionRoot />
       </body>
     </html>
   );

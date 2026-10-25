@@ -1,0 +1,1627 @@
+{
+ "url": "http://localhost:3100/",
+ "at": "2026-10-25T12:44:12.067Z",
+ "allow": [],
+ "viewports": [
+  {
+   "width": 1440,
+   "height": 900,
+   "load": "load",
+   "screens": 6,
+   "filled": [
+    0.92,
+    0.39,
+    0.49,
+    0.61,
+    0.46,
+    1
+   ],
+   "motion": {
+    "elements": 42,
+    "css": 1,
+    "transitions": 41,
+    "scripted": 0,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "page": {
+     "height": 5097,
+     "screens": 5.7,
+     "words": 476,
+     "img": 25,
+     "video": 0,
+     "canvas": 0,
+     "svg": 0,
+     "sections": 5,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 15,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [
+      "1792521425170.jpg",
+      "1792520033337.png",
+      "photo-1493976040374-85c8e12f0c0e?auto=format&fit",
+      "photo-1540959733332-eab4deabeeaf?auto=format&fit",
+      "1792521425170.jpg",
+      "1792520033337.png",
+      "1792520109649.png",
+      "1792597783221.png"
+     ],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Rodrick đi và chụp",
+     "words": 4,
+     "chars": 18,
+     "lines": 2,
+     "size": 108.2,
+     "vw": 7.5,
+     "font": "Archivo",
+     "weight": 400,
+     "tracking": -0.02,
+     "leading": 1.02,
+     "upper": false,
+     "italic": false,
+     "mono": false,
+     "align": "left",
+     "position": "left",
+     "widthRatio": 0.39,
+     "top": 173,
+     "tag": "h1",
+     "kind": "heading"
+    },
+    "h1": {
+     "text": "Rodrick đi và chụp",
+     "words": 4,
+     "lines": 2,
+     "size": 108.2,
+     "font": "Archivo"
+    },
+    "headings": [
+     {
+      "text": "Rodrick đi và chụp",
+      "words": 4,
+      "chars": 18,
+      "lines": 2,
+      "size": 108.2,
+      "vw": 7.5,
+      "font": "Archivo",
+      "weight": 400,
+      "tracking": -0.02,
+      "leading": 1.02,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.39,
+      "top": 173,
+      "tag": "h1",
+      "kind": "heading"
+     },
+     {
+      "text": "Nơi tôi lưu trữ những kỉ niệm",
+      "words": 7,
+      "chars": 29,
+      "lines": 2,
+      "size": 64,
+      "vw": 4.4,
+      "font": "Archivo",
+      "weight": 400,
+      "tracking": -0.02,
+      "leading": 1.02,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.36,
+      "top": 1080,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "46ngày",
+      "words": 1,
+      "chars": 6,
+      "lines": 1,
+      "size": 108.2,
+      "vw": 7.5,
+      "font": "Archivo",
+      "weight": 400,
+      "tracking": -0.03,
+      "leading": 0.9,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "right",
+      "widthRatio": 0.39,
+      "top": 1229,
+      "tag": "p",
+      "kind": "statement"
+     },
+     {
+      "text": "Hành trình đã lên lịch",
+      "words": 5,
+      "chars": 22,
+      "lines": 2,
+      "size": 64,
+      "vw": 4.4,
+      "font": "Archivo",
+      "weight": 400,
+      "tracking": -0.02,
+      "leading": 1.02,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "right",
+      "widthRatio": 0.31,
+      "top": 1784,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Kho khung hình Sony A6400",
+      "words": 5,
+      "chars": 25,
+      "lines": 2,
+      "size": 64,
+      "vw": 4.4,
+      "font": "Archivo",
+      "weight": 400,
+      "tracking": -0.02,
+      "leading": 1.02,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "right",
+      "widthRatio": 0.3,
+      "top": 2739,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Về tôi",
+      "words": 2,
+      "chars": 6,
+      "lines": 1,
+      "size": 64,
+      "vw": 4.4,
+      "font": "Archivo",
+      "weight": 400,
+      "tracking": -0.02,
+      "leading": 1.02,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.3,
+      "top": 3712,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "RODRICK",
+      "words": 1,
+      "chars": 7,
+      "lines": 1,
+      "size": 273.6,
+      "vw": 19,
+      "font": "Archivo",
+      "weight": 600,
+      "tracking": -0.045,
+      "leading": 0.8,
+      "upper": true,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.96,
+      "top": 4801,
+      "tag": "p",
+      "kind": "statement"
+     }
+    ],
+    "headingSummary": {
+     "count": 7,
+     "maxLines": 2,
+     "over2Lines": 0,
+     "statements": 2,
+     "centered": 0,
+     "medianWords": 5,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Archivo",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      14,
+      19,
+      26,
+      64,
+      108,
+      274
+     ],
+     "sizeCount": 6,
+     "notLoaded": [],
+     "body": {
+      "font": "Archivo",
+      "size": 19,
+      "leading": 1.5,
+      "weight": 600,
+      "tracking": 0,
+      "contrast": null
+     },
+     "measureChars": 66,
+     "max": {
+      "size": 273.6,
+      "vw": 19,
+      "font": "Archivo",
+      "text": "Rodrick"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0,
+     "centerShare": 0.01,
+     "smallText": 0
+    },
+    "eyebrows": [],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#e8e6e1",
+     "bodyBgHsl": {
+      "h": 43,
+      "s": 0.13,
+      "l": 0.9
+     },
+     "dark": false,
+     "sectionBgs": [
+      {
+       "color": "#ffffff",
+       "top": 76,
+       "hsl": {
+        "h": 0,
+        "s": 0,
+        "l": 1
+       }
+      },
+      {
+       "color": "#d9d6cf",
+       "top": 76,
+       "hsl": {
+        "h": 42,
+        "s": 0.12,
+        "l": 0.83
+       }
+      },
+      {
+       "color": "#e8e6e1",
+       "top": 1784,
+       "hsl": {
+        "h": 43,
+        "s": 0.13,
+        "l": 0.9
+       }
+      },
+      {
+       "color": "#171412",
+       "top": 4197,
+       "hsl": {
+        "h": 24,
+        "s": 0.12,
+        "l": 0.08
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#1f1b19",
+       "share": 0.69
+      },
+      {
+       "color": "#57514b",
+       "share": 0.17
+      },
+      {
+       "color": "#f0efec",
+       "share": 0.1
+      },
+      {
+       "color": "#ffffff",
+       "share": 0.03
+      },
+      {
+       "color": "#b61c25",
+       "share": 0
+      }
+     ],
+     "button": {
+      "bg": "#1f1b19",
+      "hsl": {
+       "h": 20,
+       "s": 0.11,
+       "l": 0.11
+      },
+      "fg": "#ffffff"
+     },
+     "lowContrast": []
+    },
+    "buttons": {
+     "count": 5,
+     "inHero": 2,
+     "radius": 0,
+     "height": 48,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "Đăng nhập",
+      "Xem các chuyến đi"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 0,
+     "shadowSamples": [],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 0,
+     "hairlineSamples": [],
+     "outlinedBoxes": 0,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 0,
+     "boxRadius": 0,
+     "squareMedia": 16,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": []
+    },
+    "heroMedia": [
+     {
+      "type": "img",
+      "ratio": 0.46
+     },
+     {
+      "type": "img",
+      "ratio": 0.46
+     },
+     {
+      "type": "img",
+      "ratio": 0.46
+     },
+     {
+      "type": "img",
+      "ratio": 0.46
+     }
+    ],
+    "nav": {
+     "links": 5,
+     "fixed": true,
+     "height": 64,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": [
+     "archivo"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "pageH": 5097,
+    "margins": {
+     "left": 32,
+     "right": 32
+    },
+    "sections": [
+     {
+      "sel": "div.flex-1",
+      "tag": "div",
+      "top": 64,
+      "height": 3424,
+      "words": 329,
+      "media": 4,
+      "middle": 0,
+      "heading": {
+       "text": "Rodrick đi và chụp",
+       "size": 108,
+       "tag": "h1"
+      },
+      "left": 32,
+      "right": 32,
+      "textLeft": 32,
+      "textRight": 36,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": true
+     },
+     {
+      "sel": "footer#footer.mt-40.lg:mt-56",
+      "tag": "footer",
+      "top": 3712,
+      "height": 1385,
+      "words": 102,
+      "media": 1,
+      "middle": 62,
+      "heading": {
+       "text": "Về tôi",
+       "size": 64,
+       "tag": "h2"
+      },
+      "left": 21,
+      "right": 32,
+      "textLeft": 21,
+      "textRight": 32,
+      "fullBleed": true,
+      "footer": true,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     }
+    ],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "Rodrick đi và chụp",
+      "size": 108,
+      "top": 173,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 32,
+      "n": 2
+     },
+     {
+      "x": 88,
+      "n": 2
+     },
+     {
+      "x": 792,
+      "n": 2
+     },
+     {
+      "x": 971,
+      "n": 2
+     },
+     {
+      "x": 736,
+      "n": 1
+     }
+    ],
+    "leftBlocks": 9,
+    "bodySize": 19,
+    "stage": false,
+    "explains": true,
+    "slivers": [],
+    "voidShare": 0.09,
+    "voidBox": {
+     "x": 0,
+     "y": 720,
+     "w": 660,
+     "h": 180
+    }
+   },
+   "app": null,
+   "consoleErrors": []
+  },
+  {
+   "width": 768,
+   "height": 1024,
+   "load": "load",
+   "screens": 6,
+   "filled": [
+    0.92,
+    0.56,
+    0.75,
+    0.63,
+    0.46,
+    0.93
+   ],
+   "motion": {
+    "elements": 30,
+    "css": 1,
+    "transitions": 29,
+    "scripted": 0,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "page": {
+     "height": 6089,
+     "screens": 5.9,
+     "words": 463,
+     "img": 25,
+     "video": 0,
+     "canvas": 0,
+     "svg": 0,
+     "sections": 5,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 15,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [
+      "1792521425170.jpg",
+      "1792520033337.png",
+      "photo-1493976040374-85c8e12f0c0e?auto=format&fit",
+      "photo-1540959733332-eab4deabeeaf?auto=format&fit",
+      "1792521425170.jpg",
+      "1792520033337.png",
+      "1792520109649.png",
+      "1792597783221.png"
+     ],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Rodrick đi và chụp",
+     "words": 4,
+     "chars": 18,
+     "lines": 2,
+     "size": 65.2,
+     "vw": 8.5,
+     "font": "Archivo",
+     "weight": 400,
+     "tracking": -0.02,
+     "leading": 1.02,
+     "upper": false,
+     "italic": false,
+     "mono": false,
+     "align": "left",
+     "position": "left",
+     "widthRatio": 0.44,
+     "top": 596,
+     "tag": "h1",
+     "kind": "heading"
+    },
+    "h1": {
+     "text": "Rodrick đi và chụp",
+     "words": 4,
+     "lines": 2,
+     "size": 65.2,
+     "font": "Archivo"
+    },
+    "headings": [
+     {
+      "text": "Rodrick đi và chụp",
+      "words": 4,
+      "chars": 18,
+      "lines": 2,
+      "size": 65.2,
+      "vw": 8.5,
+      "font": "Archivo",
+      "weight": 400,
+      "tracking": -0.02,
+      "leading": 1.02,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.44,
+      "top": 596,
+      "tag": "h1",
+      "kind": "heading"
+     },
+     {
+      "text": "Nơi tôi lưu trữ những kỉ niệm",
+      "words": 7,
+      "chars": 29,
+      "lines": 2,
+      "size": 45.4,
+      "vw": 5.9,
+      "font": "Archivo",
+      "weight": 400,
+      "tracking": -0.02,
+      "leading": 1.02,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.47,
+      "top": 1272,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "46ngày",
+      "words": 1,
+      "chars": 6,
+      "lines": 1,
+      "size": 65.2,
+      "vw": 8.5,
+      "font": "Archivo",
+      "weight": 400,
+      "tracking": -0.03,
+      "leading": 0.9,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.83,
+      "top": 1749,
+      "tag": "p",
+      "kind": "statement"
+     },
+     {
+      "text": "Hành trình đã lên lịch",
+      "words": 5,
+      "chars": 22,
+      "lines": 2,
+      "size": 45.4,
+      "vw": 5.9,
+      "font": "Archivo",
+      "weight": 400,
+      "tracking": -0.02,
+      "leading": 1.02,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.41,
+      "top": 2620,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Kho khung hình Sony A6400",
+      "words": 5,
+      "chars": 25,
+      "lines": 2,
+      "size": 45.4,
+      "vw": 5.9,
+      "font": "Archivo",
+      "weight": 400,
+      "tracking": -0.02,
+      "leading": 1.02,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.41,
+      "top": 3282,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Về tôi",
+      "words": 2,
+      "chars": 6,
+      "lines": 1,
+      "size": 45.4,
+      "vw": 5.9,
+      "font": "Archivo",
+      "weight": 400,
+      "tracking": -0.02,
+      "leading": 1.02,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.94,
+      "top": 4698,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "RODRICK",
+      "words": 1,
+      "chars": 7,
+      "lines": 1,
+      "size": 145.9,
+      "vw": 19,
+      "font": "Archivo",
+      "weight": 600,
+      "tracking": -0.045,
+      "leading": 0.8,
+      "upper": true,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.95,
+      "top": 5896,
+      "tag": "p",
+      "kind": "statement"
+     }
+    ],
+    "headingSummary": {
+     "count": 7,
+     "maxLines": 2,
+     "over2Lines": 0,
+     "statements": 2,
+     "centered": 0,
+     "medianWords": 5,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Archivo",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      13,
+      18,
+      23,
+      45,
+      65,
+      146
+     ],
+     "sizeCount": 6,
+     "notLoaded": [],
+     "body": {
+      "font": "Archivo",
+      "size": 17.9,
+      "leading": 1.5,
+      "weight": 600,
+      "tracking": 0,
+      "contrast": null
+     },
+     "measureChars": 39,
+     "max": {
+      "size": 145.9,
+      "vw": 19,
+      "font": "Archivo",
+      "text": "Rodrick"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0,
+     "centerShare": 0.01,
+     "smallText": 0
+    },
+    "eyebrows": [],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#e8e6e1",
+     "bodyBgHsl": {
+      "h": 43,
+      "s": 0.13,
+      "l": 0.9
+     },
+     "dark": false,
+     "sectionBgs": [
+      {
+       "color": "#ffffff",
+       "top": 556,
+       "hsl": {
+        "h": 0,
+        "s": 0,
+        "l": 1
+       }
+      },
+      {
+       "color": "#d9d6cf",
+       "top": 76,
+       "hsl": {
+        "h": 42,
+        "s": 0.12,
+        "l": 0.83
+       }
+      },
+      {
+       "color": "#e8e6e1",
+       "top": 2179,
+       "hsl": {
+        "h": 43,
+        "s": 0.13,
+        "l": 0.9
+       }
+      },
+      {
+       "color": "#171412",
+       "top": 5188,
+       "hsl": {
+        "h": 24,
+        "s": 0.12,
+        "l": 0.08
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#1f1b19",
+       "share": 0.67
+      },
+      {
+       "color": "#57514b",
+       "share": 0.19
+      },
+      {
+       "color": "#f0efec",
+       "share": 0.1
+      },
+      {
+       "color": "#ffffff",
+       "share": 0.03
+      },
+      {
+       "color": "#b61c25",
+       "share": 0
+      }
+     ],
+     "button": {
+      "bg": "#1f1b19",
+      "hsl": {
+       "h": 20,
+       "s": 0.11,
+       "l": 0.11
+      },
+      "fg": "#ffffff"
+     },
+     "lowContrast": []
+    },
+    "buttons": {
+     "count": 5,
+     "inHero": 2,
+     "radius": 0,
+     "height": 48,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "Đăng nhập",
+      "Xem các chuyến đi"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 0,
+     "shadowSamples": [],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 0,
+     "hairlineSamples": [],
+     "outlinedBoxes": 0,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 0,
+     "boxRadius": 0,
+     "squareMedia": 16,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": []
+    },
+    "heroMedia": [
+     {
+      "type": "img",
+      "ratio": 0.48
+     },
+     {
+      "type": "img",
+      "ratio": 0.48
+     },
+     {
+      "type": "img",
+      "ratio": 0.48
+     },
+     {
+      "type": "img",
+      "ratio": 0.48
+     }
+    ],
+    "nav": {
+     "links": 5,
+     "fixed": true,
+     "height": 64,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": [
+     "archivo"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "pageH": 6089,
+    "margins": {
+     "left": 18,
+     "right": 24
+    },
+    "sections": [
+     {
+      "sel": "div.flex-1",
+      "tag": "div",
+      "top": 64,
+      "height": 4474,
+      "words": 327,
+      "media": 5,
+      "middle": 0,
+      "heading": {
+       "text": "Rodrick đi và chụp",
+       "size": 65,
+       "tag": "h1"
+      },
+      "left": 11,
+      "right": 14,
+      "textLeft": 24,
+      "textRight": 24,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "footer#footer.mt-40.lg:mt-56",
+      "tag": "footer",
+      "top": 4698,
+      "height": 1390,
+      "words": 102,
+      "media": 1,
+      "middle": 0,
+      "heading": {
+       "text": "Về tôi",
+       "size": 45,
+       "tag": "h2"
+      },
+      "left": 18,
+      "right": 24,
+      "textLeft": 18,
+      "textRight": 24,
+      "fullBleed": true,
+      "footer": true,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     }
+    ],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "Rodrick đi và chụp",
+      "size": 65,
+      "top": 596,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 24,
+      "n": 5
+     },
+     {
+      "x": 64,
+      "n": 2
+     },
+     {
+      "x": 76,
+      "n": 2
+     }
+    ],
+    "leftBlocks": 9,
+    "bodySize": 18,
+    "stage": false,
+    "explains": true,
+    "slivers": [],
+    "voidShare": 0,
+    "voidBox": null
+   },
+   "app": null,
+   "consoleErrors": []
+  },
+  {
+   "width": 390,
+   "height": 844,
+   "load": "load",
+   "screens": 7,
+   "filled": [
+    0.89,
+    0.52,
+    0.58,
+    0.56,
+    0.53,
+    0.53,
+    0.93
+   ],
+   "motion": {
+    "elements": 33,
+    "css": 1,
+    "transitions": 32,
+    "scripted": 0,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "page": {
+     "height": 5556,
+     "screens": 6.6,
+     "words": 443,
+     "img": 25,
+     "video": 0,
+     "canvas": 0,
+     "svg": 0,
+     "sections": 5,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 15,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [
+      "1792521425170.jpg",
+      "1792520033337.png",
+      "photo-1493976040374-85c8e12f0c0e?auto=format&fit",
+      "photo-1540959733332-eab4deabeeaf?auto=format&fit",
+      "1792521425170.jpg",
+      "1792520033337.png",
+      "1792520109649.png",
+      "1792597783221.png"
+     ],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Rodrick đi và chụp",
+     "words": 4,
+     "chars": 18,
+     "lines": 2,
+     "size": 44,
+     "vw": 11.3,
+     "font": "Archivo",
+     "weight": 400,
+     "tracking": -0.02,
+     "leading": 1.02,
+     "upper": false,
+     "italic": false,
+     "mono": false,
+     "align": "left",
+     "position": "center",
+     "widthRatio": 0.58,
+     "top": 493,
+     "tag": "h1",
+     "kind": "heading"
+    },
+    "h1": {
+     "text": "Rodrick đi và chụp",
+     "words": 4,
+     "lines": 2,
+     "size": 44,
+     "font": "Archivo"
+    },
+    "headings": [
+     {
+      "text": "Rodrick đi và chụp",
+      "words": 4,
+      "chars": 18,
+      "lines": 2,
+      "size": 44,
+      "vw": 11.3,
+      "font": "Archivo",
+      "weight": 400,
+      "tracking": -0.02,
+      "leading": 1.02,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.58,
+      "top": 493,
+      "tag": "h1",
+      "kind": "heading"
+     },
+     {
+      "text": "Nơi tôi lưu trữ những kỉ niệm",
+      "words": 7,
+      "chars": 29,
+      "lines": 2,
+      "size": 33.3,
+      "vw": 8.5,
+      "font": "Archivo",
+      "weight": 400,
+      "tracking": -0.02,
+      "leading": 1.02,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.68,
+      "top": 1182,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "46ngày",
+      "words": 1,
+      "chars": 6,
+      "lines": 1,
+      "size": 44,
+      "vw": 11.3,
+      "font": "Archivo",
+      "weight": 400,
+      "tracking": -0.03,
+      "leading": 0.9,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.75,
+      "top": 1658,
+      "tag": "p",
+      "kind": "statement"
+     },
+     {
+      "text": "Hành trình đã lên lịch",
+      "words": 5,
+      "chars": 22,
+      "lines": 2,
+      "size": 33.3,
+      "vw": 8.5,
+      "font": "Archivo",
+      "weight": 400,
+      "tracking": -0.02,
+      "leading": 1.02,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.59,
+      "top": 2355,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Kho khung hình Sony A6400",
+      "words": 5,
+      "chars": 25,
+      "lines": 2,
+      "size": 33.3,
+      "vw": 8.5,
+      "font": "Archivo",
+      "weight": 400,
+      "tracking": -0.02,
+      "leading": 1.02,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.59,
+      "top": 3031,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Về tôi",
+      "words": 2,
+      "chars": 6,
+      "lines": 1,
+      "size": 33.3,
+      "vw": 8.5,
+      "font": "Archivo",
+      "weight": 400,
+      "tracking": -0.02,
+      "leading": 1.02,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.88,
+      "top": 4301,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "RODRICK",
+      "words": 1,
+      "chars": 7,
+      "lines": 1,
+      "size": 74.1,
+      "vw": 19,
+      "font": "Archivo",
+      "weight": 600,
+      "tracking": -0.045,
+      "leading": 0.8,
+      "upper": true,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.88,
+      "top": 5421,
+      "tag": "p",
+      "kind": "statement"
+     }
+    ],
+    "headingSummary": {
+     "count": 7,
+     "maxLines": 2,
+     "over2Lines": 0,
+     "statements": 2,
+     "centered": 0,
+     "medianWords": 5,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Archivo",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      13,
+      17,
+      20,
+      33,
+      44,
+      74
+     ],
+     "sizeCount": 6,
+     "notLoaded": [],
+     "body": {
+      "font": "Archivo",
+      "size": 17,
+      "leading": 1.5,
+      "weight": 600,
+      "tracking": 0,
+      "contrast": null
+     },
+     "measureChars": 27,
+     "max": {
+      "size": 74.1,
+      "vw": 19,
+      "font": "Archivo",
+      "text": "Rodrick"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0,
+     "centerShare": 0.01,
+     "smallText": 0
+    },
+    "eyebrows": [],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#e8e6e1",
+     "bodyBgHsl": {
+      "h": 43,
+      "s": 0.13,
+      "l": 0.9
+     },
+     "dark": false,
+     "sectionBgs": [
+      {
+       "color": "#ffffff",
+       "top": 469,
+       "hsl": {
+        "h": 0,
+        "s": 0,
+        "l": 1
+       }
+      },
+      {
+       "color": "#d9d6cf",
+       "top": 76,
+       "hsl": {
+        "h": 42,
+        "s": 0.12,
+        "l": 0.83
+       }
+      },
+      {
+       "color": "#171412",
+       "top": 4813,
+       "hsl": {
+        "h": 24,
+        "s": 0.12,
+        "l": 0.08
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#1f1b19",
+       "share": 0.69
+      },
+      {
+       "color": "#57514b",
+       "share": 0.17
+      },
+      {
+       "color": "#f0efec",
+       "share": 0.11
+      },
+      {
+       "color": "#ffffff",
+       "share": 0.03
+      }
+     ],
+     "button": {
+      "bg": "#1f1b19",
+      "hsl": {
+       "h": 20,
+       "s": 0.11,
+       "l": 0.11
+      },
+      "fg": "#ffffff"
+     },
+     "lowContrast": []
+    },
+    "buttons": {
+     "count": 5,
+     "inHero": 1,
+     "radius": 0,
+     "height": 48,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "Đăng nhập"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 0,
+     "shadowSamples": [],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 0,
+     "hairlineSamples": [],
+     "outlinedBoxes": 0,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 0,
+     "boxRadius": 0,
+     "squareMedia": 16,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": []
+    },
+    "heroMedia": [
+     {
+      "type": "img",
+      "ratio": 0.45
+     },
+     {
+      "type": "img",
+      "ratio": 0.45
+     },
+     {
+      "type": "img",
+      "ratio": 0.45
+     },
+     {
+      "type": "img",
+      "ratio": 0.45
+     }
+    ],
+    "nav": {
+     "links": 1,
+     "fixed": true,
+     "height": 64,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": [
+     "archivo"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "pageH": 5556,
+    "margins": {
+     "left": 21,
+     "right": 24
+    },
+    "sections": [
+     {
+      "sel": "div.flex-1",
+      "tag": "div",
+      "top": 64,
+      "height": 4077,
+      "words": 316,
+      "media": 6,
+      "middle": 0,
+      "heading": {
+       "text": "Rodrick đi và chụp",
+       "size": 44,
+       "tag": "h1"
+      },
+      "left": 17,
+      "right": 19,
+      "textLeft": 24,
+      "textRight": 26,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "footer#footer.mt-40.lg:mt-56",
+      "tag": "footer",
+      "top": 4301,
+      "height": 1255,
+      "words": 102,
+      "media": 1,
+      "middle": 0,
+      "heading": {
+       "text": "Về tôi",
+       "size": 33,
+       "tag": "h2"
+      },
+      "left": 21,
+      "right": 25,
+      "textLeft": 21,
+      "textRight": 25,
+      "fullBleed": true,
+      "footer": true,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     }
+    ],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "Rodrick đi và chụp",
+      "size": 44,
+      "top": 493,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 24,
+      "n": 5
+     },
+     {
+      "x": 48,
+      "n": 2
+     },
+     {
+      "x": 60,
+      "n": 2
+     }
+    ],
+    "leftBlocks": 9,
+    "bodySize": 17,
+    "stage": false,
+    "explains": true,
+    "slivers": [],
+    "voidShare": 0,
+    "voidBox": null
+   },
+   "app": null,
+   "consoleErrors": []
+  }
+ ],
+ "findings": [
+  {
+   "level": "WARN",
+   "id": "no-footage",
+   "width": 1440,
+   "message": "No video anywhere on the page.",
+   "fix": "Look for one honest clip with scripts/assets.mjs --video (the place, the material, the process) and use it as a muted loop with a poster frame. Defend its absence only if no clip fits the subject."
+  }
+ ],
+ "images": [
+  {
+   "viewport": "desktop",
+   "width": 1440,
+   "fold": "D:\\PersonalProjects\\RodrickBlog\\rodrick-blog\\.taste-skill\\after\\home\\desktop-fold.jpg",
+   "pages": [
+    "D:\\PersonalProjects\\RodrickBlog\\rodrick-blog\\.taste-skill\\after\\home\\desktop-page-01.jpg",
+    "D:\\PersonalProjects\\RodrickBlog\\rodrick-blog\\.taste-skill\\after\\home\\desktop-page-02.jpg"
+   ],
+   "film": []
+  },
+  {
+   "viewport": "tablet",
+   "width": 768,
+   "fold": "D:\\PersonalProjects\\RodrickBlog\\rodrick-blog\\.taste-skill\\after\\home\\tablet-fold.jpg",
+   "pages": [
+    "D:\\PersonalProjects\\RodrickBlog\\rodrick-blog\\.taste-skill\\after\\home\\tablet-page-01.jpg"
+   ],
+   "film": []
+  },
+  {
+   "viewport": "mobile",
+   "width": 390,
+   "fold": "D:\\PersonalProjects\\RodrickBlog\\rodrick-blog\\.taste-skill\\after\\home\\mobile-fold.jpg",
+   "pages": [
+    "D:\\PersonalProjects\\RodrickBlog\\rodrick-blog\\.taste-skill\\after\\home\\mobile-page-01.jpg"
+   ],
+   "film": []
+  }
+ ]
+}

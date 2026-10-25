@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ItineraryService } from '@/services/itinerary.service';
 import { ItinerarySinglePageView } from '@/components/itinerary/ItinerarySinglePageView';
-import { optimizeCloudinaryUrl } from '@/lib/cloudinary';
 
 import { TripHeroHeader } from '@/components/itinerary/TripHeroHeader';
 
@@ -27,38 +26,43 @@ export default async function TripDetailPage({ params }: TripDetailPageProps) {
   const totalPhotos = events.reduce((sum, e) => sum + (e.images?.length || 0), 0);
 
   return (
-    <div className="w-full bg-[#FAF8F5] text-[#1C1B18]">
-      <main className="max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12">
-        {/* Breadcrumb Navigation */}
-        <nav className="flex items-center gap-2 text-xs font-mono text-[#78756E]">
-          <Link href="/" className="hover:text-[#B93829] transition-colors">
-            Trang chủ
-          </Link>
-          <span>/</span>
-          <Link href="/#trips" className="hover:text-[#B93829] transition-colors">
-            Hành trình
-          </Link>
-          <span>/</span>
-          <span className="text-[#1C1B18] font-semibold truncate max-w-xs">
+    <main className="w-full">
+      {/* Breadcrumb Navigation */}
+      <nav aria-label="Vị trí trang" className="frame pt-2 pb-4 text-small">
+        <ol className="flex flex-wrap items-center gap-x-2 gap-y-1 text-muted">
+          <li>
+            <Link href="/" className="text-link">
+              Trang chủ
+            </Link>
+          </li>
+          <li aria-hidden="true">/</li>
+          <li>
+            <Link href="/trips" className="text-link">
+              Hành trình
+            </Link>
+          </li>
+          <li aria-hidden="true">/</li>
+          <li aria-current="page" className="text-ink font-semibold truncate max-w-[60vw]">
             {trip.title}
-          </span>
-        </nav>
+          </li>
+        </ol>
+      </nav>
 
-        {/* Trip Hero Header with integrated Edit Modal */}
-        <TripHeroHeader
-          initialTrip={trip}
-          eventsCount={events.length}
-          totalPhotos={totalPhotos}
-        />
+      {/* Trip Hero Header with integrated Edit Modal */}
+      <TripHeroHeader
+        initialTrip={trip}
+        eventsCount={events.length}
+        totalPhotos={totalPhotos}
+        events={events}
+      />
 
-        {/* Detailed Timeline View */}
-        <ItinerarySinglePageView
-          events={events}
-          tripId={trip.id}
-          tripTitle={trip.title}
-          trip={trip}
-        />
-      </main>
-    </div>
+      {/* Detailed Timeline View */}
+      <ItinerarySinglePageView
+        events={events}
+        tripId={trip.id}
+        tripTitle={trip.title}
+        trip={trip}
+      />
+    </main>
   );
 }

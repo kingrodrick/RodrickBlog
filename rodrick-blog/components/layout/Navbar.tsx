@@ -6,6 +6,14 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/components/auth/AuthContext';
 import { LoginModal } from '@/components/auth/LoginModal';
 
+const NAV_LINKS = [
+  { href: '/', label: 'Trang chủ' },
+  { href: '/trips', label: 'Hành trình' },
+  { href: '/#gallery', label: 'Bộ sưu tập' },
+  // Tạm ẩn cùng phần "Về tôi" ở footer (SHOW_ABOUT trong Footer.tsx)
+  // { href: '/#footer', label: 'Về tôi' },
+];
+
 export function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
@@ -13,9 +21,10 @@ export function Navbar() {
   const isHome = pathname === '/';
   const { user, isLoggedIn, logout, setIsLoginModalOpen } = useAuth();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
-  // Close UserMenu on outside click or ESC key
+  // Đóng menu tài khoản khi bấm ra ngoài hoặc nhấn ESC
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -29,10 +38,11 @@ export function Navbar() {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
         setIsUserMenuOpen(false);
+        setIsMobileOpen(false);
       }
     }
 
-    if (isUserMenuOpen) {
+    if (isUserMenuOpen || isMobileOpen) {
       document.addEventListener('mousedown', handleClickOutside);
       document.addEventListener('keydown', handleKeyDown);
     }
@@ -40,172 +50,148 @@ export function Navbar() {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isUserMenuOpen]);
+  }, [isUserMenuOpen, isMobileOpen]);
+
+  const isActive = (href: string) =>
+    (href === '/' && isHome) || (href === '/trips' && isTripPage);
 
   return (
-    <header className="sticky top-0 z-40 bg-[#FAF8F5]/90 backdrop-blur-md border-b border-[#E6E2DA]">
-      <div className="max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-        {/* Logo & Context */}
-        <div className="flex items-center gap-3">
-          <Link href="/" className="flex flex-col group">
-            <div className="flex items-center gap-1">
-              <span className="font-serif text-xl font-bold tracking-tight text-[#1C1B18] group-hover:text-[#B93829] transition-colors">
-                RODRICK
-              </span>
-              <span className="w-1.5 h-1.5 rounded-full bg-[#B93829]" />
-            </div>
-            <span className="font-mono text-[9px] uppercase tracking-widest text-[#78756E] -mt-1">
-              Ký sự du lịch & nhiếp ảnh Sony A6400
+    <header className="sticky top-0 z-40 bg-pattern">
+      <div className="frame h-16 flex items-center justify-between gap-6">
+        {/* Logo: tên in hoa kèm chấm đỏ, dòng phụ nhỏ bên dưới */}
+        <Link href="/" className="group flex flex-col leading-none">
+          <span className="flex items-center gap-1">
+            <span className="text-xl font-bold tracking-tight transition-colors duration-200 group-hover:text-accent">
+              RODRICK
             </span>
-          </Link>
-        </div>
+            <span aria-hidden="true" className="w-1.5 h-1.5 rounded-full bg-accent" />
+          </span>
+          <span className="mt-1 text-[9px] uppercase tracking-widest text-muted">
+            Blog xàm xí của Rodrick
+          </span>
+        </Link>
 
-        {/* Menu Links */}
-        <nav className="hidden md:flex items-center gap-7 text-xs font-medium uppercase tracking-wider">
-          <Link
-            href="/"
-            className={`py-1 transition-colors ${
-              isHome
-                ? 'text-[#1C1B18] font-semibold border-b-2 border-[#B93829]'
-                : 'text-[#57544E] hover:text-[#B93829]'
-            }`}
-          >
-            Trang chủ
-          </Link>
-          <Link
-            href="/#trips"
-            className={`py-1 transition-colors ${
-              isTripPage
-                ? 'text-[#1C1B18] font-semibold border-b-2 border-[#B93829]'
-                : 'text-[#57544E] hover:text-[#B93829]'
-            }`}
-          >
-            Hành trình
-          </Link>
-          <Link
-            href="/#gallery"
-            className="text-[#57544E] hover:text-[#B93829] py-1 transition-colors"
-          >
-            Bộ sưu tập
-          </Link>
-          <Link
-            href="/#footer"
-            className="text-[#57544E] hover:text-[#B93829] py-1 transition-colors"
-          >
-            Về tôi
-          </Link>
+        <nav aria-label="Điều hướng chính" className="hidden md:flex items-center gap-8 text-small">
+          {NAV_LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              aria-current={isActive(link.href) ? 'page' : undefined}
+              className={`py-2 transition-colors duration-200 hover:text-accent ${
+                isActive(link.href) ? 'text-accent font-semibold' : 'text-ink'
+              }`}
+            >
+              {link.label}
+            </Link>
+          ))}
         </nav>
 
-        {/* Actions Right */}
-        <div className="flex items-center gap-2.5">
-          <Link
-            href="/#gallery"
-            className="hidden sm:inline-flex items-center gap-1.5 bg-[#F2EFE9] border border-[#E2DDD5] rounded-full px-3 py-1.5 text-xs text-[#57544E] hover:border-[#1C1B18] transition-colors font-mono"
-          >
-            <span>📷</span>
-            <span>SONY A6400</span>
-          </Link>
-
-          {isTripPage ? (
-            <Link
-              href="/#trips"
-              className="bg-[#1C1B18] hover:bg-[#B93829] text-white text-xs font-medium px-4 py-2 rounded-md transition-colors font-mono uppercase tracking-wider flex items-center gap-1.5"
-            >
-              <span>←</span>
-              <span>CÁC CHUYẾN ĐI</span>
-            </Link>
-          ) : (
-            <Link
-              href="/#trips"
-              className="bg-[#1C1B18] hover:bg-[#33312B] text-white text-xs font-medium px-4 py-2 rounded-md transition-colors font-mono uppercase tracking-wider"
-            >
-              CÁC CHUYẾN ĐI
-            </Link>
-          )}
-
-          {/* User Auth: Login Button or Avatar if logged in */}
+        <div className="flex items-center gap-3">
           {!isLoggedIn ? (
             <button
               type="button"
               onClick={() => setIsLoginModalOpen(true)}
-              title="Đăng nhập tài khoản quản trị"
-              className="bg-[#B93829] hover:bg-[#1C1B18] text-white text-xs font-mono uppercase tracking-wider font-semibold px-3.5 py-2 rounded-md transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+              className="btn btn-ink min-h-10 py-2"
             >
-              <span>ĐĂNG NHẬP</span>
+              Đăng nhập
             </button>
           ) : (
             <div className="relative" ref={userMenuRef}>
               <button
                 type="button"
                 onClick={() => setIsUserMenuOpen((prev) => !prev)}
-                className="relative flex items-center focus:outline-hidden cursor-pointer group"
-                title={`Tài khoản: ${user?.name}`}
+                className="flex items-center gap-2 cursor-pointer text-small transition-colors duration-200 hover:text-accent"
                 aria-expanded={isUserMenuOpen}
                 aria-haspopup="true"
               >
-                <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-[#B93829] shadow-xs group-hover:scale-105 transition-transform bg-[#F3F0EA]">
-                  <img
-                    src={user?.avatar}
-                    alt={user?.name || 'User'}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white" />
+                <img
+                  src={user?.avatar}
+                  alt=""
+                  className="w-8 h-8 object-cover bg-surface"
+                />
+                <span className="hidden sm:inline font-semibold">{user?.name}</span>
               </button>
 
-              {/* Dropdown Menu */}
               {isUserMenuOpen && (
-                <div className="absolute right-0 mt-2.5 w-64 bg-white border border-[#E6E2DA] rounded-2xl shadow-xl p-3.5 z-50 space-y-3 animate-in fade-in zoom-in-95 duration-150">
-                  <div className="flex items-center gap-3 border-b border-[#F0ECE4] pb-3">
-                      <img
-                        src={user?.avatar}
-                        alt={user?.name}
-                        className="w-10 h-10 rounded-full object-cover border border-[#E6E2DA]"
-                      />
-                      <div className="min-w-0 flex-1">
-                        <h4 className="font-serif text-sm font-bold text-[#1C1B18] truncate leading-tight">
-                          {user?.name}
-                        </h4>
-                        <p className="font-mono text-[10px] text-[#78756E] truncate mt-0.5">
-                          @{user?.username}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="text-[11px] font-mono text-[#57544E] space-y-1.5 bg-[#FAF8F5] p-2.5 rounded-xl border border-[#EFECE4]">
-                      <div className="flex items-center justify-between">
-                        <span>Vai trò:</span>
-                        <span className="font-semibold text-[#B93829]">Tác giả / Admin</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span>Quyền hạn:</span>
-                        <span className="text-emerald-700 font-semibold">Chỉnh sửa kế hoạch</span>
-                      </div>
-                    </div>
-
-                    <div className="pt-1">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setIsUserMenuOpen(false);
-                          logout();
-                          if (pathname.startsWith('/editor') || pathname.startsWith('/admin')) {
-                            router.replace('/');
-                          }
-                        }}
-                        className="w-full text-left px-3 py-2 rounded-xl text-xs font-mono text-rose-700 bg-rose-50 hover:bg-rose-200 transition-colors flex items-center justify-center cursor-pointer font-semibold"
-                      >
-                        <span>Đăng xuất</span>
-                      </button>
+                <div className="menu-float absolute right-0 mt-3 w-72 bg-paper p-5 z-50 space-y-4">
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={user?.avatar}
+                      alt={user?.name}
+                      className="w-11 h-11 object-cover bg-surface"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold truncate leading-tight">{user?.name}</p>
+                      <p className="text-small text-muted truncate">@{user?.username}</p>
                     </div>
                   </div>
-                )}
-              </div>
-            )}
+
+                  <dl className="text-small bg-ground p-3 space-y-1.5">
+                    <div className="flex items-center justify-between gap-3">
+                      <dt className="text-muted">Vai trò</dt>
+                      <dd className="font-semibold">Tác giả, admin</dd>
+                    </div>
+                    <div className="flex items-center justify-between gap-3">
+                      <dt className="text-muted">Quyền hạn</dt>
+                      <dd className="font-semibold">Chỉnh sửa kế hoạch</dd>
+                    </div>
+                  </dl>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsUserMenuOpen(false);
+                      logout();
+                      if (pathname.startsWith('/editor') || pathname.startsWith('/admin')) {
+                        router.replace('/');
+                      }
+                    }}
+                    className="btn w-full"
+                  >
+                    Đăng xuất
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={() => setIsMobileOpen((prev) => !prev)}
+            aria-expanded={isMobileOpen}
+            aria-controls="mobile-nav"
+            className="md:hidden min-h-10 px-3 text-small font-semibold bg-surface cursor-pointer transition-colors duration-200 hover:bg-ink hover:text-paper"
+          >
+            {isMobileOpen ? 'Đóng' : 'Menu'}
+          </button>
         </div>
       </div>
 
-      {/* Login Modal */}
+      {isMobileOpen && (
+        <nav
+          id="mobile-nav"
+          aria-label="Điều hướng chính"
+          className="md:hidden frame pb-8 pt-2 bg-pattern"
+        >
+          <ul className="space-y-1">
+            {NAV_LINKS.map((link) => (
+              <li key={link.href}>
+                <Link
+                  href={link.href}
+                  onClick={() => setIsMobileOpen(false)}
+                  aria-current={isActive(link.href) ? 'page' : undefined}
+                  className={`block py-2 text-head leading-none transition-colors duration-200 hover:text-accent ${
+                    isActive(link.href) ? 'text-accent' : ''
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
+
       <LoginModal />
     </header>
   );

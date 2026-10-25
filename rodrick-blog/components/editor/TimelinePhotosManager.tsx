@@ -7,6 +7,7 @@ import {
   buildCloudinaryTimelineFolder,
   slugifyFolderName,
 } from '@/lib/cloudinary';
+import { PhotoFrame } from '@/components/ui/PhotoFrame';
 
 export interface TimelineImageItem {
   id: string;
@@ -403,8 +404,12 @@ export function TimelinePhotosManager({
   const totalCount = images.filter((img) => img.url.trim()).length;
   const selectedCardIndex = images.findIndex((img) => img.id === selectedCardId);
 
+  // Ô nhập cùng kiểu với hộp sửa mốc, nhưng nền giấy vì thẻ ảnh đã là nền đá
+  const fieldClass =
+    'w-full bg-paper border border-transparent px-3 py-2 text-small text-ink outline-none transition-colors duration-200 placeholder:text-muted/60 hover:border-surface focus:border-ink focus:bg-paper';
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Hidden inputs */}
       <input
         ref={multiFileInputRef}
@@ -422,69 +427,77 @@ export function TimelinePhotosManager({
         className="hidden"
       />
 
-      {/* COMPACT & ELEGANT PHOTO TOOLBAR */}
-      <div className="bg-[#FAF8F5] border border-[#E6E2DA] rounded-2xl p-3.5 sm:p-4 shadow-2xs">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <h4 className="font-serif text-base font-bold text-[#1C1B18]">
-              Ảnh ({totalCount})
-            </h4>
-            {realCount > 0 && (
-              <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-mono font-semibold">
-                📷 {realCount} A6400
-              </span>
-            )}
-            {refCount > 0 && (
-              <span className="px-2 py-0.5 rounded-full bg-sky-50 text-sky-800 border border-sky-200 text-[10px] font-mono font-semibold">
-                🌐 {refCount} Tham khảo
-              </span>
-            )}
-          </div>
-
-          {/* Add Photo Buttons */}
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => handleAddEmptyImage(false)}
-              disabled={isProcessingFiles}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-700 hover:bg-sky-800 text-white font-mono text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-95 disabled:opacity-50"
-            >
-              <span>🌐</span>
-              <span>+ Ảnh tham khảo</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleAddEmptyImage(true)}
-              disabled={isProcessingFiles}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-mono text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-95 disabled:opacity-50"
-            >
-              <span>📷</span>
-              <span>+ Ảnh thực tế</span>
-            </button>
-          </div>
+      {/* Thanh công cụ: đếm ảnh theo loại, thêm ảnh */}
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="text-lead leading-none tabular">{totalCount} ảnh</p>
+          <p className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-small text-muted tabular">
+            <span className="inline-flex items-center gap-2">
+              <span aria-hidden="true" className="w-2.5 h-2.5 bg-accent" />
+              {realCount} thực tế
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <span aria-hidden="true" className="w-2.5 h-2.5 bg-(--note-ref-tag)" />
+              {refCount} tham khảo
+            </span>
+          </p>
         </div>
 
-        {/* Upload Status / Cloudinary Indicator */}
-        {isProcessingFiles && (
-          <div className="mt-3 flex items-center gap-2 text-xs font-mono text-[#B93829] bg-rose-50 border border-rose-200 px-3 py-2 rounded-xl animate-in fade-in duration-150">
-            <div className="w-4 h-4 border-2 border-[#B93829] border-t-transparent rounded-full animate-spin shrink-0" />
-            <span className="font-semibold">{uploadStatus || 'Đang tải ảnh...'}</span>
-          </div>
-        )}
-
-        {/* Cloudinary Configuration Warning Banner (Rút gọn) */}
-        {cloudinaryError && !isProcessingFiles && (
-          <div className="mt-3 px-3 py-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-mono flex items-center justify-between gap-2">
-            <span>⚠️ {cloudinaryError} (Ảnh lưu tạm Base64)</span>
-          </div>
-        )}
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => multiFileInputRef.current?.click()}
+            disabled={isProcessingFiles}
+            className="min-h-10 px-4 text-small font-semibold bg-ground hover:bg-surface cursor-pointer transition-colors duration-200 disabled:opacity-50"
+          >
+            Tải nhiều ảnh
+          </button>
+          <button
+            type="button"
+            onClick={() => handleAddEmptyImage(false)}
+            disabled={isProcessingFiles}
+            className="min-h-10 px-4 text-small font-semibold bg-(--note-ref-tag) text-ink hover:brightness-95 cursor-pointer transition-[filter] duration-200 disabled:opacity-50"
+          >
+            + Ảnh tham khảo
+          </button>
+          <button
+            type="button"
+            onClick={() => handleAddEmptyImage(true)}
+            disabled={isProcessingFiles}
+            className="min-h-10 px-4 text-small font-semibold bg-accent text-accent-ink hover:bg-accent-deep cursor-pointer transition-colors duration-200 disabled:opacity-50"
+          >
+            + Ảnh thực tế
+          </button>
+        </div>
       </div>
 
-      {/* List of Photo Cards */}
-      <div className="space-y-3">
+      <p className="text-small text-muted">
+        Chọn một ô ảnh rồi bấm Ctrl + V để dán ảnh từ clipboard, hoặc kéo thả file vào ô trống.
+        {selectedCardIndex >= 0 && <> Đang chọn: <span className="text-ink font-semibold">Ảnh {selectedCardIndex + 1}</span>.</>}
+      </p>
+
+      {/* Trạng thái tải lên và lỗi Cloudinary */}
+      {isProcessingFiles && (
+        <div className="flex items-center gap-3 px-4 py-3 bg-ink text-paper text-small" aria-live="polite">
+          <span aria-hidden="true" className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin shrink-0" />
+          {uploadStatus || 'Đang tải ảnh...'}
+        </div>
+      )}
+      {cloudinaryError && !isProcessingFiles && (
+        <div className="px-4 py-3 bg-(--note-ref) text-small">
+          {cloudinaryError}. Ảnh đang được lưu tạm dạng Base64.
+        </div>
+      )}
+
+      {/* Danh sách ảnh */}
+      <div className="space-y-4">
         {images.map((img, index) => {
           const isSelected = selectedCardId === img.id;
           const isJustPasted = justPastedId === img.id;
+          const kind = img.isRealPhoto ? 'real' : 'ref';
+          const wrongFolder =
+            img.url.includes('cloudinary.com') &&
+            ((!img.isRealPhoto && img.url.includes('/ThucTe/')) || (img.isRealPhoto && img.url.includes('/ThamKhao/')));
 
           return (
             <div
@@ -495,260 +508,167 @@ export function TimelinePhotosManager({
                 setSelectedCardId(img.id);
                 handleCardPaste(img.id, e);
               }}
-              className={`rounded-2xl transition-all cursor-pointer relative overflow-hidden ${
-                isSelected
-                  ? 'bg-white border-2 border-[#B93829] shadow-sm'
-                  : 'bg-white/90 border border-[#E6E2DA] hover:border-[#D0C9BD] hover:bg-white shadow-2xs'
+              className={`grid gap-5 sm:grid-cols-[13rem_minmax(0,1fr)] p-4 sm:p-5 cursor-pointer transition-colors duration-200 ${
+                isSelected ? 'bg-ground outline-2 outline-accent -outline-offset-2' : 'bg-ground/50 hover:bg-ground'
               }`}
             >
-              {/* CARD CONTENT */}
-              <div className="p-3.5 sm:p-4 space-y-3">
-                {/* Top row: Index Badge, Source Type Toggle, Delete */}
-                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#F0ECE4] pb-2.5">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span
-                      className={`font-mono text-xs px-2.5 py-0.5 rounded-lg border font-semibold ${
-                        isSelected
-                          ? 'bg-[#B93829] text-white border-[#B93829]'
-                          : 'bg-[#FAF8F5] text-stone-600 border-[#E6E2DA]'
-                      }`}
-                    >
-                      {isSelected ? `✓ Ảnh #${index + 1}` : `Ảnh #${index + 1}`}
-                    </span>
-
-                    {/* Source Type Toggle */}
-                    <div
-                      onClick={(e) => e.stopPropagation()}
-                      className="flex items-center gap-1 bg-[#FAF8F5] p-0.5 rounded-lg border border-[#E6E2DA]"
-                    >
+              {/* Ảnh: khung đúng loại như trên trang, hoặc ô trống để chọn/dán/thả */}
+              <div className="space-y-2">
+                {img.url ? (
+                  <PhotoFrame kind={kind} small>
+                    <span className="relative block group">
+                      <img src={img.url} alt={img.caption || 'Ảnh lịch trình'} className="block w-full aspect-4/3 object-cover bg-surface" />
                       <button
                         type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedCardId(img.id);
+                          handleTriggerReplaceSinglePhoto(img.id);
+                        }}
+                        className="absolute inset-0 flex items-center justify-center bg-ink/50 text-paper text-small font-semibold opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity duration-200 cursor-pointer"
+                      >
+                        Đổi ảnh
+                      </button>
+                    </span>
+                  </PhotoFrame>
+                ) : (
+                  <div
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedCardId(img.id);
+                      handleTriggerReplaceSinglePhoto(img.id);
+                    }}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      setSelectedCardId(img.id);
+                      if (e.dataTransfer.files?.[0]) {
+                        uploadSingleFileForCard(img.id, e.dataTransfer.files[0]);
+                      }
+                    }}
+                    tabIndex={0}
+                    title="Bấm để chọn file hoặc Ctrl + V để dán"
+                    className={`aspect-4/3 flex flex-col items-center justify-center gap-1 p-3 text-center border-2 border-dashed cursor-pointer select-none outline-none transition-colors duration-200 ${
+                      isSelected ? 'border-accent bg-paper' : 'border-surface hover:border-muted bg-paper/60'
+                    }`}
+                  >
+                    <span className="text-lead leading-none text-muted">+</span>
+                    <span className={`text-small font-semibold ${isSelected ? 'text-accent' : ''}`}>
+                      {isSelected ? 'Ctrl + V để dán' : 'Chọn ảnh'}
+                    </span>
+                    <span className="text-small text-muted">hoặc kéo thả vào đây</span>
+                  </div>
+                )}
+
+                {/* Trạng thái lưu trữ: thư mục Cloudinary, Base64, vừa dán */}
+                <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-small text-muted">
+                  {img.url.includes('cloudinary.com') && (
+                    <span>Cloudinary · {img.url.includes('/ThamKhao/') ? 'ThamKhao' : 'ThucTe'}</span>
+                  )}
+                  {img.url.startsWith('data:image/') && <span className="text-accent">Base64 tạm, chưa lên Cloudinary</span>}
+                  {isJustPasted && <span className="text-ink font-semibold">Đã dán ảnh</span>}
+                </p>
+                {wrongFolder && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleTogglePhotoType(img.id, img.isRealPhoto);
+                    }}
+                    className="text-small font-semibold text-accent underline underline-offset-4 cursor-pointer"
+                    title="Chuyển ảnh sang đúng thư mục trên Cloudinary"
+                  >
+                    Sai thư mục, chuyển ngay
+                  </button>
+                )}
+              </div>
+
+              {/* Thông tin ảnh */}
+              <div className="min-w-0 space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <span className="text-small font-semibold tabular">Ảnh {index + 1}</span>
+                    <div role="group" aria-label="Loại ảnh" onClick={(e) => e.stopPropagation()} className="flex">
+                      <button
+                        type="button"
+                        aria-pressed={img.isRealPhoto}
                         onClick={() => {
                           setSelectedCardId(img.id);
-                          handleTogglePhotoType(img.id, true);
+                          if (!img.isRealPhoto) handleTogglePhotoType(img.id, true);
                         }}
-                        className={`px-2 py-0.5 rounded-md text-[10px] font-mono transition-all cursor-pointer flex items-center gap-1 ${
-                          img.isRealPhoto
-                            ? 'bg-emerald-700 text-white font-bold shadow-xs'
-                            : 'text-stone-600 hover:text-stone-900'
+                        className={`min-h-9 px-3 text-small cursor-pointer transition-colors duration-200 ${
+                          img.isRealPhoto ? 'bg-accent text-accent-ink font-semibold' : 'bg-paper hover:bg-surface'
                         }`}
                       >
-                        <span>📷</span>
-                        <span>A6400</span>
+                        Thực tế
                       </button>
                       <button
                         type="button"
+                        aria-pressed={!img.isRealPhoto}
                         onClick={() => {
                           setSelectedCardId(img.id);
-                          handleTogglePhotoType(img.id, false);
+                          if (img.isRealPhoto) handleTogglePhotoType(img.id, false);
                         }}
-                        className={`px-2 py-0.5 rounded-md text-[10px] font-mono transition-all cursor-pointer flex items-center gap-1 ${
-                          !img.isRealPhoto
-                            ? 'bg-sky-700 text-white font-bold shadow-xs'
-                            : 'text-stone-600 hover:text-stone-900'
+                        className={`min-h-9 px-3 text-small cursor-pointer transition-colors duration-200 ${
+                          !img.isRealPhoto ? 'bg-(--note-ref-tag) text-ink font-semibold' : 'bg-paper hover:bg-surface'
                         }`}
                       >
-                        <span>🌐</span>
-                        <span>Tham khảo</span>
+                        Tham khảo
                       </button>
                     </div>
                   </div>
 
-
-                  {/* Delete button */}
                   <button
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleRemoveItem(img.id);
                     }}
-                    className="text-xs font-mono text-rose-600 hover:text-white hover:bg-rose-600 px-2.5 py-1 rounded-lg border border-rose-200 transition-all cursor-pointer flex items-center gap-1 shadow-2xs"
+                    className="text-small font-semibold text-muted hover:text-accent underline underline-offset-4 cursor-pointer"
                     title="Xóa bức ảnh này"
                   >
-                    <span>🗑️</span>
-                    <span>Xóa ảnh</span>
+                    Xóa ảnh
                   </button>
                 </div>
 
-                {/* Middle Row: Photo Preview & Edit details */}
-                <div className="flex flex-col sm:flex-row gap-4 items-start">
-                  {/* Left Thumbnail & Actions */}
-                  <div className="w-full sm:w-44 shrink-0 space-y-2">
-                    {img.url ? (
-                      <div
-                        className={`relative h-32 w-full rounded-xl overflow-hidden border bg-[#FAF8F5] group transition-all ${
-                          isSelected
-                            ? 'border-[#B93829] ring-2 ring-[#B93829]/30 shadow-xs'
-                            : 'border-[#E6E2DA]'
-                        }`}
-                      >
-                        <img
-                          src={img.url}
-                          alt={img.caption || 'Ảnh lịch trình'}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                        {img.url.includes('cloudinary.com') && (
-                          <div className="absolute top-1.5 left-1.5 flex flex-col gap-1 z-10">
-                            <span
-                              className={`px-2 py-0.5 rounded-md text-[9px] font-mono font-semibold backdrop-blur-xs flex items-center gap-1 pointer-events-none ${
-                                img.url.includes('/ThamKhao/')
-                                  ? 'bg-sky-950/85 text-sky-200 border border-sky-400/40'
-                                  : 'bg-emerald-950/85 text-emerald-200 border border-emerald-400/40'
-                              }`}
-                            >
-                              <span>☁️</span>
-                              <span>{img.url.includes('/ThamKhao/') ? '📁 ThamKhao' : '📁 ThucTe'}</span>
-                            </span>
+                <label className="block space-y-1.5">
+                  <span className="block text-small font-semibold">Chú thích</span>
+                  <input
+                    type="text"
+                    value={img.caption}
+                    onFocus={() => setSelectedCardId(img.id)}
+                    onChange={(e) => handleUpdateItem(img.id, { caption: e.target.value })}
+                    placeholder="VD: Cổng Torii trong làn sương sớm"
+                    className={fieldClass}
+                  />
+                </label>
 
-                            {/* Cảnh báo nếu thư mục trên Cloudinary khác với loại ảnh người dùng chọn */}
-                            {((!img.isRealPhoto && img.url.includes('/ThucTe/')) ||
-                              (img.isRealPhoto && img.url.includes('/ThamKhao/'))) && (
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleTogglePhotoType(img.id, img.isRealPhoto);
-                                }}
-                                className="px-2 py-0.5 rounded-md bg-rose-900/90 hover:bg-rose-800 text-white border border-rose-400 text-[9px] font-mono font-bold shadow-xs cursor-pointer pointer-events-auto flex items-center gap-1"
-                                title="Bấm để đồng bộ ảnh sang đúng thư mục trên Cloudinary"
-                              >
-                                <span>⚠️ Sai thư mục</span>
-                                <span>↻ Chuyển ngay</span>
-                              </button>
-                            )}
-                          </div>
-                        )}
-                        {img.url.startsWith('data:image/') && (
-                          <span className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-md bg-amber-950/85 text-amber-200 border border-amber-400/40 text-[9px] font-mono font-semibold backdrop-blur-xs flex items-center gap-1 z-10 pointer-events-none" title="Ảnh đang là Base64 tạm thời, chưa lưu link Cloudinary">
-                            ⚠️ Base64
-                          </span>
-                        )}
-
-                        {/* Hover Overlay */}
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedCardId(img.id);
-                              handleTriggerReplaceSinglePhoto(img.id);
-                            }}
-                            className="bg-white text-[#1C1B18] font-mono text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-md cursor-pointer hover:bg-rose-50 hover:text-[#B93829]"
-                          >
-                            ✏️ Đổi ảnh
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedCardId(img.id);
-                          handleTriggerReplaceSinglePhoto(img.id);
-                        }}
-                        onPaste={(e) => {
-                          setSelectedCardId(img.id);
-                          handleCardPaste(img.id, e);
-                        }}
-                        onDragOver={(e) => e.preventDefault()}
-                        onDrop={(e) => {
-                          e.preventDefault();
-                          setSelectedCardId(img.id);
-                          if (e.dataTransfer.files?.[0]) {
-                            uploadSingleFileForCard(img.id, e.dataTransfer.files[0]);
-                          }
-                        }}
-                        tabIndex={0}
-                        className={`h-32 w-full rounded-xl border-2 border-dashed flex flex-col items-center justify-center text-center p-2.5 cursor-pointer transition-all outline-hidden group select-none ${
-                          isSelected
-                            ? 'border-[#B93829] bg-rose-50/50 shadow-inner'
-                            : 'border-stone-300 hover:border-[#B93829] bg-[#FAF8F5]/80'
-                        }`}
-                        title="Bấm để chọn file hoặc Ctrl + V để dán"
-                      >
-                        <span className="text-xl group-hover:scale-110 transition-transform">
-                          {img.isRealPhoto ? '📷' : '🌐'}
-                        </span>
-                        <span
-                          className={`text-xs font-mono font-bold mt-1.5 ${
-                            isSelected ? 'text-[#B93829]' : 'text-stone-700'
-                          }`}
-                        >
-                          {isSelected ? 'Ctrl + V để dán' : 'Chọn ảnh'}
-                        </span>
-                      </div>
-                    )}
-
-                    {/* If photo is already uploaded, show change photo button */}
-                    {img.url && (
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedCardId(img.id);
-                          handleTriggerReplaceSinglePhoto(img.id);
-                        }}
-                        className="w-full py-1 px-2 rounded-lg bg-[#FAF8F5] hover:bg-[#1C1B18] hover:text-white text-stone-700 border border-[#E6E2DA] transition-colors text-center cursor-pointer text-[10px] font-mono font-medium"
-                      >
-                        Đổi ảnh từ máy
-                      </button>
-                    )}
-                  </div>
-
-                  {/* Right Form Inputs */}
-                  <div className="flex-1 w-full space-y-2.5">
-                    {/* Caption Input */}
-                    <div className="space-y-1">
-                      <label className="block text-[10px] font-mono uppercase tracking-wider text-[#78756E] font-semibold">
-                        Chú thích ảnh (Caption)
-                      </label>
+                {img.isRealPhoto && (
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <label className="block space-y-1.5">
+                      <span className="block text-small font-semibold">Máy ảnh và ống kính</span>
                       <input
                         type="text"
-                        value={img.caption}
+                        value={img.cameraGear}
                         onFocus={() => setSelectedCardId(img.id)}
-                        onChange={(e) => handleUpdateItem(img.id, { caption: e.target.value })}
-                        placeholder="VD: Cổng Torii trong làn sương sớm ban mai..."
-                        className="w-full bg-[#FAF8F5] focus:bg-white border border-[#E6E2DA] focus:border-[#B93829] rounded-xl px-3 py-2 text-xs font-sans text-[#1C1B18] outline-hidden shadow-2xs"
+                        onChange={(e) => handleUpdateItem(img.id, { cameraGear: e.target.value })}
+                        placeholder="Sony A6400 • 18-135mm"
+                        className={fieldClass}
                       />
-                    </div>
-
-                    {/* Camera Gear & EXIF inputs */}
-                    {img.isRealPhoto && (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-0.5">
-                        <div className="space-y-1">
-                          <label className="block text-[10px] font-mono uppercase tracking-wider text-[#78756E] font-semibold">
-                            Thiết bị & Lens
-                          </label>
-                          <input
-                            type="text"
-                            value={img.cameraGear}
-                            onFocus={() => setSelectedCardId(img.id)}
-                            onChange={(e) =>
-                              handleUpdateItem(img.id, { cameraGear: e.target.value })
-                            }
-                            placeholder="Sony A6400 • 18-135mm"
-                            className="w-full bg-[#FAF8F5] focus:bg-white border border-[#E6E2DA] focus:border-[#B93829] rounded-xl px-3 py-1.5 text-xs font-mono text-[#1C1B18] outline-hidden"
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <label className="block text-[10px] font-mono uppercase tracking-wider text-[#78756E] font-semibold">
-                            Thông số EXIF
-                          </label>
-                          <input
-                            type="text"
-                            value={img.exifInfo}
-                            onFocus={() => setSelectedCardId(img.id)}
-                            onChange={(e) =>
-                              handleUpdateItem(img.id, { exifInfo: e.target.value })
-                            }
-                            placeholder="35mm • f/4.0 • 1/250s • ISO 100"
-                            className="w-full bg-[#FAF8F5] focus:bg-white border border-[#E6E2DA] focus:border-[#B93829] rounded-xl px-3 py-1.5 text-xs font-mono text-[#1C1B18] outline-hidden"
-                          />
-                        </div>
-                      </div>
-                    )}
+                    </label>
+                    <label className="block space-y-1.5">
+                      <span className="block text-small font-semibold">Thông số EXIF</span>
+                      <input
+                        type="text"
+                        value={img.exifInfo}
+                        onFocus={() => setSelectedCardId(img.id)}
+                        onChange={(e) => handleUpdateItem(img.id, { exifInfo: e.target.value })}
+                        placeholder="35mm • f/4.0 • 1/250s • ISO 100"
+                        className={`${fieldClass} tabular`}
+                      />
+                    </label>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           );

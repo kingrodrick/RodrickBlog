@@ -31,6 +31,23 @@ Xây dựng một **Blog Cá Nhân chuyên về Lịch Trình Du Lịch & Bộ S
   - **Body (`--font-sans`)**: Sử dụng **`Inter`** (`weight: ['400', '500', '600', '700']`)[cite: 7], thẻ `<body>` áp dụng mặc định class `font-sans font-medium` để nét chữ đanh và dày dặn.
   - **Favicon (`app/icon.svg`)**: Biểu tượng nền vuông bo góc `#1A1A1A` với chữ **R** siêu đậm màu `#B61C25`[cite: 7, 8].
 
+### 1.3. Quy Chuẩn Thẩm Mỹ & Ràng Buộc Taste Skill (`design-taste-frontend`)
+
+Mọi tác vụ tạo mới hoặc chỉnh sửa giao diện trong `app/` và `components/` **BẮT BUỘC** phải đọc và tuân thủ file `.claude/skills/design-taste-frontend/SKILL.md` (kết hợp `.agents/skills/design-taste-frontend/SKILL.md`), với các quy tắc khóa cứng (Overrides) dành riêng cho `rodrick-blog` như sau:
+
+1. **Thứ tự ưu tiên (Source of Truth Precedence):**
+   - **Font chữ & Bảng màu:** Tuân thủ tuyệt đối Mục 1.2 của `AGENT.md` (`Plus Jakarta Sans` cho Heading/Mono, `Inter` cho Body; nền `#FAF8F5`, chữ `#1A1A1A`, màu nhấn `#B61C25`). Quy tắc cấm font Serif của `AGENT.md` được ưu tiên cao hơn gợi ý font mặc định trong `SKILL.md`.
+   - **Bố cục (Layout), Chuyển động (Motion) & Chống giao diện rập khuôn (Anti-Slop):** Tuân thủ tuyệt đối Section 4 (The 3 Locks), Section 9 (Anti-Slop Bans) và Section 14 (Pre-Flight Check) của `SKILL.md`.
+2. **The 3 Locks (Khóa đồng nhất toàn trang):**
+   - **Color Lock:** Chỉ sử dụng `#B61C25` (Primary Vermilion) làm màu nhấn hành động chính và `#C59F60` (Gold) cho chi tiết phụ tinh tế. Không tự ý thêm các badge màu xanh lục/xanh dương rực rỡ gây phá vỡ tông màu giấy cổ điển (`#FAF8F5`).
+   - **Shape Lock:** Thống nhất một hệ bo góc duy nhất trên toàn bộ thẻ lịch trình và khung ảnh.
+   - **Theme Lock:** Cố định tông màu sáng ấm (`#FAF8F5` / `#F3F0EA`), không lật sang nền tối giữa chừng (trừ popup `ImageLightboxModal` xem ảnh toàn màn hình).
+3. **Quy tắc Anti-Slop bắt buộc (Section 9 trong `SKILL.md`):**
+   - **Cấm tuyệt đối dấu gạch ngang dài** (Em-dash `—` và En-dash `–`) trong toàn bộ giao diện và dữ liệu text; chỉ sử dụng dấu gạch ngang ngắn (`-`) hoặc dấu chấm tròn (`•`).
+   - **Không đè thẻ Pill/Tag lên trên bề mặt ảnh (`PhotoCard`):** Thông tin EXIF chi tiết và địa điểm đặt ở phần caption/metadata ngay bên dưới bức ảnh.
+   - **Ngoại lệ duy nhất - Giấy nhớ phân loại ảnh (`components/ui/PhotoFrame.tsx`):** Trong trang lịch trình, ảnh được đóng khung (`.photo-frame`) và dán một tờ giấy nhớ (`.sticky-tag`) lệch ở mép trên: ảnh thực tế là bản in giấy trắng + giấy nhớ đỏ `#B61C25`; ảnh tham khảo là mẩu cắt giấy ngả vàng nét đứt + giấy nhớ vàng (rút từ `#C59F60`). Không thêm màu khác cho nhãn này.
+   - **Không chia 3 cột thẻ đều nhau đơn điệu:** Ưu tiên lưới bất đối xứng (asymmetric editorial grid) hoặc bố cục tạp chí 2 cột lệch nhịp cho trang Bộ sưu tập và Lịch trình.
+
 ---
 
 ## 2. Cấu Trúc Cơ Sở Dữ Liệu (Supabase PostgreSQL - 4 Bảng Quan Hệ)

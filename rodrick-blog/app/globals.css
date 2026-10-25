@@ -1,40 +1,418 @@
 @import "tailwindcss";
 
+/*
+ * Rodrick: hướng "split stage". Một nền, một mực, một màu nhấn (đỏ cổng torii).
+ * Góc vuông ở mọi nơi; bề mặt tách nhau bằng bước tông, không dùng viền hay bóng đổ.
+ */
 @theme inline {
-  /* Body dùng Inter */
-  --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  
-  /* Headline và Label cùng trỏ về Plus Jakarta Sans */
-  --font-serif: var(--font-plus-jakarta), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-mono: var(--font-plus-jakarta), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-sans: var(--font-archivo), "Helvetica Neue", Arial, sans-serif;
+  /* Các màn hình editor còn dùng font-serif / font-mono: trỏ về cùng một họ chữ */ /* taste-skill-ignore */
+  --font-serif: var(--font-archivo), "Helvetica Neue", Arial, sans-serif; /* taste-skill-ignore: không phải monospace */
+  --font-mono: var(--font-archivo), "Helvetica Neue", Arial, sans-serif; /* taste-skill-ignore: không phải monospace */
 
-  --color-primary: #B61C25;
+  --color-ground: var(--ground);
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-deep: var(--accent-deep);
+  --color-accent-ink: var(--accent-ink);
+  --color-night: var(--night);
+  --color-night-ink: var(--night-ink);
+
+  /* Token cũ, giữ để các màn hình editor không đổi màu */
+  --color-primary: var(--accent);
   --color-secondary: #2D3436;
   --color-tertiary: #C59F60;
-  --color-neutral: #1A1A1A;
+  --color-neutral: var(--ink);
+  --color-card: var(--surface);
 
-  --color-paper: #FAF8F5;
-  --color-card: #F3F0EA;
+  /* Năm cỡ chữ: nhỏ, thân, dẫn, tiêu đề, trưng bày */
+  --text-small: var(--step-small);
+  --text-body: var(--step-body);
+  --text-lead: var(--step-lead);
+  --text-head: var(--step-head);
+  --text-display: var(--step-display);
 }
 
 :root {
-  --background: #FAF8F5;
-  --foreground: #1A1A1A;
+  /* Nền trang sáng màu đá; giấy vé trắng tinh để tách rõ khỏi nền */
+  --ground: #e8e6e1;
+  --paper: #ffffff;
+  --surface: #d9d6cf;
+  --ink: #1f1b19;
+  --muted: #57514b;
+  --accent: #b61c25;
+  --accent-deep: #8f141c;
+  --accent-ink: #ffffff;
+  --night: #171412;
+  --night-ink: #f0efec;
+  /* Giấy ngả vàng cho ảnh tham khảo, rút từ màu vàng phụ #C59F60 */
+  --note-ref: #f4ead6;
+  --note-ref-line: #c59f60;
+  --note-ref-tag: #e9d3a3;
+
+  --step-small: clamp(0.8125rem, 0.79rem + 0.1vw, 0.875rem);
+  --step-body: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem);
+  --step-lead: clamp(1.25rem, 1.1rem + 0.7vw, 1.625rem);
+  --step-head: clamp(2rem, 1.3rem + 3.2vw, 4rem);
+  --step-display: clamp(2.75rem, 1rem + 6.4vw, 7rem);
+
+  /*
+   * Họa tiết chìm của nền: seigaiha (sóng biển), nét trắng mảnh trên màu nền.
+   * Mỗi đợt sóng là một đĩa màu nền với ba vòng trắng; vẽ theo thứ tự từ trên xuống để
+   * đợt sau che nửa dưới đợt trước, nên ô 40×20 lặp lại liền mạch.
+   */
+  --ground-pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 20' width='40' height='20'%3E%3Cdefs%3E%3Cg id='w' stroke='%23fff' stroke-width='1.3' stroke-opacity='0.85'%3E%3Ccircle r='19.4' fill='%23e8e6e1'/%3E%3Ccircle r='14' fill='none'/%3E%3Ccircle r='8.6' fill='none'/%3E%3Ccircle r='3.2' fill='none'/%3E%3C/g%3E%3C/defs%3E%3Cuse href='%23w' x='20' y='-10'/%3E%3Cuse href='%23w' x='0' y='0'/%3E%3Cuse href='%23w' x='40' y='0'/%3E%3Cuse href='%23w' x='20' y='10'/%3E%3Cuse href='%23w' x='0' y='20'/%3E%3Cuse href='%23w' x='40' y='20'/%3E%3Cuse href='%23w' x='20' y='30'/%3E%3C/svg%3E");
+  --ground-pattern-size: 28px 14px;
+
+  --gutter: 1.5rem;
+  --page-max: 100rem;
+  --bar-h: 4rem;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --gutter: 2rem;
+  }
 }
 
 html {
-  background-color: #FAF8F5;
-  color: #1A1A1A;
+  background-color: var(--ground);
+  color: var(--ink);
+  -webkit-text-size-adjust: 100%;
+}
+
+body,
+.bg-pattern {
+  background-color: var(--ground);
+  background-image: var(--ground-pattern);
+  background-size: var(--ground-pattern-size);
+  /* Cố định theo màn hình để thanh điều hướng và thân trang khớp họa tiết, không lộ đường nối */
+  background-attachment: fixed;
 }
 
 body {
-  background-color: #FAF8F5;
-  color: #1A1A1A;
-  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: var(--step-body);
+  line-height: 1.5;
 }
 
-h1, h2, h3, h4, h5, h6, .font-serif, .font-mono {
-  font-family: var(--font-plus-jakarta), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.02;
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/*
+ * Khung trang: một cặp lề ngoài dùng chung cho mọi section.
+ * Màn hình rộng (hoặc thu nhỏ trình duyệt) thì lề nở ra, nội dung không vượt quá --page-max;
+ * dùng padding thay vì max-width để nền tràn viền của section vẫn chạy hết bề ngang.
+ */
+.frame {
+  padding-inline: max(var(--gutter), calc((100% - var(--page-max, 100rem)) / 2));
+}
+
+/* Nút: phẳng, một màu, góc vuông */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  min-height: 3rem;
+  padding: 0.75rem 1.4rem;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: var(--step-small);
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: background-color 220ms ease, transform 160ms var(--ease-out);
+}
+.btn:hover {
+  background: var(--accent-deep);
+}
+.btn:active {
+  transform: scale(0.97);
+}
+.btn-ink {
+  background: var(--ink);
+  color: var(--paper);
+}
+.btn-ink:hover {
+  background: var(--accent);
+}
+
+/* Menu nổi (tài khoản): thứ duy nhất có bóng đổ */
+.menu-float {
+  box-shadow: 0 18px 40px -12px rgba(23, 20, 18, 0.35); /* taste-skill-ignore: menu nổi */
+}
+
+/* Liên kết chữ: gạch chân dịch chuyển khi trỏ chuột */
+.text-link {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.25em;
+  transition: color 200ms ease, text-underline-offset 200ms var(--ease-out);
+}
+.text-link:hover {
+  color: var(--accent);
+  text-underline-offset: 0.4em;
+}
+
+/*
+ * Tấm vé: phần chính và cuống vé, nối nhau ở đường xé.
+ * Mask chỉ cắt hình (khuyết bán nguyệt hai bên, mép đáy răng cưa), không tô màu.
+ */
+.ticket-main,
+.ticket-stub {
+  --notch: 14px;
+  --scallop: 8px;
+  --scallop-step: 24px;
+  background: var(--paper);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
+.ticket-main {
+  /* Mép trên răng cưa lượn tròn, và hai khuyết bán nguyệt ở hai góc dưới, ngay trên đường xé */
+  -webkit-mask-image: radial-gradient(circle var(--scallop) at 50% 0, #0000 98%, #000 100%), radial-gradient(circle var(--notch) at 0 100%, #0000 98%, #000 100%), radial-gradient(circle var(--notch) at 100% 100%, #0000 98%, #000 100%); /* taste-skill-ignore: mask cắt hình */
+  mask-image: radial-gradient(circle var(--scallop) at 50% 0, #0000 98%, #000 100%), radial-gradient(circle var(--notch) at 0 100%, #0000 98%, #000 100%), radial-gradient(circle var(--notch) at 100% 100%, #0000 98%, #000 100%); /* taste-skill-ignore: mask cắt hình */
+  -webkit-mask-size: var(--scallop-step) 100%, 100% 100%, 100% 100%;
+  mask-size: var(--scallop-step) 100%, 100% 100%, 100% 100%;
+  -webkit-mask-repeat: repeat-x, no-repeat, no-repeat;
+  mask-repeat: repeat-x, no-repeat, no-repeat;
+  -webkit-mask-position: 0 0, 0 0, 0 0;
+  mask-position: 0 0, 0 0, 0 0;
+}
+.ticket-stub {
+  position: relative;
+  /* Khuyết bán nguyệt ở hai góc trên, và mép đáy răng cưa lượn tròn */
+  -webkit-mask-image: radial-gradient(circle var(--notch) at 0 0, #0000 98%, #000 100%), radial-gradient(circle var(--notch) at 100% 0, #0000 98%, #000 100%), radial-gradient(circle var(--scallop) at 50% 100%, #0000 98%, #000 100%); /* taste-skill-ignore: mask cắt hình */
+  mask-image: radial-gradient(circle var(--notch) at 0 0, #0000 98%, #000 100%), radial-gradient(circle var(--notch) at 100% 0, #0000 98%, #000 100%), radial-gradient(circle var(--scallop) at 50% 100%, #0000 98%, #000 100%); /* taste-skill-ignore: mask cắt hình */
+  -webkit-mask-size: 100% 100%, 100% 100%, var(--scallop-step) 100%;
+  mask-size: 100% 100%, 100% 100%, var(--scallop-step) 100%;
+  -webkit-mask-repeat: no-repeat, no-repeat, repeat-x;
+  mask-repeat: no-repeat, no-repeat, repeat-x;
+  -webkit-mask-position: 0 0, 0 0, 0 0;
+  mask-position: 0 0, 0 0, 0 0;
+}
+/* Hàng lỗ đục dọc theo đường xé, nằm giữa hai khuyết */
+.ticket-perf {
+  position: absolute;
+  top: 0;
+  left: calc(var(--notch) + 10px);
+  right: calc(var(--notch) + 10px);
+  height: 6px;
+  transform: translateY(-50%);
+  display: flex;
+  justify-content: space-between;
+  overflow: hidden;
+  contain: inline-size;
+}
+.ticket-perf > span {
+  flex: 0 0 6px;
+  height: 6px;
+  border-radius: 50%;
+  /* Lỗ đục thấu qua họa tiết nền (cùng mốc cố định nên khớp với phần nền phía sau) */
+  background: var(--ground) var(--ground-pattern) 0 0 / var(--ground-pattern-size) fixed;
+}
+@media (max-width: 639px) {
+  .ticket-perf > span:nth-child(n + 15) {
+    display: none;
+  }
+}
+
+/*
+ * Khung ảnh. Ảnh thực tế: bản in trên giấy trắng, mép đáy dày như ảnh rửa.
+ * Ảnh tham khảo: mẩu cắt báo trên giấy ngả vàng, đường cắt nét đứt quanh ảnh.
+ * Đặt trong layer components để utility của Tailwind (absolute, flex-1...) luôn thắng.
+ */
+@layer components {
+.photo-frame {
+  --mat: 10px;
+  display: flex;
+  flex-direction: column;
+  padding: var(--mat) var(--mat) calc(var(--mat) * 2.6);
+  background: var(--paper);
+  /* Viền mảnh màu đá để bản in trắng vẫn tách khỏi thẻ mốc trắng */
+  outline: 1px solid var(--surface);
+  outline-offset: -1px;
+}
+.photo-frame[data-kind='ref'] {
+  padding-bottom: var(--mat);
+  background: var(--note-ref);
+  outline: none;
+}
+.photo-frame[data-kind='ref']::after {
+  content: '';
+  position: absolute;
+  inset: calc(var(--mat) / 2);
+  border: 1px dashed var(--note-ref-line);
+  pointer-events: none;
+}
+.photo-frame-sm {
+  --mat: 6px;
+}
+
+/* Giấy nhớ dán lên góc ảnh: đỏ cho ảnh thực tế, vàng giấy cho ảnh tham khảo */
+.sticky-tag {
+  position: absolute;
+  z-index: 2;
+  top: -0.6rem;
+  left: 1rem;
+  min-width: 6.5rem;
+  max-width: 13rem;
+  padding: 0.7rem 0.8rem 0.55rem;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: var(--step-small);
+  line-height: 1.2;
+  text-align: left;
+  transform: rotate(-3deg);
+  pointer-events: none;
+}
+.sticky-tag[data-kind='ref'] {
+  background: var(--note-ref-tag);
+  color: var(--ink);
+  transform: rotate(2.5deg);
+}
+/* Mẩu băng dính trong mờ giữ tờ giấy nhớ */
+.sticky-tag::before {
+  content: '';
+  position: absolute;
+  top: -0.45rem;
+  left: 50%;
+  width: 2.6rem;
+  height: 0.9rem;
+  background: rgba(255, 255, 255, 0.55);
+  transform: translateX(-50%) rotate(4deg);
+}
+/* Góc giấy quăn nhẹ: vệt gấp tối ở góc dưới phải, hợp cả nền sáng lẫn nền tối */
+.sticky-tag::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 0.7rem;
+  height: 0.7rem;
+  background: linear-gradient(315deg, rgba(255, 255, 255, 0.35) 0 50%, rgba(0, 0, 0, 0.16) 50% 100%);
+}
+.sticky-tag-sm {
+  top: -0.4rem;
+  left: 0.5rem;
+  min-width: 0;
+  padding: 0.45rem 0.55rem 0.35rem;
+  font-size: 0.75rem;
+}
+.sticky-tag-sm::before {
+  width: 1.8rem;
+  height: 0.65rem;
+  top: -0.35rem;
+}
+.sticky-tag-sm::after {
+  width: 0.5rem;
+  height: 0.5rem;
+}
+}
+
+/* Ảnh mới hiện ra trong bàn soi ảnh: mờ dần vào, nhích nhẹ */
+@keyframes photoEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.photo-enter {
+  animation: photoEnter 380ms var(--ease-out);
+}
+
+/* Ảnh chồng lên nhau, chuyển qua lại bằng crossfade */
+.stack-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 1600ms ease;
+}
+.stack-img[data-active='true'] {
+  opacity: 1;
+}
+.stack-fast .stack-img {
+  transition-duration: 500ms;
+}
+
+/* Ảnh lớn trôi chậm (ảnh chuyển động duy nhất) */
+@keyframes drift {
+  from {
+    transform: scale(1.02) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.1) translate3d(-1.5%, -1%, 0);
+  }
+}
+.drift {
+  animation: drift 24s ease-in-out infinite alternate;
+}
+
+/*
+ * Lớp xuất hiện. html[data-motion] được bật bởi script nội tuyến trong layout và tự gỡ
+ * sau 3 giây nếu React không khởi động, nên nội dung không bao giờ bị giấu vĩnh viễn.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-motion] [data-reveal] {
+    opacity: 0;
+    transform: translate3d(0, 24px, 0);
+    transition:
+      opacity 800ms var(--ease-out),
+      transform 900ms var(--ease-out);
+    transition-delay: var(--d, 0ms);
+  }
+  html[data-motion] [data-reveal][data-in] {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drift,
+  .photo-enter {
+    animation: none;
+  }
+  .stack-img {
+    transition: none;
+  }
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 @keyframes tripLoadingBar {
@@ -48,4 +426,4 @@ h1, h2, h3, h4, h5, h6, .font-serif, .font-mono {
 
 .animate-trip-loading {
   animation: tripLoadingBar 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-}
+}

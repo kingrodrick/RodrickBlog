@@ -3,13 +3,33 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { TimelineEvent, GalleryImage, Trip } from '@/types/database.type';
 import { DayFilterTabs } from './DayFilterTabs';
-import { TimelineItemCard } from './TimelineItemCard';
+import {
+  TimelineItemCard,
+  TimelineGalleryModal,
+  GalleryTab,
+  GalleryMode,
+  splitEventPhotos,
+  galleryTarget,
+} from './TimelineItemCard';
+import { TimelineRouteMap } from './TimelineRouteMap';
 import { ImageLightboxModal } from '@/components/gallery/ImageLightboxModal';
+import { PhotoStack } from '@/components/ui/PhotoStack';
+import { PhotoFrame, photoKind, photoTagDetail } from '@/components/ui/PhotoFrame';
+import { PhotoNav, stepIndex } from '@/components/ui/PhotoNav';
 import { useAuth } from '@/components/auth/AuthContext';
 import { AddTimelineEventModal } from '@/components/editor/AddTimelineEventModal';
 import { EditTimelineEventModal } from '@/components/editor/EditTimelineEventModal';
 import { SqlInstructionModal } from '@/components/editor/SqlInstructionModal';
 import { sortTimelineEvents } from '@/lib/timeUtils';
+import { optimizeCloudinaryUrl } from '@/lib/cloudinary';
+import {
+  formatDateVN,
+  formatDuration,
+  formatMonthYear,
+  splitTimeSlot,
+  tripDurationDays,
+  weekdayVN,
+} from '@/lib/tripFormat';
 import { ItineraryService } from '@/services/itinerary.service';
 
 interface ItinerarySinglePageViewProps {
@@ -18,6 +38,25 @@ interface ItinerarySinglePageViewProps {
   tripTitle?: string;
   trip?: Trip;
 }
+
+interface GalleryState {
+  event: TimelineEvent;
+  tab: GalleryTab;
+  mode: GalleryMode;
+  index: number;
+}
+
+// Tạm ẩn các section phụ cuối trang; đổi thành true để hiện lại
+const SHOW_PRINCIPLES = false;
+const SHOW_GEAR = false;
+
+const GEAR = [
+  { label: 'Body máy ảnh', value: 'Sony Alpha A6400' },
+  { label: 'Ống kính đa dụng', value: 'Sony E 18-135mm OSS' },
+  { label: 'Thẻ nhớ tốc độ cao', value: 'SanDisk Extreme Pro 128GB' },
+  { label: 'Nguồn năng lượng', value: '3x NP-FW50 + Sạc đôi' },
+  { label: 'Chân máy du lịch', value: 'Ulanzi Carbon Tripod' },
+];
 
 export function ItinerarySinglePageView({
   events,
@@ -34,6 +73,12 @@ export function ItinerarySinglePageView({
   const [selectedDay, setSelectedDay] = useState<number | 'all'>('all');
   const [selectedCity, setSelectedCity] = useState<string>('all');
   const [activeImage, setActiveImage] = useState<GalleryImage | null>(null);
+  const [activeEventId, setActiveEventId] = useState<number | null>(null);
+  // Mốc đang được xem bản đồ trên sân khấu (đổi mốc thì sân khấu quay về ảnh)
+  const [mapEventId, setMapEventId] = useState<number | null>(null);
+  const [gallery, setGallery] = useState<GalleryState | null>(null);
+  // Ảnh đang xem trên sân khấu, tính trong các ảnh của mốc đó (đổi mốc thì về ảnh đầu)
+  const [stagePick, setStagePick] = useState<{ eventId: number; offset: number } | null>(null);
 
   useEffect(() => {
     setEventList(sortTimelineEvents(events));
@@ -166,44 +211,16 @@ export function ItinerarySinglePageView({
     return groups;
   }, [filteredEvents]);
 
-  // Dynamic trip title, dates, and gear from trips table
-  const tripDisplayTitle = useMemo(() => {
-    const title = currentTrip?.title || tripTitle;
-    if (!title) return 'Lịch Trình Chi Tiết Chuyến Đi';
-    if (title.toLowerCase().startsWith('lịch trình')) {
-      return title;
-    }
-    return `${title}`;
-  }, [currentTrip, tripTitle]);
-
+  // Tháng và độ dài chuyến đi từ bảng trips
   const { tripMonthYear, tripDuration } = useMemo(() => {
-    if (currentTrip?.start_date && currentTrip?.end_date) {
-      const startParts = currentTrip.start_date.split('-').map(Number);
-      const endParts = currentTrip.end_date.split('-').map(Number);
-
-      let durationDays = days.length;
-      if (startParts.length === 3 && endParts.length === 3) {
-        const startDateObj = new Date(startParts[0], startParts[1] - 1, startParts[2]);
-        const endDateObj = new Date(endParts[0], endParts[1] - 1, endParts[2]);
-        const diffDays = Math.round((endDateObj.getTime() - startDateObj.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-        if (!isNaN(diffDays) && diffDays > 0) {
-          durationDays = Math.max(durationDays, diffDays);
-        }
-      }
-
-      const monthYear = startParts.length === 3 ? `Tháng ${startParts[1]}/${startParts[0]}` : '';
-      const duration = durationDays > 0 ? `${durationDays} Ngày ${Math.max(0, durationDays - 1)} Đêm` : '';
-
-      return { tripMonthYear: monthYear, tripDuration: duration };
-    }
-
-    const duration = days.length > 0 ? `${days.length} Ngày ${Math.max(0, days.length - 1)} Đêm` : '';
-    return { tripMonthYear: '', tripDuration: duration };
+    const durationDays = tripDurationDays(currentTrip?.start_date, currentTrip?.end_date, days.length);
+    return {
+      tripMonthYear: formatMonthYear(currentTrip?.start_date),
+      tripDuration: formatDuration(durationDays),
+    };
   }, [currentTrip, days]);
 
   const tripCitiesLabel = currentTrip?.cities || cities.join(' & ') || 'Hành Trình';
-
-  let itemSequenceCounter = 0;
 
   // City & Date context based on current view/filter for adding events
   const currentContextCity = useMemo(() => {
@@ -222,245 +239,365 @@ export function ItinerarySinglePageView({
     return undefined;
   }, [selectedDay, datesByDay]);
 
+  // Mốc đang đọc: mốc nằm giữa màn hình khi cuộn, hoặc mốc vừa được trỏ tới
+  const activeEvent =
+    filteredEvents.find((e) => e.id === activeEventId) || filteredEvents[0] || null;
+
+  useEffect(() => {
+    if (typeof IntersectionObserver === 'undefined') return;
+    const rows = Array.from(document.querySelectorAll<HTMLElement>('[data-event-id]'));
+    if (rows.length === 0) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveEventId(Number(entry.target.getAttribute('data-event-id')));
+          }
+        });
+      },
+      { rootMargin: '-40% 0px -55% 0px' }
+    );
+    rows.forEach((row) => io.observe(row));
+    return () => io.disconnect();
+  }, [filteredEvents]);
+
+  // Mọi ảnh của từng mốc (thực tế rồi tham khảo), xếp chồng trên sân khấu
+  const stagePhotos = useMemo(
+    () =>
+      filteredEvents.flatMap((e) => {
+        const { realPhotos, refPhotos } = splitEventPhotos(e.images);
+        return [...realPhotos, ...refPhotos].map((image) => ({ event: e, image }));
+      }),
+    [filteredEvents]
+  );
+
+  const activePhotos = splitEventPhotos(activeEvent?.images);
+  const activePhotoTotal = activePhotos.realPhotos.length + activePhotos.refPhotos.length;
+  const stageOffset =
+    activeEvent && stagePick?.eventId === activeEvent.id ? Math.min(stagePick.offset, activePhotoTotal - 1) : 0;
+  const stageStart = stagePhotos.findIndex((p) => p.event.id === activeEvent?.id);
+  const stageIndex = stageStart >= 0 ? stageStart + stageOffset : -1;
+  const stageLead = stageIndex >= 0 ? stagePhotos[stageIndex].image : null;
+  const activeHasMap = !!activeEvent?.map_embed_url && activeEvent.map_embed_url.trim().length > 0;
+  const stageView = activeEvent && mapEventId === activeEvent.id ? 'map' : 'photo';
+  const showMapOnStage = activeHasMap && (stageView === 'map' || !stageLead);
+
+  const stepStage = (delta: number) =>
+    activeEvent &&
+    setStagePick({ eventId: activeEvent.id, offset: stepIndex(stageOffset, delta, activePhotoTotal) });
+
+  const openGallery = (event: TimelineEvent, tab: GalleryTab, mode: GalleryMode, index = 0) =>
+    setGallery({ event, tab, mode, index });
+
+  const galleryPhotos = gallery ? splitEventPhotos(gallery.event.images) : null;
+
   return (
-    <section id="itinerary" className="space-y-10 scroll-mt-20">
-      {/* Header section */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-[#E5E0D8] pb-4 gap-4">
-        <div>
-          <span className="font-mono text-[10px] uppercase tracking-widest text-[#B93829]">
-            — LỊCH TRÌNH CHI TIẾT DU LỊCH & NHIẾP ẢNH
-          </span>
-          <h2 className="font-serif text-2xl sm:text-3xl font-semibold mt-2 text-[#1C1B18]">
-            {tripDisplayTitle}
-          </h2>
-          <p className="flex flex-wrap items-center font-mono text-[11px] text-[#78756E] mt-2">
-            <span>{tripCitiesLabel}</span>
-            {tripMonthYear && (
-              <>
-                <span className="mx-2.5">•</span>
-                <span>{tripMonthYear}</span>
-              </>
-            )}
-            {tripDuration && (
-              <>
-                <span className="mx-2.5">•</span>
-                <span>{tripDuration}</span>
-              </>
-            )}
-          </p>
-        </div>
-
-        {/* Breakdown Badges: Total, Real Photos, Reference Photos & Add Event Button */}
-        <div className="flex flex-wrap items-center gap-2.5">
-          <span className="font-mono text-[10px] bg-white border border-[#E6E2DA] px-3 py-1.5 rounded-full text-[#57544E]">
-            ⏱ {filteredEvents.length} mốc thời gian
-          </span>
-          {/* {realCount > 0 && (
-            <span className="font-mono text-[10px] bg-emerald-50 border border-emerald-300 text-emerald-800 px-3 py-1.5 rounded-full font-semibold">
-              📷 {realCount} ảnh chụp thực tế
-            </span>
-          )}
-          {refCount > 0 && (
-            <span className="font-mono text-[10px] bg-sky-50 border border-sky-300 text-sky-800 px-3 py-1.5 rounded-full font-semibold">
-              🌐 {refCount} ảnh tham khảo web
-            </span>
-          )} */}
-
-          {/* Add Timeline Event Button (Only visible when logged in) */}
-          {isLoggedIn && tripId && (
-            <button
-              type="button"
-              onClick={() => setIsAddEventModalOpen(true)}
-              className="bg-[#B93829] hover:bg-[#1C1B18] text-white text-xs font-mono uppercase tracking-wider font-semibold px-4 py-1.5 rounded-xl transition-all shadow-md shadow-[#B93829]/20 flex items-center gap-1.5 cursor-pointer ml-auto"
-            >
-              <span>+</span>
-              <span>THÊM SỰ KIỆN TIMELINE</span>
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Filter Tabs */}
-      <DayFilterTabs
-        days={days}
-        selectedDay={selectedDay}
-        onSelectDay={setSelectedDay}
-        cities={cities}
-        selectedCity={selectedCity}
-        onSelectCity={setSelectedCity}
-        totalFilteredCount={filteredEvents.length}
-        datesByDay={datesByDay}
-      />
-
-      {/* Timeline List grouped by Day */}
-      {filteredEvents.length === 0 ? (
-        <div className="bg-white border border-[#E6E2DA] rounded-2xl p-10 text-center space-y-3">
-          <span className="text-3xl">⛩️</span>
-          <h4 className="font-serif text-lg font-bold text-[#1C1B18]">
-            Chưa có chặng hành trình nào trong cơ sở dữ liệu
-          </h4>
-          <p className="text-xs text-[#78756E] max-w-md mx-auto leading-relaxed">
-            Các mốc lịch trình và kho ảnh tương ứng sẽ hiển thị sống động tại đây khi dữ liệu được đồng bộ.
-          </p>
-          {(selectedDay !== 'all' || selectedCity !== 'all') && (
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedDay('all');
-                setSelectedCity('all');
-              }}
-              className="mt-2 text-xs font-mono uppercase text-[#B93829] underline hover:no-underline cursor-pointer"
-            >
-              Đặt lại bộ lọc
-            </button>
-          )}
+    <>
+      <section id="itinerary" aria-labelledby="itinerary-title" className="scroll-mt-20 frame mt-32 lg:mt-48">
+        {/* Đầu section */}
+        <div className="grid gap-8 lg:grid-cols-12 lg:gap-8 lg:items-end">
+          <div className="lg:col-span-7">
+            <h2 id="itinerary-title" data-reveal className="text-head max-w-[14ch]">
+              Lịch trình từng giờ
+            </h2>
+            <p data-reveal style={{ '--d': '80ms' } as React.CSSProperties} className="mt-6 max-w-[52ch]">
+              {tripCitiesLabel}
+              {tripMonthYear ? `, ${tripMonthYear}` : ''}
+              {tripDuration ? `, ${tripDuration}` : ''}. {filteredEvents.length} mốc thời gian,{' '}
+              {realCount} ảnh chụp thực tế và {refCount} ảnh tham khảo.
+            </p>
+          </div>
 
           {isLoggedIn && tripId && (
-            <div className="pt-3">
-              <button
-                type="button"
-                onClick={() => setIsAddEventModalOpen(true)}
-                className="bg-[#B93829] hover:bg-[#1C1B18] text-white text-xs font-mono uppercase tracking-wider font-semibold px-5 py-2.5 rounded-xl transition-all shadow-xs cursor-pointer inline-flex items-center gap-1.5"
-              >
-                <span>+ Thêm sự kiện đầu tiên cho hành trình này</span>
+            <div className="lg:col-span-5 lg:text-right">
+              <button type="button" onClick={() => setIsAddEventModalOpen(true)} className="btn">
+                Thêm sự kiện timeline
               </button>
             </div>
           )}
         </div>
-      ) : (
-        <div className="space-y-12">
-          {eventsGroupedByDay.map((group) => {
-            const firstLoc = group.items[0]?.location_name;
-            return (
-              <div key={group.dayNumber} className="space-y-6">
-                {/* Day Header Banner (As shown in screenshot) */}
-                <div className="flex flex-wrap items-center justify-between gap-3 bg-[#FAF8F5] border-b-2 border-[#1C1B18] pb-3 pt-2">
-                  <div className="flex items-center gap-3">
-                    <span className="bg-[#1C1B18] text-white font-mono text-xs font-bold px-3 py-1 rounded-md tracking-wider flex items-center gap-1.5 shadow-xs">
-                      <span className="text-[#B93829]">●</span>
-                      DAY {group.dayNumber} — {group.city}
-                    </span>
+
+        <div className="mt-12">
+          <DayFilterTabs
+            days={days}
+            selectedDay={selectedDay}
+            onSelectDay={setSelectedDay}
+            cities={cities}
+            selectedCity={selectedCity}
+            onSelectCity={setSelectedCity}
+            totalFilteredCount={filteredEvents.length}
+            datesByDay={datesByDay}
+          />
+        </div>
+
+        {filteredEvents.length === 0 ? (
+          <div className="mt-12 bg-paper p-8 sm:p-12 space-y-4">
+            <h3 className="text-lead">Chưa có chặng hành trình nào trong cơ sở dữ liệu</h3>
+            <p className="max-w-[52ch]">
+              Các mốc lịch trình và kho ảnh tương ứng sẽ hiển thị sống động tại đây khi dữ liệu được
+              đồng bộ.
+            </p>
+            <div className="flex flex-wrap items-center gap-6 pt-2">
+              {(selectedDay !== 'all' || selectedCity !== 'all') && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedDay('all');
+                    setSelectedCity('all');
+                  }}
+                  className="text-link font-semibold cursor-pointer"
+                >
+                  Đặt lại bộ lọc
+                </button>
+              )}
+              {isLoggedIn && tripId && (
+                <button type="button" onClick={() => setIsAddEventModalOpen(true)} className="btn">
+                  Thêm sự kiện đầu tiên cho hành trình này
+                </button>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="mt-16 grid gap-10 lg:grid-cols-12 lg:gap-8">
+            {/* Thời gian biểu */}
+            <div className="min-w-0 lg:col-span-7 space-y-20">
+              {eventsGroupedByDay.map((group) => {
+                const uniqueDates = Array.from(
+                  new Set(group.items.map((i) => i.trip_date).filter(Boolean))
+                );
+                const dateDisplay = uniqueDates
+                  .map((d) => `${weekdayVN(d)} ${formatDateVN(d)}`)
+                  .join(' → ');
+                return (
+                  <div key={group.dayNumber}>
+                    <div data-reveal className="pb-6">
+                      <h3 className="text-head">Ngày {group.dayNumber}</h3>
+                      <p className="mt-3 text-small text-muted">
+                        {dateDisplay}, {group.city}, {group.items.length} mốc
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      {group.items.map((item) => (
+                        <TimelineItemCard
+                          key={item.id}
+                          item={item}
+                          isActive={item.id === activeEvent?.id}
+                          onActivate={(ev) => setActiveEventId(ev.id)}
+                          onOpenGallery={openGallery}
+                          onOpenImage={(img) => setActiveImage(img)}
+                          onEdit={(itemToEdit) => setEditingEvent(itemToEdit)}
+                        />
+                      ))}
+                    </div>
                   </div>
+                );
+              })}
 
-                  {(() => {
-                    const uniqueDates = Array.from(
-                      new Set(group.items.map((i) => i.trip_date).filter(Boolean))
-                    );
-                    const dateDisplay =
-                      uniqueDates.length > 1
-                        ? uniqueDates.join(' → ')
-                        : group.items[0]?.trip_date || '';
-                    return (
-                      <span className="font-mono text-xs text-[#78756E]">
-                        {group.items.length} mốc • 🗓 {dateDisplay}
-                      </span>
-                    );
-                  })()}
-                </div>
-
-                {/* Vertical Timeline container for this day */}
-                <div className="relative border-l-2 border-[#B93829]/30 ml-3 sm:ml-5 space-y-8 py-2">
-                  {group.items.map((item) => {
-                    itemSequenceCounter++;
-                    return (
-                      <TimelineItemCard
-                        key={item.id}
-                        item={item}
-                        index={itemSequenceCounter}
-                        onOpenImage={(img) => setActiveImage(img)}
-                        onEdit={(itemToEdit) => setEditingEvent(itemToEdit)}
-                      />
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })}
-
-          {/* Nút Thêm sự kiện Timeline ở cuối danh sách (chỉ hiện khi đã đăng nhập Edit Mode) */}
-          {isLoggedIn && tripId && (
-            <div className="pt-2 flex justify-center">
-              <button
-                type="button"
-                onClick={() => setIsAddEventModalOpen(true)}
-                className="group w-full py-4 px-6 rounded-2xl border-2 border-dashed border-[#B93829]/40 hover:border-[#B93829] bg-white hover:bg-rose-50/50 text-[#B93829] font-mono text-xs uppercase tracking-wider font-bold transition-all flex items-center justify-center gap-2.5 shadow-xs hover:shadow-md cursor-pointer active:scale-[0.99]"
-              >
-                <span>THÊM SỰ KIỆN TIMELINE</span>
-              </button>
+              {/* Nút Thêm sự kiện Timeline ở cuối danh sách (chỉ hiện khi đã đăng nhập) */}
+              {isLoggedIn && tripId && (
+                <button
+                  type="button"
+                  onClick={() => setIsAddEventModalOpen(true)}
+                  className="btn btn-ink w-full"
+                >
+                  Thêm sự kiện timeline
+                </button>
+              )}
             </div>
-          )}
+
+            {/* Sân khấu dính: nơi của mốc đang đọc */}
+            <aside
+              aria-label="Ảnh và bản đồ của mốc đang đọc"
+              className="hidden lg:flex lg:col-start-8 lg:col-span-5 sticky top-[calc(var(--bar-h)+1.5rem)] self-start h-[min(calc(100svh-var(--bar-h)-3rem),50rem)] flex-col"
+            >
+              <div className="relative flex-1 min-h-0">
+                {stagePhotos.length > 0 && (
+                  <PhotoFrame
+                    kind={photoKind(stageLead)}
+                    detail={photoTagDetail(stageLead)}
+                    className={`absolute inset-0 transition-opacity duration-500 ${
+                      stageLead && !showMapOnStage ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                    }`}
+                  >
+                    <span className="relative flex-1 min-h-0 flex">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (!activeEvent) return;
+                          const { tab, index } = galleryTarget(activePhotos.realPhotos, stageOffset);
+                          openGallery(activeEvent, tab, 'lightbox', index);
+                        }}
+                        disabled={!stageLead}
+                        aria-label={activeEvent ? `Phóng to ảnh của ${activeEvent.location_name}` : 'Xem ảnh'}
+                        className="flex-1 flex cursor-zoom-in"
+                      >
+                        <PhotoStack
+                          photos={stagePhotos.map((p) => ({
+                            key: `${p.event.id}-${p.image.id}`,
+                            src: optimizeCloudinaryUrl(p.image.cloudinary_url),
+                            alt: p.image.caption || p.event.location_name,
+                          }))}
+                          active={stageIndex}
+                          fast
+                          className="flex-1"
+                        />
+                      </button>
+                      {stageLead && !showMapOnStage && (
+                        <PhotoNav
+                          index={stageOffset}
+                          count={activePhotoTotal}
+                          onPrev={() => stepStage(-1)}
+                          onNext={() => stepStage(1)}
+                        />
+                      )}
+                    </span>
+                  </PhotoFrame>
+                )}
+
+                {showMapOnStage && activeEvent && (
+                  <div className="absolute inset-0">
+                    <TimelineRouteMap
+                      key={activeEvent.id}
+                      map_embed_url={activeEvent.map_embed_url}
+                      locationName={activeEvent.location_name}
+                      city={activeEvent.city}
+                    />
+                  </div>
+                )}
+
+                {/* Mốc không có ảnh lẫn bản đồ: tấm vé chữ của chính mốc đó */}
+                {!stageLead && !activeHasMap && activeEvent && (
+                  <div className="absolute inset-0 bg-accent text-accent-ink p-10 flex flex-col justify-between">
+                    <p className="text-display leading-none tabular">
+                      {splitTimeSlot(activeEvent.time_slot).start}
+                    </p>
+                    <p className="text-lead leading-tight max-w-[18ch]">{activeEvent.location_name}</p>
+                  </div>
+                )}
+              </div>
+
+              {activeEvent && (
+                <div className="pt-4 flex items-start justify-between gap-6 text-small">
+                  <p className="min-w-0">
+                    {showMapOnStage
+                      ? ''
+                      : stageLead
+                      ? `${stageLead.caption || activeEvent.location_name}${
+                          stageLead.is_real_photo !== false && stageLead.exif_info ? `. ${stageLead.exif_info}` : ''
+                        }`
+                      : `${activeEvent.location_name}, chưa có ảnh`}
+                  </p>
+                  <div className="flex items-center gap-4 shrink-0">
+                    {stageLead && activeHasMap && (
+                      <button
+                        type="button"
+                        onClick={() => setMapEventId(stageView === 'map' ? null : activeEvent.id)}
+                        className="text-link font-semibold cursor-pointer"
+                      >
+                        {stageView === 'map' ? 'Xem ảnh' : 'Xem tuyến đường'}
+                      </button>
+                    )}
+                    {activePhotoTotal > 1 && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          openGallery(activeEvent, activePhotos.realPhotos.length > 0 ? 'real' : 'ref', 'grid')
+                        }
+                        className="text-link font-semibold cursor-pointer"
+                      >
+                        Xem {activePhotoTotal} ảnh
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </aside>
+          </div>
+        )}
+      </section>
+
+      {/* Nguyên tắc: trường màu duy nhất của trang, chạy hết bề ngang */}
+      {SHOW_PRINCIPLES && (
+      <section aria-labelledby="principles-title" className="mt-40 lg:mt-56 bg-accent text-accent-ink">
+        <div className="frame py-24 lg:py-32 grid gap-12 lg:grid-cols-12 lg:gap-8">
+          <h2 id="principles-title" data-reveal className="text-display leading-[0.92] tracking-[-0.035em] lg:col-span-6 max-w-[10ch]">
+            Nguyên tắc của Rodrick
+          </h2>
+          <div className="lg:col-start-8 lg:col-span-5 space-y-6">
+            <blockquote
+              data-reveal
+              style={{ '--d': '80ms' } as React.CSSProperties}
+              className="text-lead leading-[1.3]"
+            >
+              “Ăn món mình thích, chụp góc mình yêu, không chạy theo số đông.”
+            </blockquote>
+            <p data-reveal style={{ '--d': '160ms' } as React.CSSProperties}>
+              <strong className="font-semibold">Ẩm thực độc hành:</strong> Tuyệt đối không ăn Sushi
+              theo sở thích cá nhân. Ưu tiên hàng đầu là các quán Mì Ramen nước dùng xương hầm đậm đà,
+              Cơm lươn nướng than hoa Unagi, Bò nướng than đá Yakiniku và Lẩu Sukiyaki béo ngậy.
+            </p>
+            <p data-reveal style={{ '--d': '240ms' } as React.CSSProperties}>
+              <strong className="font-semibold">Phân loại nguồn ảnh:</strong> Mọi bức ảnh chụp thực tế
+              bằng máy Sony A6400 được ghi rõ “Ảnh chụp thực tế” cùng thông số EXIF chi tiết. Các ảnh
+              phục vụ mục đích tham khảo lịch trình được ghi rõ “Ảnh tham khảo” một cách minh bạch.
+            </p>
+            <p className="text-small pt-4">Tự do, độc hành, chân thực. Tokyo &amp; Kyoto 2026.</p>
+          </div>
         </div>
+      </section>
       )}
 
-      {/* Bottom Info Section: Travel Rules & Gear Checklist (Matching Screenshot) */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 pt-6">
-        {/* Left Dark Box: Nguyên Tắc Du Lịch & Nhiếp Ảnh */}
-        <div className="md:col-span-7 bg-[#1C1B18] text-white rounded-2xl p-6 sm:p-7 space-y-4 shadow-sm flex flex-col justify-between">
-          <div className="space-y-3">
-            <span className="font-mono text-[10px] text-rose-300 uppercase tracking-widest font-semibold flex items-center gap-1.5">
-              <span>●</span> NGUYÊN TẮC DU LỊCH & NHIẾP ẢNH CỦA RODRICK
-            </span>
-
-            <h4 className="font-serif text-xl sm:text-2xl font-bold leading-snug">
-              “Ăn món mình thích, chụp góc mình yêu, không chạy theo số đông.”
-            </h4>
-
-            <div className="space-y-2 text-xs sm:text-sm text-stone-300 leading-relaxed font-sans pt-1">
-              <p>
-                <strong className="text-white font-serif">🍜 Ẩm thực độc hành:</strong> Tuyệt đối không ăn Sushi theo sở thích cá nhân. Ưu tiên hàng đầu là các quán Mì Ramen nước dùng xương hầm đậm đà, Cơm lươn nướng than hoa Unagi, Bò nướng than đá Yakiniku và Lẩu Sukiyaki béo ngậy.
-              </p>
-              <p>
-                <strong className="text-white font-serif">📷 Phân loại nguồn ảnh:</strong> Mọi bức ảnh chụp thực tế bằng máy Sony A6400 được gắn nhãn xanh lục cùng thông số EXIF chi tiết. Các ảnh phục vụ mục đích tham khảo lịch trình được đánh dấu nhãn xanh dương minh bạch.
-              </p>
-            </div>
-          </div>
-
-          <div className="pt-4 border-t border-white/10 flex items-center justify-between text-[11px] font-mono text-stone-400">
-            <span>Tự do • Độc hành • Chân thực</span>
-            <span className="text-rose-400">Tokyo & Kyoto 2026</span>
-          </div>
+      {/* Thiết bị mang theo */}
+      {SHOW_GEAR && (
+      <section aria-labelledby="gear-title" className="frame mt-40 lg:mt-56 grid gap-12 lg:grid-cols-12 lg:gap-8">
+        <div className="lg:col-span-7">
+          <h2 id="gear-title" data-reveal className="text-head max-w-[16ch]">
+            Trang thiết bị nhiếp ảnh gọn nhẹ
+          </h2>
+          <table data-reveal style={{ '--d': '80ms' } as React.CSSProperties} className="mt-10 w-full text-left">
+            <caption className="text-left text-small text-muted pb-4">
+              Danh mục thiết bị mang theo (Sony A6400 gear)
+            </caption>
+            <tbody>
+              {GEAR.map((row) => (
+                <tr key={row.label} className="border-b border-surface" /* taste-skill-ignore: bảng thật */>
+                  <th scope="row" className="py-4 pr-6 font-normal text-muted">
+                    {row.label}
+                  </th>
+                  <td className="py-4 text-right font-semibold">{row.value}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
 
-        {/* Right Light Box: Danh Mục Thiết Bị Mang Theo */}
-        <div className="md:col-span-5 bg-[#F3F0EA] border border-[#E6E2DA] rounded-2xl p-6 sm:p-7 space-y-4 shadow-xs flex flex-col justify-between">
-          <div className="space-y-3">
-            <span className="font-mono text-[10px] text-[#B93829] uppercase tracking-widest font-semibold flex items-center gap-1.5">
-              <span>📷</span> DANH MỤC THIẾT BỊ MANG THEO (SONY A6400 GEAR)
-            </span>
-
-            <h4 className="font-serif text-lg sm:text-xl font-bold text-[#1C1B18]">
-              Trang Thiết Bị Nhiếp Ảnh Gọn Nhẹ
-            </h4>
-
-            <ul className="space-y-2.5 text-xs text-[#57544E] font-mono">
-              <li className="flex items-center justify-between border-b border-[#E6E2DA] pb-1.5">
-                <span>Body Máy ảnh</span>
-                <strong className="text-[#1C1B18]">Sony Alpha A6400</strong>
-              </li>
-              <li className="flex items-center justify-between border-b border-[#E6E2DA] pb-1.5">
-                <span>Ống kính đa dụng</span>
-                <strong className="text-[#1C1B18]">Sony E 18-135mm OSS</strong>
-              </li>
-              <li className="flex items-center justify-between border-b border-[#E6E2DA] pb-1.5">
-                <span>Thẻ nhớ tốc độ cao</span>
-                <strong className="text-[#1C1B18]">SanDisk Extreme Pro 128GB</strong>
-              </li>
-              <li className="flex items-center justify-between border-b border-[#E6E2DA] pb-1.5">
-                <span>Nguồn năng lượng</span>
-                <strong className="text-[#1C1B18]">3x NP-FW50 + Sạc đôi</strong>
-              </li>
-              <li className="flex items-center justify-between">
-                <span>Chân máy du lịch</span>
-                <strong className="text-[#1C1B18]">Ulanzi Carbon Tripod</strong>
-              </li>
-            </ul>
-          </div>
-
-          <div className="pt-3 border-t border-[#E6E2DA] text-[10px] font-mono text-[#8C8881]">
-            ✓ Tối ưu hóa trọng lượng để đi bộ 15.000 - 25.000 bước/ngày
-          </div>
+        <div data-reveal style={{ '--d': '120ms' } as React.CSSProperties} className="lg:col-start-9 lg:col-span-4 bg-paper p-8 sm:p-10 self-start">
+          <p className="text-head leading-none tabular">15.000–25.000</p>
+          <p className="mt-3 text-lead">bước mỗi ngày</p>
+          <p className="mt-8">Tối ưu hóa trọng lượng để đi bộ 15.000 - 25.000 bước/ngày.</p>
         </div>
-      </div>
+      </section>
+      )}
+
+      {/* Hộp ảnh của một mốc */}
+      {gallery && galleryPhotos && (
+        <TimelineGalleryModal
+          key={`${gallery.event.id}-${gallery.tab}-${gallery.mode}-${gallery.index}`}
+          isOpen
+          onClose={() => setGallery(null)}
+          locationName={gallery.event.location_name}
+          timeSlot={gallery.event.time_slot}
+          city={gallery.event.city}
+          dayNumber={gallery.event.day_number}
+          realPhotos={galleryPhotos.realPhotos}
+          refPhotos={galleryPhotos.refPhotos}
+          initialTab={gallery.tab}
+          initialViewMode={gallery.mode}
+          initialIndex={gallery.index}
+          onOpenExternalImage={(img) => setActiveImage(img)}
+        />
+      )}
 
       {/* Lightbox Modal */}
       <ImageLightboxModal
@@ -493,7 +630,7 @@ export function ItinerarySinglePageView({
         onOpenSqlModal={() => setIsSqlModalOpen(true)}
         existingDates={existingDates}
         tripSlug={currentTrip?.slug}
-        tripTitle={currentTrip?.title}
+        tripTitle={currentTrip?.title || tripTitle}
         availableCities={cities}
       />
 
@@ -502,7 +639,7 @@ export function ItinerarySinglePageView({
         isOpen={isSqlModalOpen}
         onClose={() => setIsSqlModalOpen(false)}
       />
-    </section>
+    </>
   );
 }
 

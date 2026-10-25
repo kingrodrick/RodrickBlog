@@ -13,6 +13,12 @@ interface DayFilterTabsProps {
   datesByDay?: Record<number, string>;
 }
 
+function chipClass(isActive: boolean) {
+  return `min-h-10 px-4 text-small whitespace-nowrap cursor-pointer transition-colors duration-200 active:scale-[0.97] ${
+    isActive ? 'bg-ink text-paper font-semibold' : 'bg-paper hover:bg-surface'
+  }`;
+}
+
 export function DayFilterTabs({
   days,
   selectedDay,
@@ -23,84 +29,67 @@ export function DayFilterTabs({
   totalFilteredCount,
   datesByDay = {},
 }: DayFilterTabsProps) {
-  // Format day label with date if available
+  // Nhãn ngày kèm ngày tháng nếu có: 'Ngày 1 (11/12)'
   const getDayLabel = (day: number) => {
     const rawDate = datesByDay[day];
     if (rawDate) {
-      // If rawDate is '2026-12-12', extract 12/12
       const parts = rawDate.split('-');
       if (parts.length === 3) {
-        return `NGÀY ${day} (${parts[2]}/${parts[1]})`;
+        return `Ngày ${day} (${parts[2]}/${parts[1]})`;
       }
     }
-    return `NGÀY ${day}`;
+    return `Ngày ${day}`;
   };
 
   return (
     <div className="space-y-4">
-      {/* City Filter Pills */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="font-mono text-[10px] uppercase tracking-wider text-[#8C8881] mr-1">
-            LỌC THEO THÀNH PHỐ:
-          </span>
-          <button
-            type="button"
-            onClick={() => onSelectCity('all')}
-            className={`px-3 py-1 text-xs font-mono rounded-full border transition-all cursor-pointer ${
-              selectedCity === 'all'
-                ? 'bg-[#1C1B18] text-white border-[#1C1B18]'
-                : 'bg-white text-[#57544E] border-[#E6E2DA] hover:border-[#1C1B18]'
-            }`}
-          >
-            Tất cả thành phố
-          </button>
-          {cities.map((city) => (
-            <button
-              key={city}
-              type="button"
-              onClick={() => onSelectCity(city)}
-              className={`px-3 py-1 text-xs font-mono rounded-full border transition-all cursor-pointer ${
-                selectedCity === city
-                  ? 'bg-[#B93829] text-white border-[#B93829]'
-                  : 'bg-white text-[#57544E] border-[#E6E2DA] hover:border-[#B93829]'
-              }`}
-            >
-              📍 {city}
-            </button>
-          ))}
-        </div>
+      <p className="text-small text-muted" aria-live="polite">
+        Đang hiển thị <span className="font-semibold text-ink tabular">{totalFilteredCount}</span> mốc
+        hành trình.
+      </p>
 
-        <div className="text-[11px] font-mono text-[#8C8881] whitespace-nowrap">
-          Đang hiển thị: <span className="font-semibold text-[#1C1B18]">{totalFilteredCount}</span> mốc hành trình
-        </div>
-      </div>
-
-      {/* Day Tabs */}
-      <div className="flex items-center gap-2 border-b border-[#E6E2DA] pb-3 overflow-x-auto">
+      <div role="group" aria-label="Lọc theo ngày" className="flex flex-wrap items-center gap-2">
+        <span className="text-small text-muted shrink-0 w-24">Ngày</span>
         <button
           type="button"
           onClick={() => onSelectDay('all')}
-          className={`px-3.5 py-1.5 text-xs font-mono uppercase rounded-md transition-all cursor-pointer whitespace-nowrap ${
-            selectedDay === 'all'
-              ? 'bg-[#1C1B18] text-white font-semibold shadow-xs'
-              : 'bg-white border border-[#E6E2DA] text-[#57544E] hover:bg-[#F3F0EA]'
-          }`}
+          aria-pressed={selectedDay === 'all'}
+          className={chipClass(selectedDay === 'all')}
         >
-          TẤT CẢ CÁC NGÀY
+          Tất cả các ngày
         </button>
         {days.map((day) => (
           <button
             key={day}
             type="button"
             onClick={() => onSelectDay(day)}
-            className={`px-3.5 py-1.5 text-xs font-mono uppercase rounded-md transition-all cursor-pointer whitespace-nowrap ${
-              selectedDay === day
-                ? 'bg-[#B93829] text-white font-semibold shadow-xs'
-                : 'bg-white border border-[#E6E2DA] text-[#57544E] hover:bg-[#F3F0EA]'
-            }`}
+            aria-pressed={selectedDay === day}
+            className={chipClass(selectedDay === day)}
           >
             {getDayLabel(day)}
+          </button>
+        ))}
+      </div>
+
+      <div role="group" aria-label="Lọc theo thành phố" className="flex flex-wrap items-center gap-2">
+        <span className="text-small text-muted shrink-0 w-24">Thành phố</span>
+        <button
+          type="button"
+          onClick={() => onSelectCity('all')}
+          aria-pressed={selectedCity === 'all'}
+          className={chipClass(selectedCity === 'all')}
+        >
+          Tất cả thành phố
+        </button>
+        {cities.map((city) => (
+          <button
+            key={city}
+            type="button"
+            onClick={() => onSelectCity(city)}
+            aria-pressed={selectedCity === city}
+            className={chipClass(selectedCity === city)}
+          >
+            {city}
           </button>
         ))}
       </div>

@@ -6,6 +6,8 @@ import { GalleryShowcase } from '@/components/gallery/GalleryShowcase';
 import { ItineraryService } from '@/services/itinerary.service';
 import { GalleryService } from '@/services/gallery.service';
 import { GalleryImage } from '@/types/database.type';
+import { optimizeCloudinaryUrl } from '@/lib/cloudinary';
+import { pickNextTrip, tripCoverUrl } from '@/lib/tripFormat';
 
 export const instant = false;
 
@@ -29,29 +31,42 @@ export default async function RodrickHomePage() {
   });
   const allImages = Array.from(imageMap.values());
 
+  // Ảnh lớn ở đầu trang: ảnh bìa các chuyến đi, rồi ảnh bìa các album
+  const heroPhotos = [
+    ...trips.map((t) => ({ key: `trip-${t.id}`, src: tripCoverUrl(t), alt: t.title })),
+    ...collections
+      .filter((c) => c.cover_image)
+      .map((c) => ({
+        key: `album-${c.id}`,
+        src: optimizeCloudinaryUrl(c.cover_image as string),
+        alt: c.title,
+      })),
+  ].slice(0, 5);
+
+  const nextTrip = pickNextTrip(trips);
+
   return (
-    <div className="w-full bg-[#FAF8F5] text-[#1C1B18]">
-      <main className="max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-16">
-        {/* Khối giới thiệu mở đầu */}
-        <HeroSection />
+    <main className="w-full">
+      {/* Tấm vé và ảnh lớn */}
+      <HeroSection photos={heroPhotos} />
 
-        {/* Thanh thống kê nhanh */}
-        <StatsBar
-          trips={trips}
-          collections={collections}
-          images={allImages}
-        />
+      {/* Mở đầu: các con số và đồng hồ chuyến đi kế tiếp */}
+      <StatsBar
+        trips={trips}
+        collections={collections}
+        images={allImages}
+        nextTrip={nextTrip}
+      />
 
-        {/* Module 1: Danh sách các chuyến đi (Điều hướng sang trang chi tiết) */}
-        <TripListSection trips={trips} />
+      {/* Module 1: Danh sách các chuyến đi (Điều hướng sang trang chi tiết) */}
+      <TripListSection trips={trips} />
 
-        {/* Module 2: Một số ảnh tiêu biểu từ bộ sưu tập */}
-        <GalleryShowcase
-          collections={collections}
-          images={allImages}
-          limit={6}
-        />
-      </main>
-    </div>
+      {/* Module 2: Một số ảnh tiêu biểu từ bộ sưu tập */}
+      <GalleryShowcase
+        collections={collections}
+        images={allImages}
+        limit={8}
+      />
+    </main>
   );
 }

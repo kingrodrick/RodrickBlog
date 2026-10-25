@@ -133,63 +133,45 @@ export function AdminRoutePickerMap({
     updateRoute(destination, origin);
   };
 
+  const fieldClass =
+    'w-full bg-paper border border-transparent px-3 py-2 text-small text-ink outline-none transition-colors duration-200 hover:border-surface focus:border-ink';
+
   return (
-    <div className="w-full space-y-2.5 font-sans min-w-0">
-      {/* 🌟 HEADER: TIÊU ĐỀ BÊN TRÁI & 2 ICON BUTTONS BÊN PHẢI CÙNG DÒNG */}
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2 min-w-0">
-          <label className="text-xs font-mono uppercase tracking-wider font-semibold text-[#1C1B18] flex items-center gap-1.5 shrink-0">
-            <span>🗺️</span>
-            <span>Trình tạo & Xem trước Bản đồ</span>
-          </label>
-          {origin.trim() && destination.trim() && !isPanelOpen && (
-            <span className="hidden sm:inline font-mono text-[11px] text-stone-500 truncate">
-              ({origin} ➔ {destination})
-            </span>
+    <div className="w-full space-y-3 min-w-0">
+      {/* Đầu khối: tiêu đề, lộ trình hiện tại, hai hành động dạng liên kết */}
+      <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+        <div className="min-w-0">
+          <p className="text-small font-semibold">Xem trước tuyến đường</p>
+          {origin.trim() && destination.trim() && (
+            <p className="mt-1 text-small text-muted truncate">
+              {origin} → {destination}
+            </p>
           )}
         </div>
-
-        {/* 2 ICON BUTTONS: ĐỔI LỘ TRÌNH & MỞ APP */}
-        <div className="flex items-center gap-1.5 shrink-0">
-          {/* Nút Đổi lộ trình: Icon + Title */}
+        <div className="flex items-center gap-5 shrink-0 text-small font-semibold">
           <button
             type="button"
             onClick={() => setIsPanelOpen((prev) => !prev)}
-            className={`w-8 h-8 rounded-xl border flex items-center justify-center transition-all cursor-pointer shadow-2xs ${
-              isPanelOpen
-                ? 'bg-[#B61C25] text-white border-[#B61C25] shadow-xs scale-105'
-                : 'bg-[#FAF8F5] hover:bg-stone-200 text-stone-700 hover:text-black border-[#E6E2DA]'
-            }`}
-            title={isPanelOpen ? 'Thu gọn bảng đổi lộ trình' : 'Đổi lộ trình (Điểm đi & Điểm đến)'}
+            aria-expanded={isPanelOpen}
+            className="text-link cursor-pointer"
           >
-            <span className="text-xs font-bold leading-none">
-              {isPanelOpen ? '✕' : '✏️'}
-            </span>
+            {isPanelOpen ? 'Ẩn bảng lộ trình' : 'Đổi điểm đi và đến'}
           </button>
-
-          {/* Nút Mở App Google Maps: Icon + Title */}
-          <a
-            href={directAppUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-8 h-8 rounded-xl bg-[#FAF8F5] hover:bg-rose-50 text-stone-700 hover:text-[#B61C25] border border-[#E6E2DA] hover:border-rose-200 flex items-center justify-center transition-colors cursor-pointer shadow-2xs"
-            title="Mở chỉ đường trên ứng dụng Google Maps"
-          >
-            <span className="text-xs font-bold leading-none">↗</span>
+          <a href={directAppUrl} target="_blank" rel="noopener noreferrer" className="text-link">
+            Mở Google Maps ↗
           </a>
         </div>
       </div>
 
-      {/* 🌟 CONTAINER: BẢN ĐỒ THU GỌN THEO CHIỀU NGANG VÀ PANEL BÊN PHẢI TRƯỢT RA THEO TỈ LỆ 7/3 */}
+      {/* Bản đồ, và bảng nhập lộ trình trượt ra bên phải khi mở */}
       <div className="w-full flex flex-col md:flex-row gap-3 items-stretch min-w-0">
-        {/* KHUNG BẢN ĐỒ GOOGLE MAPS EMBED (Tỉ lệ 7/10 khi mở panel) */}
         <div
-          className={`h-[380px] rounded-2xl overflow-hidden border border-[#E6E2DA] bg-[#F5F2EB] shadow-inner transition-all duration-300 ease-in-out ${
-            isPanelOpen ? 'w-full md:w-[calc(70%-6px)] min-w-0 shrink-0' : 'w-full'
+          className={`h-[380px] overflow-hidden bg-surface transition-all duration-300 ease-out ${
+            isPanelOpen ? 'w-full md:w-[calc(68%-6px)] min-w-0 shrink-0' : 'w-full'
           }`}
         >
           <iframe
-            title="Google Maps Embed Preview"
+            title="Xem trước bản đồ Google Maps"
             src={currentEmbedUrl}
             width="100%"
             height="100%"
@@ -201,76 +183,50 @@ export function AdminRoutePickerMap({
           />
         </div>
 
-        {/* KHUNG NHẬP ĐIỂM ĐI / ĐIỂM ĐẾN BÊN PHẢI (Tỉ lệ 3/10 khi mở panel) */}
         <div
-          className={`transition-all duration-300 ease-in-out overflow-hidden flex flex-col min-w-0 ${
+          className={`transition-all duration-300 ease-out overflow-hidden flex flex-col min-w-0 ${
             isPanelOpen
-              ? 'w-full md:w-[calc(30%-6px)] md:shrink-0 opacity-100 translate-x-0'
+              ? 'w-full md:w-[calc(32%-6px)] md:shrink-0 opacity-100 translate-x-0'
               : 'w-0 max-h-0 md:max-h-[380px] opacity-0 translate-x-4 pointer-events-none'
           }`}
         >
-          <div className="h-full bg-[#FAF8F5] border border-[#E6E2DA] rounded-2xl p-4 flex flex-col justify-center space-y-4 shadow-2xs w-full min-w-0">
-            {/* Header của Panel */}
-            <div className="flex items-center justify-between border-b border-[#EFECE4] pb-2.5">
-              <span className="font-mono text-xs font-bold text-[#1C1B18] flex items-center gap-1.5">
-                <span>🚗</span>
-                <span>Lộ trình điểm đi & đến</span>
+          <div className="h-full bg-ground p-5 flex flex-col justify-center gap-4 w-full min-w-0">
+            <label className="block space-y-1.5">
+              <span className="flex items-center gap-2 text-small font-semibold">
+                <span aria-hidden="true" className="w-2.5 h-2.5 border-2 border-ink" />
+                Điểm xuất phát
               </span>
-              <button
-                type="button"
-                onClick={() => setIsPanelOpen(false)}
-                className="w-6 h-6 rounded-lg hover:bg-stone-200 text-stone-500 hover:text-black flex items-center justify-center text-xs cursor-pointer transition-colors"
-                title="Đóng bảng này"
-              >
-                ✕
-              </button>
-            </div>
+              <input
+                type="text"
+                value={origin}
+                onChange={(e) => updateRoute(e.target.value, destination)}
+                placeholder="VD: Ga Tokyo, Ga Kyoto"
+                className={fieldClass}
+              />
+            </label>
 
-            {/* Inputs: Điểm xuất phát & Điểm đến */}
-            <div className="space-y-3.5">
-              {/* Điểm xuất phát */}
-              <div className="space-y-1">
-                <label className="block text-[11px] font-mono text-stone-600 font-semibold flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full border border-stone-400 bg-white" />
-                  <span>Điểm xuất phát:</span>
-                </label>
-                <input
-                  type="text"
-                  value={origin}
-                  onChange={(e) => updateRoute(e.target.value, destination)}
-                  placeholder="VD: Ga Tokyo, Ga Kyoto..."
-                  className="w-full bg-white border border-[#E6E2DA] focus:border-[#B61C25] rounded-xl px-3 py-2 text-xs font-mono text-[#1C1B18] outline-hidden shadow-2xs transition-colors"
-                />
-              </div>
+            <button
+              type="button"
+              onClick={handleSwap}
+              title="Đảo chiều điểm xuất phát và điểm đến"
+              className="self-start min-h-9 px-3 text-small font-semibold bg-paper hover:bg-surface cursor-pointer transition-colors duration-200"
+            >
+              ⇅ Đổi chiều
+            </button>
 
-              {/* Nút Hoán đổi A ⇄ B */}
-              <div className="flex justify-center -my-1">
-                <button
-                  type="button"
-                  onClick={handleSwap}
-                  className="px-3 py-1 rounded-lg bg-white hover:bg-stone-100 text-stone-600 hover:text-[#B61C25] border border-[#E6E2DA] font-mono text-[10px] font-semibold flex items-center gap-1 transition-all cursor-pointer shadow-2xs"
-                  title="Đảo chiều điểm xuất phát và điểm đến"
-                >
-                  <span>⇅</span>
-                  <span>Đổi chiều đi</span>
-                </button>
-              </div>
-
-              {/* Điểm đến */}
-              <div className="space-y-1">
-                <label className="block text-[11px] font-mono text-stone-600 font-semibold flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-[#B61C25]" />
-                  <span>Điểm đến:</span>
-                </label>
-                <input
-                  type="text"
-                  value={destination}
-                  onChange={(e) => updateRoute(origin, e.target.value)}
-                  placeholder="VD: Chùa Kinkaku-ji, Asakusa..."
-                  className="w-full bg-white border border-[#E6E2DA] focus:border-[#B61C25] rounded-xl px-3 py-2 text-xs font-mono text-[#1C1B18] font-bold outline-hidden shadow-2xs transition-colors"
-                />
-              </div>
-            </div>
+            <label className="block space-y-1.5">
+              <span className="flex items-center gap-2 text-small font-semibold">
+                <span aria-hidden="true" className="w-2.5 h-2.5 bg-accent" />
+                Điểm đến
+              </span>
+              <input
+                type="text"
+                value={destination}
+                onChange={(e) => updateRoute(origin, e.target.value)}
+                placeholder="VD: Chùa Kinkaku-ji, Asakusa"
+                className={fieldClass}
+              />
+            </label>
           </div>
         </div>
       </div>

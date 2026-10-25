@@ -1,51 +1,77 @@
+'use client';
+
 import React from 'react';
+import { PhotoStack, StackPhoto, useAutoAdvance } from '@/components/ui/PhotoStack';
+import { TicketPerf } from '@/components/ui/Ticket';
 
-export function HeroSection() {
+interface HeroSectionProps {
+  photos: StackPhoto[];
+}
+
+export function HeroSection({ photos }: HeroSectionProps) {
+  const [active] = useAutoAdvance(photos.length, 6000);
+  const current = photos[active];
+
   return (
-    <section className="relative bg-[#F3F0EA] border border-[#E5E0D8] rounded-xl p-8 mb-4 sm:p-12 overflow-hidden">
-      <div className="relative z-10 flex flex-col lg:flex-row lg:items-end justify-between gap-8">
-        <div className="max-w-2xl space-y-5">
-          {/* Status Badge */}
-          <div className="inline-flex items-center gap-2 bg-white/80 border border-[#E2DDD5] rounded-full px-3 py-1 text-[10px] font-mono uppercase tracking-wider text-[#57544E]">
-            <span className="w-2 h-2 rounded-full bg-[#B93829] animate-pulse" />
-            <span>Blog cá nhân của Rodrick</span>
-          </div>
-
-          {/* Main Heading */}
-          <h1 className="font-serif text-4xl sm:text-5xl leading-[1.15] text-[#1C1B18]">
-            Những góc nhìn & những chuyến hành trình{' '}
-            <span className="italic text-[#B93829] font-normal">Rodrick.</span>
-          </h1>
-
-          {/* Subtitle */}
-          <p className="font-serif italic text-lg sm:text-xl text-[#4A4742] leading-relaxed">
-            Chia sẽ những góc nhìn & những chuyến hành trình của Rodrick thông qua từng con phố, ngôi chùa cổ kính, những món ăn địa phương và những bộ sưu tập hình ảnh thực tế từ ống kính máy ảnh.
-          </p>
-
-          {/* Meta Tags */}
-          <div className="flex flex-wrap items-center gap-5 pt-2 text-[11px] font-mono uppercase tracking-wider text-[#78756E]">
-            <span className="flex items-center gap-1.5">📷 Sony A6400 • 18-135mm</span>
+    <section
+      aria-labelledby="home-title"
+      className="frame pt-3 grid gap-3 lg:grid-cols-2 lg:h-[min(calc(100svh-var(--bar-h)-0.75rem),56rem)] lg:min-h-[600px]"
+    >
+      {/* Tấm vé: phần chính (tiêu đề, câu dẫn, hành động) và cuống vé (liên kết phụ) */}
+      <div className="relative z-10 min-w-0 order-2 lg:order-1 -mt-6 lg:mt-0 mx-3 lg:mx-0 flex flex-col">
+        <div className="ticket-main flex-1 flex flex-col justify-center p-6 pb-10 sm:p-10 sm:pb-12 xl:p-14 xl:pb-14">
+          <div>
+            <h1
+              id="home-title"
+              data-reveal
+              className="text-display leading-[0.92] tracking-[-0.035em] max-w-[9ch]"
+            >
+              Rodrick đi và chụp
+            </h1>
+            <p
+              data-reveal
+              style={{ '--d': '90ms' } as React.CSSProperties}
+              className="mt-8 lg:mt-10 text-lead leading-[1.35] max-w-[34ch]"
+            >
+              Chia sẻ những góc nhìn &amp; những chuyến hành trình của Rodrick thông qua từng con phố,
+              ngôi chùa cổ kính, những món ăn địa phương và những bộ sưu tập hình ảnh thực tế từ ống
+              kính máy ảnh.
+            </p>
+            <div data-reveal style={{ '--d': '180ms' } as React.CSSProperties} className="mt-10">
+              <a href="#trips" className="btn">
+                Xem các chuyến đi
+              </a>
+            </div>
           </div>
         </div>
 
-        {/* Hero CTA Buttons */}
-        <div className="flex flex-col sm:flex-row lg:flex-col gap-3 min-w-[220px]">
-          <a
-            href="#trips"
-            className="bg-[#1C1B18] text-white text-xs font-mono uppercase tracking-wider px-5 py-3.5 rounded flex items-center justify-between hover:bg-[#33312B] transition-colors"
+        <div className="ticket-stub px-6 pt-8 pb-10 sm:px-10 xl:px-14">
+          <TicketPerf />
+          <div
+            data-reveal
+            style={{ '--d': '260ms' } as React.CSSProperties}
+            className="flex flex-wrap items-baseline gap-x-8 gap-y-2 text-small"
           >
-            <span>Xem các chuyến đi</span>
-            <span>↓</span>
-          </a>
-          <a
-            href="#gallery"
-            className="bg-white border border-[#DCD7CE] text-[#1C1B18] text-xs font-mono uppercase tracking-wider px-5 py-3.5 rounded flex items-center justify-between hover:bg-[#FAF8F5] transition-colors"
-          >
-            <span>Bộ sưu tập ảnh</span>
-            <span>↓</span>
-          </a>
+            <a href="#gallery" className="text-link font-semibold">
+              Bộ sưu tập ảnh
+            </a>
+            <a href="#footer" className="text-link font-semibold">
+              Về tôi
+            </a>
+            <span className="text-muted">Máy ảnh Sony A6400, ống kính 18–135mm</span>
+          </div>
         </div>
       </div>
+
+      {/* Ảnh lớn: các ảnh bìa chuyến đi và album lần lượt hiện ra */}
+      <figure className="order-1 lg:order-2 relative h-[48svh] lg:h-auto">
+        <PhotoStack photos={photos} active={active} drift priority className="absolute inset-0" />
+        {current && (
+          <figcaption className="absolute left-0 top-0 lg:top-auto lg:bottom-0 bg-ground px-4 py-2.5 text-small max-w-[80%]">
+            {current.alt}
+          </figcaption>
+        )}
+      </figure>
     </section>
   );
 }
