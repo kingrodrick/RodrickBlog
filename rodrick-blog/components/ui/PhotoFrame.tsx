@@ -34,17 +34,19 @@ interface PhotoFrameProps {
   kind: PhotoKind;
   detail?: string | null;
   small?: boolean;
+  /** Bỏ giấy nhớ khi nơi dùng đã ghi loại ảnh ở chỗ khác (ví dụ tab) */
+  hideTag?: boolean;
   className?: string;
   children: React.ReactNode;
 }
 
 /** Khung ảnh: bản in giấy trắng cho ảnh thực tế, mẩu cắt giấy vàng cho ảnh tham khảo, kèm giấy nhớ */
-export function PhotoFrame({ kind, detail, small, className = '', children }: PhotoFrameProps) {
+export function PhotoFrame({ kind, detail, small, hideTag, className = '', children }: PhotoFrameProps) {
   // Khung tự định vị (relative) trừ khi nơi dùng đã đặt absolute
   const position = /\babsolute\b/.test(className) ? '' : 'relative';
   return (
     <span data-kind={kind} className={`photo-frame ${position} ${small ? 'photo-frame-sm' : ''} ${className}`}>
-      <StickyTag kind={kind} detail={detail} small={small} />
+      {!hideTag && <StickyTag kind={kind} detail={detail} small={small} />}
       {children}
     </span>
   );

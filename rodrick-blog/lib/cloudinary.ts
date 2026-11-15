@@ -70,6 +70,18 @@ export function optimizeCloudinaryUrl(url: string): string {
 }
 
 /**
+ * Bản thu nhỏ cắt vừa khung (dùng cho hàng ảnh mini): Cloudinary tự cắt và giảm kích thước.
+ * URL không phải Cloudinary được trả về nguyên vẹn.
+ */
+export function cloudinaryThumbUrl(url: string, width = 160, height = 120): string {
+  if (!url || !url.includes('/image/upload/')) {
+    return url;
+  }
+  const base = url.replace('/image/upload/f_auto,q_auto/', '/image/upload/');
+  return base.replace('/image/upload/', `/image/upload/f_auto,q_auto,c_fill,w_${width},h_${height}/`);
+}
+
+/**
  * Tải file ảnh trực tiếp lên Cloudinary sử dụng Unsigned Upload Preset
  * Đặt tên file bằng timestamp tải ảnh lên
  * @param file File ảnh hoặc Blob từ máy tính / Clipboard

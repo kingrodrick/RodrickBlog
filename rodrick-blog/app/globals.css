@@ -70,6 +70,8 @@
   --gutter: 1.5rem;
   --page-max: 100rem;
   --bar-h: 4rem;
+  /* Chiều cao thanh chọn ngày dính trong trang lịch trình (chip 2.5rem + đệm trên dưới) */
+  --day-bar-h: 3.5rem;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -277,6 +279,812 @@ p {
   --mat: 6px;
 }
 
+/*
+ * Tab bìa hồ sơ dồn sang phải, rộng theo chữ. Mỗi tab: hai cạnh thẳng đứng, hai góc trên bo tròn,
+ * các tab đặt sát nhau dùng chung đường viền. Tab bên phải nằm trước tab bên trái.
+ * Chỉ tab đang mở nhô cao hơn và lên trước nhất; nó cùng màu, đè lên viền trên của trang nên liền với trang.
+ * Tab và trang dùng viền 1px (không đổ bóng); mỗi tab là một hộp có viền, bo hai góc trên.
+ */
+.folder-tabs,
+.folder-page {
+  --tab-line: color-mix(in srgb, var(--ink) 28%, var(--paper));
+}
+/*
+ * Đường viền trên của trang thuộc về hàng tab (trang bên dưới không có viền trên).
+ * Ở tỉ lệ lẻ, nền tab có thể được khử răng cưa tới vị trí lẻ pixel còn đường viền thì
+ * bám lưới pixel, nên nếu đường viền đè lên tab thì phần lẻ của tab vẫn nhuộm một vệt dưới viền.
+ * Vì vậy mỗi tab chưa chọn tự vẽ viền đáy của chính nó, nền tab nằm gọn phía trên viền đó;
+ * đường viền của hàng (::after, z 0) chỉ lộ ra ở khoảng trống ngoài các tab.
+ * Tab đang mở (z 5) không có viền đáy nên liền với trang.
+ */
+.folder-tabs {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+}
+.folder-tabs::after {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: var(--tab-line);
+  pointer-events: none;
+}
+.folder-tab {
+  --tab-fill: var(--accent);
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: -1px;
+  padding: 0.5rem 1rem;
+  color: var(--accent-ink);
+  font-size: var(--step-small);
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: padding 200ms;
+}
+.folder-tab:first-child {
+  margin-left: 0;
+}
+.folder-tab:nth-child(1) {
+  z-index: 1;
+}
+.folder-tab:nth-child(2) {
+  z-index: 2;
+}
+.folder-tab:nth-child(3) {
+  z-index: 3;
+}
+.folder-tab-shape {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  box-sizing: border-box;
+  background: var(--tab-fill);
+  /* Nền chỉ phủ phần trong viền: không lấn xuống dưới viền đáy */
+  background-clip: padding-box;
+  border: 1px solid var(--tab-line);
+  border-radius: 0.5rem 0.5rem 0 0;
+  pointer-events: none;
+}
+/* Tab đang mở không có viền đáy nên liền với trang */
+.folder-tab[aria-selected='true'] .folder-tab-shape {
+  border-bottom: 0;
+}
+/* Chỉ tab chưa chọn sáng lên khi rê chuột; tab đang mở phải giữ đúng màu trang để không lộ miếng vá */
+.folder-tab:not([aria-selected='true']):hover {
+  filter: brightness(1.06);
+}
+/*
+ * Mỗi tab một màu như tờ phân trang, và trang bên dưới mang đúng màu của tab đang mở:
+ * ảnh thực tế đỏ, ảnh tham khảo vàng, bản đồ trắng. Tab chưa có nội dung (chưa chọn) màu xám.
+ */
+.folder-tab[data-tab='ref'] {
+  --tab-fill: var(--note-ref-tag);
+  color: var(--ink);
+}
+.folder-tab[data-tab='map'] {
+  --tab-fill: var(--paper);
+  color: var(--ink);
+}
+.folder-tab[data-empty='true'] {
+  --tab-fill: #ebe8e2;
+  color: var(--muted);
+}
+/* Tab đang mở: cao hơn, lên trước nhất, giữ màu của chính nó (kể cả khi chưa có nội dung) */
+.folder-tab[aria-selected='true'] {
+  z-index: 5;
+  --tab-fill: var(--accent);
+  padding-top: 0.8rem;
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+.folder-tab[aria-selected='true'][data-tab='ref'] {
+  --tab-fill: var(--note-ref-tag);
+  color: var(--ink);
+}
+.folder-tab[aria-selected='true'][data-tab='map'] {
+  --tab-fill: var(--paper);
+  color: var(--ink);
+}
+/*
+ * Miếng vá cùng màu dưới tab đang mở, nằm giữa hai cạnh viền của tab và phủ dư xuống trang vài px,
+ * để chỗ nối giữa chân hàng tab và đỉnh trang không lộ khe ở tỉ lệ lẻ.
+ * Chỉ tab đang mở có miếng vá này; phần dư rơi vào lề cùng màu của trang nên không nhìn thấy.
+ */
+.folder-tab[aria-selected='true']::after {
+  content: '';
+  position: absolute;
+  left: 1px;
+  right: 1px;
+  bottom: -4px;
+  height: 6px;
+  background: var(--tab-fill);
+  pointer-events: none;
+}
+.folder-tab:focus-visible {
+  outline-offset: -3px;
+}
+.folder-page {
+  background: var(--paper);
+  border: 1px solid var(--tab-line);
+  /* Viền trên do hàng tab vẽ (.folder-tabs::after) */
+  border-top: 0;
+}
+/* Màu trang theo tab đang mở (khớp --tab-fill của tab đó) */
+.folder-page[data-tab='real'] {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+.folder-page[data-tab='ref'] {
+  background: var(--note-ref-tag);
+  color: var(--ink);
+}
+.folder-page[data-tab='map'] {
+  background: var(--paper);
+  color: var(--ink);
+}
+/*
+ * Trang đã có viền nên khung ảnh bên trong bỏ viền riêng của nó (viền mảnh của ảnh thực tế,
+ * nét đứt của ảnh tham khảo): giữa tab đang mở và nội dung không được có đường nào ngăn cách.
+ */
+.folder-page .photo-frame {
+  outline: none;
+  /* Lề quanh ảnh lấy màu của trang (đỏ / vàng) thay cho giấy trắng / giấy vàng nhạt của khung ảnh */
+  background: transparent;
+  /* Lề đều bốn phía như khung ảnh tham khảo (bỏ mép đáy dày kiểu ảnh rửa) để mọi tab khớp một kiểu khung */
+  padding: var(--mat);
+}
+.folder-page .photo-frame::after {
+  display: none;
+}
+
+/*
+ * Hàng chấm vị trí ảnh (carousel) nằm giữa lề dưới khung: mỗi ảnh một viên pill ngắn bo tròn,
+ * viên của ảnh đang xem dài hơn và đậm đặc. Màu theo chữ của trang (trắng trên đỏ, mực trên vàng).
+ */
+.photo-dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  padding-top: calc(var(--mat, 10px) * 0.4);
+}
+.photo-dot {
+  /* Vùng bấm cao hơn viên nhìn thấy */
+  padding: 0.35rem 0 0.1rem;
+  cursor: pointer;
+}
+.photo-dot > span {
+  display: block;
+  width: 0.75rem;
+  height: 0.1.5rem;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0.35;
+  transition: width 250ms ease, opacity 250ms ease;
+}
+.photo-dot:hover > span {
+  opacity: 0.65;
+}
+.photo-dot[aria-current='true'] > span {
+  width: 1.5rem;
+  opacity: 1;
+}
+.photo-dot:focus-visible {
+  outline-offset: 2px;
+}
+
+/*
+ * Hàng ảnh mini dưới khung ảnh: ô vuông góc, viền mảnh như khung; ảnh chưa xem hơi mờ,
+ * ảnh đang xem rõ hẳn và có viền dày màu của tab đang mở (đỏ / vàng).
+ * Chỉ một dòng, không cuộn ngang: ảnh nào không vừa thì ẩn; hai đầu hàng có nút mũi tên để trượt xem tiếp,
+ * kèm dòng đếm bên dưới.
+ * Khi dòng đã đầy (data-full), các ô ảnh giãn đều để cả hàng rộng đúng bằng khung ảnh phía trên.
+ */
+.photo-thumbs-wrap {
+  --thumb-active: var(--accent);
+  padding-top: 0.75rem;
+}
+.folder-page[data-tab='ref'] ~ .photo-thumbs-wrap {
+  --thumb-active: var(--note-ref-line);
+}
+.photo-thumbs {
+  /* Bề ngang chuẩn của một ô và của nút mũi tên; PhotoThumbs đọc hai biến này để tính số ô vừa một dòng */
+  --thumb-w: 4.5rem;
+  --thumb-nav-w: 1.5rem;
+  display: flex;
+  gap: 0.5rem;
+  overflow: hidden;
+}
+/* Dòng đầy: các ô ảnh chia đều phần bề ngang còn lại (sau hai mũi tên), giữ tỉ lệ 4:3 */
+.photo-thumbs[data-full='true'] .photo-thumb {
+  flex: 1 1 0;
+  min-width: 0;
+  width: auto;
+  height: auto;
+  aspect-ratio: 4 / 3;
+}
+/* Nút mũi tên hai đầu hàng: hẹp, cao bằng ảnh mini, viền mảnh như ô ảnh */
+.photo-thumbs-nav {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--thumb-nav-w);
+  border: 1px solid var(--tab-line, var(--surface));
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
+  transition: background-color 200ms ease, color 200ms ease, opacity 200ms ease;
+}
+.photo-thumbs-nav svg {
+  width: 0.9rem;
+  height: 0.9rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.photo-thumbs-nav:hover:not(:disabled) {
+  background: var(--ink);
+  color: var(--paper);
+}
+.photo-thumbs-nav:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.photo-thumbs-count {
+  padding: 0.35rem 0 0;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.photo-thumb {
+  flex: none;
+  width: var(--thumb-w);
+  height: calc(var(--thumb-w) * 0.75);
+  padding: 0;
+  border: 1px solid var(--tab-line, var(--surface));
+  background: var(--surface);
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity 200ms ease, outline-color 200ms ease;
+  /* Viền dày của ảnh đang xem vẽ vào trong ô để hàng không lấn ra ngoài bề ngang khung */
+  outline: 2px solid transparent;
+  outline-offset: -2px;
+}
+.photo-thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.photo-thumb:hover {
+  opacity: 0.85;
+}
+.photo-thumb[aria-current='true'] {
+  opacity: 1;
+  outline-color: var(--thumb-active);
+}
+
+/*
+ * Nút tròn đè lên ảnh trên sân khấu (thông tin ở góc trên phải, toàn màn hình ở góc dưới phải):
+ * nền mực trong mờ, biểu tượng nét mảnh màu giấy.
+ */
+.photo-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink) 62%, transparent);
+  color: var(--paper);
+  cursor: pointer;
+  transition: background-color 200ms ease;
+}
+.photo-icon-btn:hover {
+  background: color-mix(in srgb, var(--ink) 85%, transparent);
+}
+.photo-icon-btn svg {
+  width: 0.9rem;
+  height: 0.9rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.photo-fullscreen {
+  position: absolute;
+  z-index: 3;
+  right: 0.5rem;
+  bottom: 0.5rem;
+}
+/* Viên ghi tên ảnh: nút "i" nằm sẵn ở góc, bấm vào thì viên bo tròn giãn sang trái để hiện tên */
+.photo-info {
+  position: absolute;
+  z-index: 3;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: inline-flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  max-width: calc(100% - 1rem);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink) 62%, transparent);
+  color: var(--paper);
+  transition: background-color 200ms ease;
+}
+.photo-info[data-open='true'] {
+  background: color-mix(in srgb, var(--ink) 85%, transparent);
+}
+.photo-info .photo-icon-btn,
+.photo-info .photo-icon-btn:hover {
+  background: transparent;
+}
+.photo-info-text {
+  min-width: 0;
+  max-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  opacity: 0;
+  padding-left: 0;
+  font-size: 0.75rem;
+  line-height: 1.2;
+  transition: max-width 300ms ease, opacity 200ms ease, padding 300ms ease;
+}
+.photo-info[data-open='true'] .photo-info-text {
+  max-width: 22rem;
+  opacity: 1;
+  padding-left: 0.7rem;
+}
+/*
+ * Hai nút chỉ hiện khi rê chuột vào ảnh (hoặc khi dùng phím Tab tới chúng; bấm chuột thì không giữ hiện).
+ * Màn hình cảm ứng không có rê chuột nên luôn hiện.
+ */
+.stage-photo .photo-info,
+.stage-photo .photo-fullscreen {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease, background-color 200ms ease;
+}
+.stage-photo:hover .photo-info,
+.stage-photo:hover .photo-fullscreen,
+.stage-photo:has(:focus-visible) .photo-info,
+.stage-photo:has(:focus-visible) .photo-fullscreen {
+  opacity: 1;
+  pointer-events: auto;
+}
+@media (hover: none) {
+  .stage-photo .photo-info,
+  .stage-photo .photo-fullscreen {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+/*
+ * Bàn soi ảnh (xem từng ảnh / lưới ảnh) trên nền tối.
+ * Cùng ngôn ngữ với trang: nét mảnh, góc vuông cho ảnh, nút tròn nhỏ trong mờ, ô vuông màu chỉ loại ảnh.
+ */
+.viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  background: var(--night);
+  color: var(--night-ink);
+  --viewer-line: rgb(255 255 255 / 0.1);
+  --viewer-info-w: 20rem;
+}
+.viewer-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-shrink: 0;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid var(--viewer-line);
+}
+@media (min-width: 1024px) {
+  .viewer-bar {
+    padding: 0.85rem 2rem;
+  }
+}
+.viewer-kind {
+  display: inline-block;
+  flex: none;
+  width: 0.55rem;
+  height: 0.55rem;
+  background: var(--accent);
+}
+.viewer-kind[data-kind='ref'] {
+  background: var(--note-ref-tag);
+}
+/* Lọc loại ảnh: chữ nhỏ, mục đang chọn gạch chân */
+.viewer-filter {
+  display: none;
+  gap: 0.25rem;
+}
+@media (min-width: 640px) {
+  .viewer-filter {
+    display: flex;
+  }
+}
+.viewer-filter button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.7rem;
+  font-size: var(--step-small);
+  opacity: 0.6;
+  border-bottom: 1px solid transparent;
+  cursor: pointer;
+  transition: opacity 200ms ease, border-color 200ms ease;
+}
+.viewer-filter button:hover {
+  opacity: 0.9;
+}
+.viewer-filter button[aria-pressed='true'] {
+  opacity: 1;
+  border-bottom-color: currentColor;
+}
+/* Nút tròn nhỏ trong mờ; nút đang bật đảo màu */
+.viewer-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.07);
+  color: var(--night-ink);
+  cursor: pointer;
+  transition: background-color 200ms ease, color 200ms ease;
+}
+.viewer-btn:hover {
+  background: rgb(255 255 255 / 0.16);
+}
+.viewer-btn[aria-pressed='true'],
+.viewer-btn[data-active='true'] {
+  background: var(--night-ink);
+  color: var(--night);
+}
+.viewer-icon {
+  width: 1.05rem;
+  height: 1.05rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ---- Xem từng ảnh ---- */
+.viewer-stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.viewer-canvas {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Đáy chừa chỗ cho hàng ảnh mini (cao ~4.5rem tính từ mép dưới) cộng khoảng cách 1.5rem với ảnh chính */
+  padding: 3.75rem 1rem 6rem;
+  transition: padding 280ms ease;
+  user-select: none;
+}
+@media (min-width: 768px) {
+  .viewer-canvas {
+    padding: 3.75rem 4.75rem 6rem;
+  }
+  .viewer-stage[data-info='true'] .viewer-canvas {
+    padding-right: calc(var(--viewer-info-w) + 2rem);
+  }
+}
+.viewer-stage[data-zoomed='true'] .viewer-canvas {
+  cursor: grab;
+}
+.viewer-stage[data-dragging='true'] .viewer-canvas {
+  cursor: grabbing;
+}
+.viewer-img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  transition: transform 180ms ease;
+  will-change: transform;
+}
+.viewer-stage[data-dragging='true'] .viewer-img {
+  transition: none;
+}
+.viewer-counter {
+  position: absolute;
+  z-index: 4;
+  top: 0.75rem;
+  left: 1rem;
+  height: 2.25rem;
+  padding: 0 0.9rem;
+  border-radius: 999px;
+  /* Nền tối mờ để vẫn đọc được khi ảnh phóng to tràn xuống dưới */
+  background: color-mix(in srgb, var(--night) 70%, transparent);
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  font-size: var(--step-small);
+}
+.viewer-counter-kind {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  opacity: 0.7;
+}
+.viewer-tools {
+  position: absolute;
+  z-index: 6;
+  top: 0.75rem;
+  right: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.viewer-zoom {
+  display: inline-flex;
+  align-items: center;
+  height: 2.25rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--night) 70%, transparent);
+}
+.viewer-zoom button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.25rem;
+  height: 100%;
+  padding: 0 0.4rem;
+  font-size: 0.75rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background-color 200ms ease, opacity 200ms ease;
+}
+.viewer-zoom button:hover:not(:disabled) {
+  background: rgb(255 255 255 / 0.12);
+}
+.viewer-zoom button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+/* Nút trên khung ảnh: nền tối mờ để nổi trên cả ảnh sáng lẫn ảnh đang phóng to */
+.viewer-stage .viewer-btn:not([data-active='true']) {
+  background: color-mix(in srgb, var(--night) 70%, transparent);
+}
+.viewer-stage .viewer-btn:not([data-active='true']):hover {
+  background: color-mix(in srgb, var(--night) 90%, transparent);
+}
+.viewer-nav {
+  position: absolute;
+  z-index: 4;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.viewer-nav[data-side='prev'] {
+  left: 1rem;
+}
+.viewer-nav[data-side='next'] {
+  right: 1rem;
+  transition: right 280ms ease, background-color 200ms ease, color 200ms ease;
+}
+/* Bảng thông tin trượt vào từ bên phải */
+.viewer-info {
+  position: absolute;
+  z-index: 5;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(var(--viewer-info-w), 100%);
+  display: flex;
+  flex-direction: column;
+  padding: 4.25rem 1.75rem 1.75rem;
+  overflow-y: auto;
+  background: color-mix(in srgb, var(--night) 94%, transparent);
+  border-left: 1px solid var(--viewer-line);
+  transform: translateX(100%);
+  transition: transform 280ms ease;
+}
+.viewer-stage[data-info='true'] .viewer-info {
+  transform: none;
+}
+@media (min-width: 768px) {
+  .viewer-stage[data-info='true'] .viewer-nav[data-side='next'] {
+    right: calc(var(--viewer-info-w) + 1rem);
+  }
+}
+/* Hàng ảnh mini ở đáy: ẩn, hiện khi rê chuột xuống vùng đáy (luôn hiện trên màn hình cảm ứng) */
+.viewer-thumbs {
+  position: absolute;
+  z-index: 4;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 3rem 1.5rem 1.1rem;
+  background: linear-gradient(to top, color-mix(in srgb, var(--night) 88%, transparent), transparent);
+  opacity: 0;
+  transform: translateY(0.75rem);
+  transition: opacity 220ms ease, transform 220ms ease, right 280ms ease;
+}
+/* Hiện khi chuột đang di chuyển trong khung (data-chrome), khi rê lên chính hàng, hoặc khi dùng bàn phím trong hàng */
+.viewer-stage[data-chrome='true'] .viewer-thumbs,
+.viewer-thumbs:hover,
+.viewer-thumbs:focus-within {
+  opacity: 1;
+  transform: none;
+}
+@media (hover: none) {
+  .viewer-thumbs {
+    opacity: 1;
+    transform: none;
+  }
+}
+/* Đang phóng to: ẩn hẳn hàng ảnh mini (kể cả khi rê chuột / màn hình cảm ứng) để không che ảnh */
+.viewer-stage[data-zoomed='true'] .viewer-thumbs,
+.viewer-stage[data-zoomed='true'] .viewer-thumbs:hover,
+.viewer-stage[data-zoomed='true'] .viewer-thumbs:focus-within {
+  opacity: 0;
+  transform: translateY(0.75rem);
+  visibility: hidden;
+  pointer-events: none;
+}
+@media (min-width: 768px) {
+  .viewer-stage[data-info='true'] .viewer-thumbs {
+    right: var(--viewer-info-w);
+  }
+}
+.viewer-thumbs .photo-thumbs-wrap {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding-top: 0;
+  --thumb-active: var(--accent);
+}
+.viewer-thumbs .photo-thumbs {
+  justify-content: center;
+}
+.viewer-thumbs .photo-thumb {
+  border-color: rgb(255 255 255 / 0.18);
+  background: rgb(255 255 255 / 0.06);
+}
+.viewer-thumbs .photo-thumbs-nav {
+  border-color: rgb(255 255 255 / 0.18);
+  background: rgb(255 255 255 / 0.08);
+  color: var(--night-ink);
+}
+.viewer-thumbs .photo-thumbs-nav:hover:not(:disabled) {
+  background: var(--night-ink);
+  color: var(--night);
+}
+.viewer-thumbs .photo-thumbs-count {
+  color: rgb(240 239 236 / 0.55);
+  text-align: center;
+}
+
+/* ---- Lưới ảnh ---- */
+.viewer-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--viewer-line);
+  font-size: var(--step-small);
+  font-weight: 600;
+}
+.viewer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(14rem, 100%), 1fr));
+  gap: 1.5rem 1rem;
+}
+.viewer-tile {
+  display: block;
+  min-width: 0;
+  text-align: left;
+  cursor: pointer;
+}
+.viewer-tile-img {
+  display: block;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: rgb(255 255 255 / 0.05);
+  outline: 1px solid var(--viewer-line);
+  outline-offset: -1px;
+}
+.viewer-tile-img img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.85;
+  transition: transform 500ms ease, opacity 300ms ease;
+}
+.viewer-tile:hover .viewer-tile-img img {
+  transform: scale(1.03);
+  opacity: 1;
+}
+.viewer-tile[aria-current='true'] .viewer-tile-img {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.viewer-tile-caption {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+  font-size: var(--step-small);
+}
+
+/*
+ * Thanh chọn ngày dính ngay dưới thanh menu khi cuộn trang lịch trình.
+ * Nền họa tiết trải hết bề ngang màn hình (giống thanh menu, không lộ đường nối), viền mảnh ở đáy.
+ * Chip của ngày đang đọc (khi xem tất cả các ngày) có vạch đỏ ở chân.
+ */
+.day-bar {
+  position: sticky;
+  z-index: 30;
+  top: var(--bar-h);
+  margin-top: 1rem;
+}
+.day-bar::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  bottom: 0;
+  /* Trải hết bề ngang trang: 100vw trừ thanh cuộn dọc (--scrollbar-w do DayBar đo), để không lấn ra gây cuộn ngang */
+  left: calc(50% - (100vw - var(--scrollbar-w, 0px)) / 2);
+  right: calc(50% - (100vw - var(--scrollbar-w, 0px)) / 2);
+  background-color: var(--ground);
+  background-image: var(--ground-pattern);
+  background-size: var(--ground-pattern-size);
+  background-attachment: fixed;
+  border-bottom: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
+}
+.day-bar-scroller {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: var(--day-bar-h);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.day-bar-scroller::-webkit-scrollbar {
+  display: none;
+}
+.day-chip[aria-current='step'] {
+  font-weight: 600;
+  box-shadow: inset 0 -3px 0 var(--accent);
+}
+/* Nhảy về đầu danh sách: chừa chỗ cho thanh menu và thanh chọn ngày */
+.day-bar-anchor {
+  scroll-margin-top: calc(var(--bar-h) + var(--day-bar-h) + 1rem);
+}
+
 /* Giấy nhớ dán lên góc ảnh: đỏ cho ảnh thực tế, vàng giấy cho ảnh tham khảo */
 .sticky-tag {
   position: absolute;
@@ -368,6 +1176,13 @@ p {
 }
 .stack-fast .stack-img {
   transition-duration: 500ms;
+}
+/* Khung theo tỉ lệ ảnh: ảnh đang chọn nằm trong luồng, quyết định chiều cao khung */
+.stack-fit .stack-img[data-active='true'] {
+  position: relative;
+  display: block;
+  height: auto;
+  max-height: var(--stack-max-h, none);
 }
 
 /* Ảnh lớn trôi chậm (ảnh chuyển động duy nhất) */

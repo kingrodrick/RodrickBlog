@@ -18,15 +18,19 @@ interface PhotoStackProps {
   fast?: boolean;
   /** Ảnh đầu tiên nằm ở màn hình đầu: tải ngay */
   priority?: boolean;
+  /** Khung cao theo tỉ lệ của ảnh đang chọn (rộng 100%); giới hạn chiều cao bằng biến CSS --stack-max-h */
+  fit?: boolean;
 }
 
 /** Các ảnh chồng lên nhau trong một khung; chỉ ảnh đang chọn hiện ra, chuyển bằng crossfade */
-export function PhotoStack({ photos, active, className = '', drift, fast, priority }: PhotoStackProps) {
+export function PhotoStack({ photos, active, className = '', drift, fast, priority, fit }: PhotoStackProps) {
   // Khung tự định vị (relative) trừ khi nơi dùng đã đặt absolute
   const position = /\babsolute\b/.test(className) ? '' : 'relative';
   return (
-    <span className={`block ${position} overflow-hidden bg-surface ${fast ? 'stack-fast' : ''} ${className}`}>
-      <span className={`block absolute inset-0 ${drift ? 'drift' : ''}`}>
+    <span
+      className={`block ${position} overflow-hidden bg-surface ${fast ? 'stack-fast' : ''} ${fit ? 'stack-fit' : ''} ${className}`}
+    >
+      <span className={`block ${fit ? 'relative' : 'absolute inset-0'} ${drift ? 'drift' : ''}`}>
         {photos.map((photo, i) => (
           <img
             key={photo.key}

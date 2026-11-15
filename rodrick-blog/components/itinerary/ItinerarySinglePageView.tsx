@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { TimelineEvent, GalleryImage, Trip } from '@/types/database.type';
-import { DayFilterTabs } from './DayFilterTabs';
+import { CityChips, DayBar, FilterCount } from './DayFilterTabs';
 import {
   TimelineItemCard,
   TimelineGalleryModal,
@@ -15,13 +15,13 @@ import { TimelineRouteMap } from './TimelineRouteMap';
 import { ImageLightboxModal } from '@/components/gallery/ImageLightboxModal';
 import { PhotoStack } from '@/components/ui/PhotoStack';
 import { PhotoFrame, photoKind, photoTagDetail } from '@/components/ui/PhotoFrame';
-import { PhotoNav, stepIndex } from '@/components/ui/PhotoNav';
+import { PhotoDots, PhotoThumbs, useWheelStep } from '@/components/ui/PhotoNav';
 import { useAuth } from '@/components/auth/AuthContext';
 import { AddTimelineEventModal } from '@/components/editor/AddTimelineEventModal';
 import { EditTimelineEventModal } from '@/components/editor/EditTimelineEventModal';
 import { SqlInstructionModal } from '@/components/editor/SqlInstructionModal';
 import { sortTimelineEvents } from '@/lib/timeUtils';
-import { optimizeCloudinaryUrl } from '@/lib/cloudinary';
+import { cloudinaryThumbUrl, optimizeCloudinaryUrl } from '@/lib/cloudinary';
 import {
   formatDateVN,
   formatDuration,
@@ -38,6 +38,9 @@ interface ItinerarySinglePageViewProps {
   tripTitle?: string;
   trip?: Trip;
 }
+
+/** Tab của sân khấu bên phải */
+type StageTab = 'real' | 'ref' | 'map';
 
 interface GalleryState {
   event: TimelineEvent;
@@ -74,11 +77,11 @@ export function ItinerarySinglePageView({
   const [selectedCity, setSelectedCity] = useState<string>('all');
   const [activeImage, setActiveImage] = useState<GalleryImage | null>(null);
   const [activeEventId, setActiveEventId] = useState<number | null>(null);
-  // Mốc đang được xem bản đồ trên sân khấu (đổi mốc thì sân khấu quay về ảnh)
-  const [mapEventId, setMapEventId] = useState<number | null>(null);
   const [gallery, setGallery] = useState<GalleryState | null>(null);
-  // Ảnh đang xem trên sân khấu, tính trong các ảnh của mốc đó (đổi mốc thì về ảnh đầu)
-  const [stagePick, setStagePick] = useState<{ eventId: number; offset: number } | null>(null);
+  // Tab và ảnh đang xem trên sân khấu, tính trong các ảnh của tab đó (đổi mốc thì về tab và ảnh đầu)
+  const [stagePick, setStagePick] = useState<{ eventId: number; tab: StageTab; offset: number } | null>(null);
+  // Viên ghi tên ảnh trên sân khấu đang mở hay thu (giữ nguyên khi đổi ảnh)
+  const [stageInfoOpen, setStageInfoOpen] = useState(false);
 
   useEffect(() => {
     setEventList(sortTimelineEvents(events));
@@ -273,18 +276,107 @@ export function ItinerarySinglePageView({
 
   const activePhotos = splitEventPhotos(activeEvent?.images);
   const activePhotoTotal = activePhotos.realPhotos.length + activePhotos.refPhotos.length;
-  const stageOffset =
-    activeEvent && stagePick?.eventId === activeEvent.id ? Math.min(stagePick.offset, activePhotoTotal - 1) : 0;
-  const stageStart = stagePhotos.findIndex((p) => p.event.id === activeEvent?.id);
-  const stageIndex = stageStart >= 0 ? stageStart + stageOffset : -1;
-  const stageLead = stageIndex >= 0 ? stagePhotos[stageIndex].image : null;
   const activeHasMap = !!activeEvent?.map_embed_url && activeEvent.map_embed_url.trim().length > 0;
-  const stageView = activeEvent && mapEventId === activeEvent.id ? 'map' : 'photo';
-  const showMapOnStage = activeHasMap && (stageView === 'map' || !stageLead);
 
-  const stepStage = (delta: number) =>
-    activeEvent &&
-    setStagePick({ eventId: activeEvent.id, offset: stepIndex(stageOffset, delta, activePhotoTotal) });
+  // Ba tab của sân khấu luôn hiện như tab bìa hồ sơ; tab chưa có nội dung vẫn mở được (trang trống)
+  const stageTabs = [
+    { id: 'real' as const, label: 'Ảnh thực tế', count: activePhotos.realPhotos.length },
+    { id: 'ref' as const, label: 'Ảnh tham khảo', count: activePhotos.refPhotos.length },
+    { id: 'map' as const, label: 'Bản đồ', count: activeHasMap ? 1 : 0 },
+  ];
+  const pick = activeEvent && stagePick?.eventId === activeEvent.id ? stagePick : null;
+  const stageTab: StageTab = pick?.tab ?? stageTabs.find((t) => t.count > 0)?.id ?? 'real';
+  // Mốc không có gì cả: hiện tấm vé chữ thay cho trang trống
+  const stageBlank = activePhotoTotal === 0 && !activeHasMap;
+  const stageTabEmpty = !stageBlank && (stageTabs.find((t) => t.id === stageTab)?.count ?? 0) === 0;
+  const tabPhotos =
+    stageTab === 'real' ? activePhotos.realPhotos : stageTab === 'ref' ? activePhotos.refPhotos : [];
+  const stageOffset = pick && pick.tab === stageTab ? Math.min(pick.offset, tabPhotos.length - 1) : 0;
+  // Vị trí trong danh sách gộp của mốc (thực tế rồi tham khảo)
+  const flatOffset = (stageTab === 'ref' ? activePhotos.realPhotos.length : 0) + stageOffset;
+  const stageStart = stagePhotos.findIndex((p) => p.event.id === activeEvent?.id);
+  const stageIndex = stageStart >= 0 && tabPhotos.length > 0 ? stageStart + flatOffset : -1;
+  const stageLead = stageIndex >= 0 ? stagePhotos[stageIndex].image : null;
+  const showMapOnStage = stageTab === 'map' && activeHasMap;
+  const showPhotoOnStage = !!stageLead && !showMapOnStage;
+
+  // ---- Ngày đang đọc (cho thanh ngày dính) ----
+  // Tính thẳng từ vị trí cuộn: ngày cuối cùng có tiêu đề đã đi qua mép dưới thanh ngày.
+  // Không dựa vào IntersectionObserver vì khi nhảy ngày liên tục các thông báo đến lộn thứ tự.
+  const [spyDay, setSpyDay] = useState<number | null>(null);
+  // Đang cuộn tới ngày vừa bấm: giữ nguyên chip đã chọn cho tới khi cuộn xong
+  const dayJumpUntil = useRef(0);
+
+  useEffect(() => {
+    const remPx = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+    const cssRem = (name: string, fallback: number) => {
+      const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      return v.endsWith('rem') ? parseFloat(v) * remPx : parseFloat(v) || fallback;
+    };
+    let frame = 0;
+    const compute = () => {
+      frame = 0;
+      if (performance.now() < dayJumpUntil.current) return;
+      const sections = eventsGroupedByDay
+        .map((g) => ({ day: g.dayNumber, el: document.getElementById(`itinerary-day-${g.dayNumber}`) }))
+        .filter((s): s is { day: number; el: HTMLElement } => !!s.el);
+      if (sections.length === 0) return;
+      const line = cssRem('--bar-h', 64) + cssRem('--day-bar-h', 56) + 24;
+      let current = sections[0].day;
+      for (const s of sections) if (s.el.getBoundingClientRect().top <= line) current = s.day;
+      // Cuộn tới đáy trang: ngày cuối có thể không lên tới vạch, lấy ngày cuối đã lộ ra nửa trên màn hình
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2) {
+        for (const s of sections) if (s.el.getBoundingClientRect().top < window.innerHeight * 0.5) current = s.day;
+      }
+      setSpyDay(current);
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(compute);
+    };
+    // Cuộn xong (kể cả cuộn mượt sau khi bấm ngày): bỏ khoá rồi tính lại cho chắc
+    const onScrollEnd = () => {
+      dayJumpUntil.current = 0;
+      compute();
+    };
+    compute();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('scrollend', onScrollEnd);
+    window.addEventListener('resize', onScroll);
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('scrollend', onScrollEnd);
+      window.removeEventListener('resize', onScroll);
+      if (frame) cancelAnimationFrame(frame);
+    };
+  }, [eventsGroupedByDay]);
+
+  // Bấm ngày trên thanh dính: đánh dấu ngay ngày đó, rồi cuộn mượt tới đầu ngày (danh sách giữ nguyên).
+  // Nếu bộ lọc đang ẩn ngày đó thì bỏ lọc trước rồi mới cuộn.
+  const goToDay = (day: number) => {
+    setSpyDay(day);
+    // Khoá dự phòng cho trình duyệt không có sự kiện scrollend
+    dayJumpUntil.current = performance.now() + 1500;
+    const scrollToDay = () =>
+      document.getElementById(`itinerary-day-${day}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (document.getElementById(`itinerary-day-${day}`)) {
+      scrollToDay();
+      return;
+    }
+    setSelectedDay('all');
+    setSelectedCity('all');
+    requestAnimationFrame(() => requestAnimationFrame(scrollToDay));
+  };
+
+  const pickStageTab = (tab: StageTab) => activeEvent && setStagePick({ eventId: activeEvent.id, tab, offset: 0 });
+  const pickStagePhoto = (offset: number) =>
+    activeEvent && setStagePick({ eventId: activeEvent.id, tab: stageTab, offset });
+  // Cuộn chuột trên ảnh để đổi ảnh trong tab; tới ảnh đầu / cuối thì trả lại cuộn trang
+  // Cột ảnh đang hiện ảnh: cuộn chuột trong cả cột chỉ để đổi ảnh (dừng ở ảnh đầu / cuối), không cuộn trang.
+  // Cột đang hiện bản đồ hoặc trang trống: cuộn trang như thường.
+  const stageWheelRef = useWheelStep<HTMLElement>((dir) => {
+    const next = stageOffset + dir;
+    if (next >= 0 && next < tabPhotos.length) pickStagePhoto(next);
+  }, showPhotoOnStage);
 
   const openGallery = (event: TimelineEvent, tab: GalleryTab, mode: GalleryMode, index = 0) =>
     setGallery({ event, tab, mode, index });
@@ -318,16 +410,19 @@ export function ItinerarySinglePageView({
         </div>
 
         <div className="mt-12">
-          <DayFilterTabs
-            days={days}
-            selectedDay={selectedDay}
-            onSelectDay={setSelectedDay}
-            cities={cities}
-            selectedCity={selectedCity}
-            onSelectCity={setSelectedCity}
-            totalFilteredCount={filteredEvents.length}
-            datesByDay={datesByDay}
-          />
+          <FilterCount count={filteredEvents.length} />
+        </div>
+
+        {/* Thanh chọn ngày dính dưới thanh menu suốt danh sách (phải là con trực tiếp của section dài) */}
+        <DayBar
+          days={days}
+          onGoToDay={goToDay}
+          datesByDay={datesByDay}
+          currentDay={spyDay ?? activeEvent?.day_number ?? null}
+        />
+
+        <div className="mt-4">
+          <CityChips cities={cities} selectedCity={selectedCity} onSelectCity={setSelectedCity} />
         </div>
 
         {filteredEvents.length === 0 ? (
@@ -358,7 +453,7 @@ export function ItinerarySinglePageView({
             </div>
           </div>
         ) : (
-          <div className="mt-16 grid gap-10 lg:grid-cols-12 lg:gap-8">
+          <div id="itinerary-list" className="mt-16 grid gap-10 lg:grid-cols-12 lg:gap-8">
             {/* Thời gian biểu */}
             <div className="min-w-0 lg:col-span-7 space-y-20">
               {eventsGroupedByDay.map((group) => {
@@ -369,7 +464,7 @@ export function ItinerarySinglePageView({
                   .map((d) => `${weekdayVN(d)} ${formatDateVN(d)}`)
                   .join(' → ');
                 return (
-                  <div key={group.dayNumber}>
+                  <div key={group.dayNumber} id={`itinerary-day-${group.dayNumber}`} className="day-bar-anchor">
                     <div data-reveal className="pb-6">
                       <h3 className="text-head">Ngày {group.dayNumber}</h3>
                       <p className="mt-3 text-small text-muted">
@@ -408,29 +503,59 @@ export function ItinerarySinglePageView({
 
             {/* Sân khấu dính: nơi của mốc đang đọc */}
             <aside
+              ref={stageWheelRef}
               aria-label="Ảnh và bản đồ của mốc đang đọc"
-              className="hidden lg:flex lg:col-start-8 lg:col-span-5 sticky top-[calc(var(--bar-h)+1.5rem)] self-start h-[min(calc(100svh-var(--bar-h)-3rem),50rem)] flex-col"
+              className={`hidden lg:flex lg:col-start-8 lg:col-span-5 sticky top-[calc(var(--bar-h)+var(--day-bar-h)+1rem)] self-start flex-col ${
+                // Đang xem ảnh: sân khấu cao theo ảnh; bản đồ và vé chữ cần chiều cao cố định
+                showMapOnStage ? 'h-[min(calc(100svh-var(--bar-h)-var(--day-bar-h)-2rem),50rem)]' : ''
+              }`}
             >
-              <div className="relative flex-1 min-h-0">
+              {/* Ba tab bìa hồ sơ: tab đang mở cùng màu và liền với trang bên dưới */}
+              {activeEvent && (
+                <div role="tablist" aria-label="Nội dung của mốc" className="folder-tabs shrink-0">
+                  {stageTabs.map((t) => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      role="tab"
+                      aria-selected={t.id === stageTab}
+                      data-tab={t.id}
+                      data-empty={t.count === 0}
+                      onClick={() => pickStageTab(t.id)}
+                      className="folder-tab"
+                    >
+                      {/* Nền và viền của tab */}
+                      <span aria-hidden="true" className="folder-tab-shape" />
+                      {t.label}
+                      {t.id !== 'map' && <span className="tabular opacity-60">{t.count}</span>}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              <div
+                data-tab={stageTab}
+                className={`folder-page relative ${showPhotoOnStage ? '' : showMapOnStage ? 'flex-1 min-h-0' : 'aspect-[4/3]'}`}
+              >
                 {stagePhotos.length > 0 && (
                   <PhotoFrame
                     kind={photoKind(stageLead)}
                     detail={photoTagDetail(stageLead)}
-                    className={`absolute inset-0 transition-opacity duration-500 ${
-                      stageLead && !showMapOnStage ? 'opacity-100' : 'opacity-0 pointer-events-none'
-                    }`}
+                    hideTag
+                    className={showPhotoOnStage ? '' : 'absolute inset-0 opacity-0 pointer-events-none'}
                   >
-                    <span className="relative flex-1 min-h-0 flex">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (!activeEvent) return;
-                          const { tab, index } = galleryTarget(activePhotos.realPhotos, stageOffset);
-                          openGallery(activeEvent, tab, 'lightbox', index);
-                        }}
-                        disabled={!stageLead}
-                        aria-label={activeEvent ? `Phóng to ảnh của ${activeEvent.location_name}` : 'Xem ảnh'}
-                        className="flex-1 flex cursor-zoom-in"
+                    <span className="stage-photo relative flex">
+                      <span
+                        className="flex-1 flex"
+                        // Ảnh cao nhất bằng sân khấu trừ hàng tab, viền khung, hàng chấm vị trí,
+                        // hàng ảnh mini và dòng đếm (khi có)
+                        style={
+                          {
+                            '--stack-max-h': `calc(min(100svh - var(--bar-h) - var(--day-bar-h) - 2rem, 50rem) - ${
+                              tabPhotos.length > 1 ? '12rem' : '6.5rem'
+                            })`,
+                          } as React.CSSProperties
+                        }
                       >
                         <PhotoStack
                           photos={stagePhotos.map((p) => ({
@@ -440,23 +565,58 @@ export function ItinerarySinglePageView({
                           }))}
                           active={stageIndex}
                           fast
+                          fit
                           className="flex-1"
                         />
-                      </button>
-                      {stageLead && !showMapOnStage && (
-                        <PhotoNav
-                          index={stageOffset}
-                          count={activePhotoTotal}
-                          onPrev={() => stepStage(-1)}
-                          onNext={() => stepStage(1)}
-                        />
+                      </span>
+
+                      {showPhotoOnStage && stageLead && activeEvent && (
+                        <>
+                          {/* Góc trên phải: nút thông tin, bấm để mở / thu viên bo tròn ghi tên ảnh */}
+                          <span className="photo-info" data-open={stageInfoOpen}>
+                            <button
+                              type="button"
+                              onClick={() => setStageInfoOpen((o) => !o)}
+                              aria-expanded={stageInfoOpen}
+                              aria-label={stageInfoOpen ? 'Ẩn tên ảnh' : 'Xem tên ảnh'}
+                              className="photo-icon-btn"
+                            >
+                              <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <circle cx="12" cy="12" r="9" />
+                                <path d="M12 11v5.5M12 7.6v.4" />
+                              </svg>
+                            </button>
+                            <span className="photo-info-text" aria-hidden={!stageInfoOpen}>
+                              {stageLead.caption || activeEvent.location_name}
+                            </span>
+                          </span>
+
+                          {/* Góc dưới phải: nút toàn màn hình, mở trang xem ảnh phóng to */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const { tab, index } = galleryTarget(activePhotos.realPhotos, flatOffset);
+                              openGallery(activeEvent, tab, 'lightbox', index);
+                            }}
+                            aria-label={`Xem toàn màn hình ảnh của ${activeEvent.location_name}`}
+                            className="photo-icon-btn photo-fullscreen"
+                          >
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                              <path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" />
+                            </svg>
+                          </button>
+                        </>
                       )}
                     </span>
+                    {/* Hàng gạch vị trí ảnh nằm trên lề dưới của khung */}
+                    {showPhotoOnStage && (
+                      <PhotoDots index={stageOffset} count={tabPhotos.length} onPick={pickStagePhoto} />
+                    )}
                   </PhotoFrame>
                 )}
 
                 {showMapOnStage && activeEvent && (
-                  <div className="absolute inset-0">
+                  <div className="absolute inset-0 bg-paper p-2.5">
                     <TimelineRouteMap
                       key={activeEvent.id}
                       map_embed_url={activeEvent.map_embed_url}
@@ -466,9 +626,23 @@ export function ItinerarySinglePageView({
                   </div>
                 )}
 
+                {/* Tab đang mở chưa có nội dung: trang hồ sơ trống, gợi ý sang tab khác */}
+                {stageTabEmpty && activeEvent && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 p-10 text-center">
+                    <p className="text-lead">
+                      {stageTab === 'map'
+                        ? 'Mốc này chưa có bản đồ'
+                        : stageTab === 'ref'
+                        ? 'Mốc này chưa có ảnh tham khảo'
+                        : 'Mốc này chưa có ảnh thực tế'}
+                    </p>
+                    <p className="text-small opacity-75">Chọn tab khác phía trên để xem nội dung đã có.</p>
+                  </div>
+                )}
+
                 {/* Mốc không có ảnh lẫn bản đồ: tấm vé chữ của chính mốc đó */}
-                {!stageLead && !activeHasMap && activeEvent && (
-                  <div className="absolute inset-0 bg-accent text-accent-ink p-10 flex flex-col justify-between">
+                {stageBlank && activeEvent && (
+                  <div className="absolute inset-2.5 bg-accent text-accent-ink p-10 flex flex-col justify-between">
                     <p className="text-display leading-none tabular">
                       {splitTimeSlot(activeEvent.time_slot).start}
                     </p>
@@ -477,40 +651,22 @@ export function ItinerarySinglePageView({
                 )}
               </div>
 
-              {activeEvent && (
-                <div className="pt-4 flex items-start justify-between gap-6 text-small">
-                  <p className="min-w-0">
-                    {showMapOnStage
-                      ? ''
-                      : stageLead
-                      ? `${stageLead.caption || activeEvent.location_name}${
-                          stageLead.is_real_photo !== false && stageLead.exif_info ? `. ${stageLead.exif_info}` : ''
-                        }`
-                      : `${activeEvent.location_name}, chưa có ảnh`}
-                  </p>
-                  <div className="flex items-center gap-4 shrink-0">
-                    {stageLead && activeHasMap && (
-                      <button
-                        type="button"
-                        onClick={() => setMapEventId(stageView === 'map' ? null : activeEvent.id)}
-                        className="text-link font-semibold cursor-pointer"
-                      >
-                        {stageView === 'map' ? 'Xem ảnh' : 'Xem tuyến đường'}
-                      </button>
-                    )}
-                    {activePhotoTotal > 1 && (
-                      <button
-                        type="button"
-                        onClick={() =>
-                          openGallery(activeEvent, activePhotos.realPhotos.length > 0 ? 'real' : 'ref', 'grid')
-                        }
-                        className="text-link font-semibold cursor-pointer"
-                      >
-                        Xem {activePhotoTotal} ảnh
-                      </button>
-                    )}
-                  </div>
-                </div>
+              {/*
+                Hàng ảnh mini dưới khung: các ảnh của tab đang mở. Không đủ chỗ cho hết ảnh trên một dòng thì
+                hai đầu hàng có nút mũi tên để trượt xem tiếp, kèm dòng đếm "xx ảnh / yy ảnh".
+                key theo mốc + tab để hàng về đầu khi đổi mốc hoặc đổi tab.
+              */}
+              {showPhotoOnStage && activeEvent && (
+                <PhotoThumbs
+                  key={`${activeEvent.id}-${stageTab}`}
+                  photos={tabPhotos.map((img) => ({
+                    key: img.id,
+                    src: cloudinaryThumbUrl(img.cloudinary_url),
+                    alt: img.caption || activeEvent.location_name,
+                  }))}
+                  index={stageOffset}
+                  onPick={pickStagePhoto}
+                />
               )}
             </aside>
           </div>
