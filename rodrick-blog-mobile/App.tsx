@@ -1,45 +1,35 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React from 'react';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { ThemeProvider } from './src/theme';
+import { AuthProvider, useAuth } from './src/features/auth/AuthProvider';
+import { Button, Screen, Text } from './src/shared/ui';
+import { LoginScreen } from './src/features/auth';
 
-import { NewAppScreen } from '@react-native/new-app-screen';
-import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
-import {
-  SafeAreaProvider,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
+function Root() {
+  const { status, username, signOut } = useAuth();
 
-function App() {
-  const isDarkMode = useColorScheme() === 'dark';
+  if (status === 'loading') {
+    return null; // sau này thay bằng bootsplash
+  }
+  if (status === 'signedOut') {
+    return <LoginScreen />;
+  }
+  return (
+    <Screen title="Trang chủ">
+      <Text>Đã đăng nhập: {username}</Text>
+      <Button title="Đăng xuất" variant="secondary" onPress={signOut} />
+    </Screen>
+  );
+}
 
+export default function App() {
   return (
     <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppContent />
+      <ThemeProvider>
+        <AuthProvider>
+          <Root />
+        </AuthProvider>
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }
-
-function AppContent() {
-  const safeAreaInsets = useSafeAreaInsets();
-
-  return (
-    <View style={styles.container}>
-      <NewAppScreen
-        templateFileName="App.tsx"
-        safeAreaInsets={safeAreaInsets}
-      />
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
-
-export default App;

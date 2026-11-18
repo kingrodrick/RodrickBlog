@@ -1,0 +1,7 @@
+{
+  "java.compile.nullAnalysis.mode": "automatic",
+  "eslint.workingDirectories": [
+    { "directory": "rodrick-blog-mobile", "changeProcessCWD": true }
+  ]
+}
+  
