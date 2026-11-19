@@ -41,7 +41,7 @@ Màn hình chỉ ghép component từ `shared/ui` (và component của chính fe
 2. Bo góc: nhãn 8, nút/ô nhập 12, thẻ/vé 16, hộp thoại/sheet 24, chip/nút icon tròn (pill).
 3. Không dùng icon đi kèm chữ. Icon chỉ đứng một mình (nút icon, footer) và chỉ khi cần thu gọn. Ngoại lệ duy nhất: icon trạng thái trong toast/cảnh báo.
 4. Bố cục mọi màn: header (tiêu đề) / body (nội dung cuộn) / footer (4 icon điều hướng: Trang chủ, Giấy tờ, Ảnh, Cài đặt). Màn đăng nhập không có footer.
-5. Không viền, không bóng. Thẻ nổi lên bằng bước tông màu so với nền.
+5. Không viền, không bóng. Thẻ nổi lên bằng bước tông màu so với nền. Ngoại lệ có chủ đích: ô chọn giao diện ở Cài đặt, ô đang chọn có khung màu nhấn dày 3 bao ngoài (dựng bằng `View` đệm 3 nền màu nhấn, không dùng `borderWidth`).
 6. Một màu nhấn duy nhất: Torii #b61c25.
 7. Giấy tờ, ảnh, bản đồ gắn theo từng mốc (event) ở màn chi tiết mốc. Tab Giấy tờ/Ảnh là tổng hợp mọi thứ. Bản đồ không nhúng: nút "Chỉ đường" mở app Google Maps.
 8. Bảng giấy tờ chưa có trên server: tab Giấy tờ hiện trạng thái trống ở giai đoạn đầu.
@@ -65,6 +65,7 @@ Màn hình chỉ ghép component từ `shared/ui` (và component của chính fe
 | Ảnh tham khảo (nền / nhãn) | #f4ead6 / #7a5a22 | #2a2318 / #e2c48c |
 Chấm loại mốc (sáng / tối): Di chuyển #2d4a7a/#8fadde · Ẩm thực #a0611a/#e0a75e · Danh thắng #b61c25/#ff6b6f · Nghỉ ngơi #4e6b3a/#9cc283 · Chụp ảnh #57514b/#c4bfb6.
 Giao diện: theo máy / sáng / tối, chọn ở Cài đặt, lưu cục bộ.
+Nền màn: hoa văn sóng seigaiha (`shared/ui/PatternBackground`, `Screen` tự vẽ), viền trắng độ đục 0.85 (sáng) / 0.07 (tối) trên màu nền màn.
 
 ## Token chữ (px)
 display 34/40 đậm 700 · title 28/34 đậm 700 · heading 18/24 600 · lead 18/26 · body 16/24 · label 14/20 600 · caption 13/18 · overline 12/16 chữ hoa 600 giãn chữ 0.6.

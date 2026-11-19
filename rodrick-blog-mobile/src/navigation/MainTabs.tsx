@@ -7,6 +7,8 @@ import {
 import { Circle, Path } from 'react-native-svg';
 import { House, FileText, Image, Settings } from 'lucide-react-native';
 import { darkColors, iconSize, iconStroke, useTheme } from '../theme';
+import { useAuth } from '../features/auth/AuthProvider';
+import { SettingsScreen } from '../features/settings';
 import { HomeStack } from './HomeStack';
 import { MainTabParamList } from './type';
 
@@ -119,13 +121,19 @@ function FooterBar({ state, navigation }: BottomTabBarProps) {
 // tabBar được gọi như hàm thường, nên phải bọc FooterBar thành element để hook chạy đúng chỗ.
 const renderTabBar = (props: BottomTabBarProps) => <FooterBar {...props} />;
 
+/** Nối phiên đăng nhập vào màn Cài đặt, để hai feature không import chéo nhau. */
+function SettingsTab() {
+  const { username, signOut } = useAuth();
+  return <SettingsScreen username={username} onSignOut={signOut} />;
+}
+
 export function MainTabs() {
   return (
     <Tab.Navigator tabBar={renderTabBar} screenOptions={{ headerShown: false }}>
       <Tab.Screen name="Home" component={HomeStack} />
       <Tab.Screen name="Documents" component={() => <></>} />
       <Tab.Screen name="Photos" component={() => <></>} />
-      <Tab.Screen name="Settings" component={() => <></>} />
+      <Tab.Screen name="Settings" component={SettingsTab} />
     </Tab.Navigator>
   );
 }

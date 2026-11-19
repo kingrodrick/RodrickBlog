@@ -2,6 +2,7 @@ import React from 'react';
 import { ScrollView, StatusBar, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { layout, useTheme } from '../../theme';
+import { PatternBackground } from './PatternBackground';
 import { Text } from './Text';
 
 type Props = {
@@ -33,6 +34,7 @@ export function Screen({
   const { colors, isDark } = useTheme();
   return (
     <SafeAreaView style={[styles.root, { backgroundColor: colors.background }]}>
+      <PatternBackground />
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
       {title || headerLeft || headerRight ? (
         <View style={styles.header}>

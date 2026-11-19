@@ -13,3 +13,4 @@ export * from './Ticket';
 export * from './Skeleton';
 export * from './States';
 export * from './Screen';
+export * from './PatternBackground';

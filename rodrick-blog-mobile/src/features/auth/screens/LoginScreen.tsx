@@ -1,5 +1,5 @@
 import { KeyboardAvoidingView, Platform, ScrollView, StatusBar, StyleSheet, View } from 'react-native';
-import { Button, Text, TextField } from '../../../shared/ui';
+import { Button, PatternBackground, Text, TextField } from '../../../shared/ui';
 import { layout, useTheme } from '../../../theme';
 import { useAuth } from '../AuthProvider';
 import { useState } from 'react';
@@ -35,6 +35,7 @@ export function LoginScreen() {
 
   return (
     <SafeAreaView style={[styles.root, { backgroundColor: colors.background }]}>
+      <PatternBackground />
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
       <KeyboardAvoidingView
         style={styles.root}
