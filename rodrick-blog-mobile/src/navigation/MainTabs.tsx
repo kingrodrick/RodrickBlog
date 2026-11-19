@@ -13,7 +13,7 @@ import { MainTabParamList } from './type';
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 /** Thanh tab: nền đen hơi trong, icon sáng. */
-const BAR_ALPHA = 0.88;
+const BAR_ALPHA = 0.6;
 const BAR_BG = `rgba(0,0,0,${BAR_ALPHA})`;
 const ICON_COLOR = darkColors.text;
 
