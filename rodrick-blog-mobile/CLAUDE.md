@@ -15,7 +15,7 @@ App di động (React Native CLI thuần, KHÔNG Expo) cho blog ảnh/du lịch 
 Mọi giá trị dưới đây lấy từ hai nguồn này; nếu lệch thì canvas thắng.
 
 ## Công nghệ
-React Native CLI, TypeScript, React Navigation (native-stack + bottom-tabs), react-native-safe-area-context, react-native-screens, react-native-svg, lucide-react-native (icon), react-native-reanimated, react-native-keychain (lưu phiên), react-native-bootsplash, `Linking` mở Google Maps. Không dùng Expo, không dùng thư viện UI dựng sẵn.
+React Native CLI, TypeScript, React Navigation (native-stack + bottom-tabs), react-native-safe-area-context, react-native-screens, react-native-svg, lucide-react-native (icon), react-native-reanimated, react-native-keychain (lưu phiên), react-native-bootsplash, react-native-image-picker (chọn ảnh để tải lên Cloudinary), `Linking` mở Google Maps. Không dùng Expo, không dùng thư viện UI dựng sẵn.
 
 ## Cấu trúc thư mục
 ```
@@ -71,7 +71,7 @@ display 34/40 đậm 700 · title 28/34 đậm 700 · heading 18/24 600 · lead 
 
 ## Khoảng cách và icon
 Bước 4: 4·8·12·16·20·24. Lề màn 20, khe giữa thẻ 12, đệm trong thẻ 16.
-Icon Lucide nét 1.75, đầu nét tròn; cỡ 16 (trong dòng chữ), 22 (nút, footer), 32 (trạng thái trống). Mục footer đang chọn: nét 2.25 + nền viên thuốc 64×40.
+Icon Lucide nét 1.75, đầu nét tròn; cỡ 16 (trong dòng chữ), 22 (nút, footer), 32 (trạng thái trống). Footer: nền đen trong suốt 88% (`rgba(0,0,0,0.88)`), icon màu chữ chính của giao diện tối. Mục đang chọn: icon tô đặc (fill), chi tiết bên trong khoét bằng màu thanh; không dùng khối nền dưới icon.
 
 ## Đặc tả component nền tảng
 **Button** — kiểu: primary, secondary, danger, link. Cỡ: lg 56 (padding ngang 28), md 48 (24), sm 36 (14); chữ 16/16/14 đậm 600; bo 12. Bị khoá: opacity 0.45. Đang tải: thay chữ bằng ActivityIndicator, giữ nguyên độ rộng. Đang nhấn: tối đi một bước. Link: chữ gạch chân, nền trong suốt. Đứng một mình thì rộng kín chiều ngang.

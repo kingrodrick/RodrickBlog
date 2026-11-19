@@ -2,17 +2,18 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { ChevronLeft } from 'lucide-react-native';
-import { EmptyState, IconButton, Screen, Text } from '../../../shared/ui';
-import { iconSize, iconStroke } from '../../../theme';
-import { MOCK_TRIPS } from '../../home';
+import {
+  EmptyState,
+  ErrorState,
+  IconButton,
+  Screen,
+  Skeleton,
+  Text,
+} from '../../../shared/ui';
+import { fetchTrips, Trip } from '../../../shared/api/trips';
+import { useAsync } from '../../../shared/hooks/useAsync';
+import { iconSize, iconStroke, radius } from '../../../theme';
 import { TripCard } from '../components/TripCard';
-
-const upcoming = MOCK_TRIPS.filter(t => t.status !== 'completed').sort((a, b) =>
-  a.startDate.localeCompare(b.startDate),
-);
-const past = MOCK_TRIPS.filter(t => t.status === 'completed').sort((a, b) =>
-  b.startDate.localeCompare(a.startDate),
-);
 
 const renderBack = (c: string) => (
   <ChevronLeft
@@ -23,20 +24,16 @@ const renderBack = (c: string) => (
   />
 );
 
-export function TripsListScreen() {
-  const navigation = useNavigation();
+function TripSections({ trips }: { trips: Trip[] }) {
+  const upcoming = trips
+    .filter(t => t.status !== 'completed')
+    .sort((a, b) => a.startDate.localeCompare(b.startDate));
+  const past = trips
+    .filter(t => t.status === 'completed')
+    .sort((a, b) => b.startDate.localeCompare(a.startDate));
+
   return (
-    <Screen
-      title="Danh sách chuyến đi"
-      headerLeft={
-        <IconButton
-          variant="ghost"
-          accessibilityLabel="Quay lại"
-          onPress={() => navigation.goBack()}
-          icon={renderBack}
-        />
-      }
-    >
+    <>
       <Text variant="overline" tone="secondary">
         Sắp tới
       </Text>
@@ -56,6 +53,33 @@ export function TripsListScreen() {
         <Text tone="muted">
           Chuyến đã hoàn thành sẽ xếp ở đây, mới nhất lên trước.
         </Text>
+      )}
+    </>
+  );
+}
+
+export function TripsListScreen() {
+  const navigation = useNavigation();
+  const { data, loading, error, reload } = useAsync(fetchTrips);
+
+  return (
+    <Screen
+      title="Danh sách chuyến đi"
+      headerLeft={
+        <IconButton
+          variant="ghost"
+          accessibilityLabel="Quay lại"
+          onPress={() => navigation.goBack()}
+          icon={renderBack}
+        />
+      }
+    >
+      {loading ? (
+        <Skeleton height={340} borderRadius={radius.card} />
+      ) : error ? (
+        <ErrorState message="Không tải được chuyến đi." onRetry={reload} />
+      ) : (
+        <TripSections trips={data ?? []} />
       )}
     </Screen>
   );

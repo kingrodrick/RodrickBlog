@@ -8,7 +8,7 @@ import {
   tripLength,
 } from '../../../shared/utils/format';
 import { radius, useTheme } from '../../../theme';
-import { Trip, TripStatus } from '../../home';
+import { Trip, TripStatus } from '../../../shared/api/trips';
 
 const STATUS_LABEL: Record<TripStatus, string> = {
   planning: 'Đang lên kế hoạch',

@@ -1,3 +1,4 @@
+import { slotStartTime } from '../src/shared/api/trips';
 import {
   pickNearestTrip,
   tripDayProgress,
@@ -15,6 +16,7 @@ const trip = (
   status,
   startDate,
   endDate,
+  slug: id,
   places: [],
   events: [],
 });
@@ -51,5 +53,15 @@ describe('tripDayProgress', () => {
   it('tính ngày thứ mấy trên tổng số ngày', () => {
     const t = trip('x', 'ongoing', '2026-11-17', '2026-11-24');
     expect(tripDayProgress(t, now)).toEqual({ day: 3, total: 8 });
+  });
+});
+
+describe('slotStartTime', () => {
+  it('đọc giờ bắt đầu từ time_slot tự do', () => {
+    expect(slotStartTime('08:30 - 10:30')).toBe('08:30');
+    expect(slotStartTime('09h15')).toBe('09:15');
+    expect(slotStartTime('Chiều 3:45')).toBe('15:45');
+    expect(slotStartTime('20:00 (11/12) - 08:30 (12/12)')).toBe('20:00');
+    expect(slotStartTime(null)).toBe('00:00');
   });
 });
