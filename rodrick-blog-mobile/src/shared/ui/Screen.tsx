@@ -5,7 +5,10 @@ import { layout, useTheme } from '../../theme';
 import { Text } from './Text';
 
 type Props = {
-  title: string;
+  /** Bỏ trống khi màn tự đặt tiêu đề trong phần cuộn (ví dụ Trang chủ). */
+  title?: string;
+  /** Vùng trái của header, ví dụ nút quay lại. */
+  headerLeft?: React.ReactNode;
   children: React.ReactNode;
   /** Vùng phải của header, ví dụ một IconButton. */
   headerRight?: React.ReactNode;
@@ -18,23 +21,40 @@ type Props = {
 };
 
 /** Bố cục mọi màn: header / body cuộn / footer. */
-export function Screen({ title, children, headerRight, footer, banner, scroll = true }: Props) {
+export function Screen({
+  title,
+  children,
+  headerLeft,
+  headerRight,
+  footer,
+  banner,
+  scroll = true,
+}: Props) {
   const { colors, isDark } = useTheme();
   return (
     <SafeAreaView style={[styles.root, { backgroundColor: colors.background }]}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
-      <View style={styles.header}>
-        <Text variant="title" accessibilityRole="header" style={styles.headerTitle} numberOfLines={1}>
-          {title}
-        </Text>
-        {headerRight}
-      </View>
+      {title || headerLeft || headerRight ? (
+        <View style={styles.header}>
+          {headerLeft}
+          <Text
+            variant="title"
+            accessibilityRole="header"
+            style={styles.headerTitle}
+            numberOfLines={1}
+          >
+            {title}
+          </Text>
+          {headerRight}
+        </View>
+      ) : null}
       {banner ? <View style={styles.banner}>{banner}</View> : null}
       {scroll ? (
         <ScrollView
           style={styles.flex}
           contentContainerStyle={styles.content}
-          showsVerticalScrollIndicator={false}>
+          showsVerticalScrollIndicator={false}
+        >
           {children}
         </ScrollView>
       ) : (
@@ -58,6 +78,10 @@ const styles = StyleSheet.create({
   },
   headerTitle: { flex: 1 },
   banner: { paddingHorizontal: layout.screenMargin, marginBottom: 8 },
-  content: { paddingHorizontal: layout.screenMargin, paddingBottom: 24, gap: layout.cardGap },
+  content: {
+    paddingHorizontal: layout.screenMargin,
+    paddingBottom: 24,
+    gap: layout.cardGap,
+  },
   footer: { paddingHorizontal: layout.screenMargin, paddingBottom: 8 },
 });

@@ -1,9 +1,12 @@
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { createBottomTabNavigator, BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import {
+  createBottomTabNavigator,
+  BottomTabBarProps,
+} from '@react-navigation/bottom-tabs';
 import { House, FileText, Image, Settings } from 'lucide-react-native';
 import { iconSize, iconStroke, useTheme } from '../theme';
-import { HomeScreen } from '../features/home';
+import { HomeStack } from './HomeStack';
 import { MainTabParamList } from './type';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -29,8 +32,14 @@ function FooterBar({ state, navigation }: BottomTabBarProps) {
             accessibilityLabel={label}
             accessibilityState={{ selected: focused }}
             onPress={() => !focused && navigation.navigate(route.name)}
-            style={styles.item}>
-            <View style={[styles.pill, focused && { backgroundColor: colors.surfaceMuted }]}>
+            style={styles.item}
+          >
+            <View
+              style={[
+                styles.pill,
+                focused && { backgroundColor: colors.surfaceMuted },
+              ]}
+            >
               <Icon
                 size={iconSize.control}
                 color={colors.text}
@@ -45,10 +54,13 @@ function FooterBar({ state, navigation }: BottomTabBarProps) {
   );
 }
 
+// tabBar được gọi như hàm thường, nên phải bọc FooterBar thành element để hook chạy đúng chỗ.
+const renderTabBar = (props: BottomTabBarProps) => <FooterBar {...props} />;
+
 export function MainTabs() {
   return (
-    <Tab.Navigator tabBar={FooterBar} screenOptions={{ headerShown: false }}>
-      <Tab.Screen name="Home" component={HomeScreen} />
+    <Tab.Navigator tabBar={renderTabBar} screenOptions={{ headerShown: false }}>
+      <Tab.Screen name="Home" component={HomeStack} />
       {/* <Tab.Screen name="Documents" component={DocumentsScreen} />
       <Tab.Screen name="Photos" component={PhotosScreen} />
       <Tab.Screen name="Settings" component={SettingsScreen} /> */}
@@ -58,6 +70,17 @@ export function MainTabs() {
 
 const styles = StyleSheet.create({
   bar: { flexDirection: 'row', paddingVertical: 8 },
-  item: { flex: 1, alignItems: 'center', justifyContent: 'center', minHeight: 44 },
-  pill: { width: 64, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+  item: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 44,
+  },
+  pill: {
+    width: 64,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });

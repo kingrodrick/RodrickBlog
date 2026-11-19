@@ -20,7 +20,7 @@ type Props = {
   onModeChange?: (mode: ThemeMode) => void;
 };
 
-export function ThemeProvider({ children, initialMode = 'system', onModeChange }: Props) {
+export function ThemeProvider({ children, initialMode = 'light', onModeChange }: Props) {
   const system = useColorScheme();
   const [mode, setModeState] = useState<ThemeMode>(initialMode);
 

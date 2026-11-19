@@ -1,3 +1,5 @@
+import { NavigatorScreenParams } from '@react-navigation/native';
+
 export type RootStackParamList = {
   Login: undefined;
   Main: undefined;
@@ -5,8 +7,14 @@ export type RootStackParamList = {
   EventDetail: { eventId: string };
 };
 
+/** Stack nằm trong tab Trang chủ, nên footer vẫn hiện ở các màn con. */
+export type HomeStackParamList = {
+  HomeMain: undefined;
+  TripsList: undefined;
+};
+
 export type MainTabParamList = {
-  Home: undefined;
+  Home: NavigatorScreenParams<HomeStackParamList> | undefined;
   Documents: undefined;
   Photos: undefined;
   Settings: undefined;
