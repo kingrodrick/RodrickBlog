@@ -15,6 +15,8 @@ import {
   NavigationContainer,
 } from '@react-navigation/native';
 import { MainTabs } from './src/navigation/MainTabs';
+import { navigationRef } from './src/navigation/navigationRef';
+import { ShareReceiver } from './src/features/trips';
 
 function Root() {
   const { status } = useAuth();
@@ -35,8 +37,10 @@ function Root() {
     return <LoginScreen />;
   }
   return (
-    <NavigationContainer theme={navTheme}>
+    <NavigationContainer ref={navigationRef} theme={navTheme}>
       <MainTabs />
+      {/* Nhận liên kết Google Maps từ nút Chia sẻ (chỉ khi đã đăng nhập). */}
+      <ShareReceiver />
     </NavigationContainer>
   );
 }

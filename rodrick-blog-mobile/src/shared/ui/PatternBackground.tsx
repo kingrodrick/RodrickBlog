@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, useWindowDimensions } from 'react-native';
 import Svg, { Circle, Defs, G, Pattern, Rect } from 'react-native-svg';
 import { useTheme } from '../../theme';
 
@@ -21,9 +21,12 @@ const RINGS = [14, 8.6, 3.2];
 export function PatternBackground() {
   const { colors, isDark } = useTheme();
   const strokeOpacity = isDark ? 0.07 : 0.85;
+  // Kích thước cụ thể thay vì absoluteFill/100%: react-native-svg không vẽ lại khi xoay màn,
+  // nền chỉ phủ theo bề ngang lúc dựng. Đổi kích thước cửa sổ thì Svg dựng lại đủ khung.
+  const { width, height } = useWindowDimensions();
 
   return (
-    <Svg style={StyleSheet.absoluteFill} pointerEvents="none">
+    <Svg style={styles.fill} width={width} height={height} pointerEvents="none">
       <Defs>
         <Pattern
           id="seigaiha"
@@ -49,8 +52,12 @@ export function PatternBackground() {
           ))}
         </Pattern>
       </Defs>
-      <Rect width="100%" height="100%" fill={colors.background} />
-      <Rect width="100%" height="100%" fill="url(#seigaiha)" />
+      <Rect width={width} height={height} fill={colors.background} />
+      <Rect width={width} height={height} fill="url(#seigaiha)" />
     </Svg>
   );
 }
+
+const styles = StyleSheet.create({
+  fill: { position: 'absolute', top: 0, left: 0 },
+});

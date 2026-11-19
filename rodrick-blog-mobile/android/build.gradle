@@ -19,3 +19,18 @@ buildscript {
 }
 
 apply plugin: "com.facebook.react.rootproject"
+
+// Windows giới hạn đường dẫn 260 ký tự (MAX_PATH). Thư mục build C++ mặc định của
+// react-native-nitro-share-intent nằm sâu trong node_modules, đường dẫn tới file prefab dài 263 ký tự
+// nên ninja không đọc được ("build.ninja still dirty after 100 tries"). Dời .cxx của thư viện này
+// về android/.cxx/nsi cho ngắn lại (còn khoảng 222 ký tự).
+// Thư viện này cũng không khai báo ndkVersion nên AGP dùng NDK mặc định (28.x), lệch với NDK
+// của app/React Native (27.1) và app crash lúc mở ("__cxa_init_primary_exception"). Ép dùng chung NDK.
+subprojects { p ->
+    if (p.name == "react-native-nitro-share-intent") {
+        p.plugins.withId("com.android.library") {
+            p.android.ndkVersion = rootProject.ext.ndkVersion
+            p.android.externalNativeBuild.cmake.buildStagingDirectory = new File(rootDir, ".cxx/nsi")
+        }
+    }
+}

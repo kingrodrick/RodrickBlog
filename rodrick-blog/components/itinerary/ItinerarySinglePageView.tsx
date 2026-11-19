@@ -12,6 +12,7 @@ import {
   galleryTarget,
 } from './TimelineItemCard';
 import { TimelineRouteMap } from './TimelineRouteMap';
+import { WEB_MAP_ENABLED } from '@/lib/featureFlags';
 import { ImageLightboxModal } from '@/components/gallery/ImageLightboxModal';
 import { PhotoStack } from '@/components/ui/PhotoStack';
 import { PhotoFrame, photoKind, photoTagDetail } from '@/components/ui/PhotoFrame';
@@ -276,16 +277,19 @@ export function ItinerarySinglePageView({
 
   const activePhotos = splitEventPhotos(activeEvent?.images);
   const activePhotoTotal = activePhotos.realPhotos.length + activePhotos.refPhotos.length;
-  const activeHasMap = !!activeEvent?.map_embed_url && activeEvent.map_embed_url.trim().length > 0;
+  const activeHasMap =
+    WEB_MAP_ENABLED && !!activeEvent?.map_embed_url && activeEvent.map_embed_url.trim().length > 0;
 
-  // Ba tab của sân khấu luôn hiện như tab bìa hồ sơ; tab chưa có nội dung vẫn mở được (trang trống)
+  // Các tab của sân khấu luôn hiện như tab bìa hồ sơ; tab chưa có nội dung vẫn mở được (trang trống).
+  // Tab Bản đồ chỉ có khi bật WEB_MAP_ENABLED.
   const stageTabs = [
     { id: 'real' as const, label: 'Ảnh thực tế', count: activePhotos.realPhotos.length },
     { id: 'ref' as const, label: 'Ảnh tham khảo', count: activePhotos.refPhotos.length },
-    { id: 'map' as const, label: 'Bản đồ', count: activeHasMap ? 1 : 0 },
+    ...(WEB_MAP_ENABLED ? [{ id: 'map' as const, label: 'Bản đồ', count: activeHasMap ? 1 : 0 }] : []),
   ];
   const pick = activeEvent && stagePick?.eventId === activeEvent.id ? stagePick : null;
-  const stageTab: StageTab = pick?.tab ?? stageTabs.find((t) => t.count > 0)?.id ?? 'real';
+  const pickTab = pick && stageTabs.some((t) => t.id === pick.tab) ? pick.tab : undefined;
+  const stageTab: StageTab = pickTab ?? stageTabs.find((t) => t.count > 0)?.id ?? 'real';
   // Mốc không có gì cả: hiện tấm vé chữ thay cho trang trống
   const stageBlank = activePhotoTotal === 0 && !activeHasMap;
   const stageTabEmpty = !stageBlank && (stageTabs.find((t) => t.id === stageTab)?.count ?? 0) === 0;

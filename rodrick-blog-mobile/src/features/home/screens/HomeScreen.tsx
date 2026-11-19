@@ -75,10 +75,10 @@ export function HomeScreen() {
         <NearestTripStatus trip={trip} />
         <NearestTripCard
           trip={trip}
-          // TODO: điều hướng tới TripDetailScreen khi màn này được dựng.
-          onPress={() => {}}
-          // TODO: điều hướng tới EventDetailScreen khi màn này được dựng.
-          onEventPress={() => {}}
+          onPress={() => navigation.navigate('TripDetail', { tripId: trip.id })}
+          onEventPress={event =>
+            navigation.navigate('EventDetail', { tripId: trip.id, eventId: event.id })
+          }
         />
       </>
     );

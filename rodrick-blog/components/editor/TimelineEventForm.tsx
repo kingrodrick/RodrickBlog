@@ -10,6 +10,7 @@ import {
   calculateDayNumberFromDates,
 } from '@/lib/timeUtils';
 import { AdminRoutePickerMap } from '@/components/itinerary/AdminRoutePickerMap';
+import { WEB_MAP_ENABLED } from '@/lib/featureFlags';
 
 interface TimelineEventFormProps {
   initialTripId?: number;
@@ -221,7 +222,7 @@ export function TimelineEventForm({
           city: city.trim(),
           category_tag: categoryTag,
           notes: notes.trim() || null,
-          map_embed_url: mapEmbedUrl.trim() || null,
+          ...(WEB_MAP_ENABLED ? { map_embed_url: mapEmbedUrl.trim() || null } : {}),
         },
         validImages
       );
@@ -366,6 +367,7 @@ export function TimelineEventForm({
           )}
         </button>
 
+        {WEB_MAP_ENABLED && (
         <button
           type="button"
           onClick={() => setActiveTab('map')}
@@ -389,6 +391,7 @@ export function TimelineEventForm({
             <span className="absolute bottom-0 inset-x-0 h-[2px] bg-transparent group-hover:bg-[#E6E2DA] transition-colors rounded-t-full" />
           )}
         </button>
+        )}
 
         <button
           type="button"
@@ -688,7 +691,7 @@ export function TimelineEventForm({
     )}
 
         {/* TAB 2: BẢN ĐỒ */}
-        {activeTab === 'map' && (
+        {WEB_MAP_ENABLED && activeTab === 'map' && (
           <div className="space-y-6 animate-in fade-in duration-150">
             {/* Link Bản đồ Google Maps Embed (Tùy chọn) */}
             <div className="space-y-1.5">

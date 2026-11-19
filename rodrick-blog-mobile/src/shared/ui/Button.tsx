@@ -68,9 +68,14 @@ export function Button({
         },
       ]}>
       {/* Chữ luôn được render (ẩn khi tải) để giữ nguyên độ rộng. */}
+      {/* Chữ chiếm hết bề ngang nút + 1 dòng: font hệ thống tuỳ chỉnh (vd. Samsung) vẽ rộng hơn
+          số đo, nếu ôm sát chữ sẽ bị đẩy xuống dòng 2 và mất chữ. */}
       <Text
         variant="label"
+        numberOfLines={1}
         style={{
+          alignSelf: 'stretch',
+          textAlign: 'center',
           color: fg,
           fontSize: s.font,
           lineHeight: s.font + 4,

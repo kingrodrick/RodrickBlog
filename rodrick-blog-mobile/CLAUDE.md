@@ -15,7 +15,7 @@ App di động (React Native CLI thuần, KHÔNG Expo) cho blog ảnh/du lịch 
 Mọi giá trị dưới đây lấy từ hai nguồn này; nếu lệch thì canvas thắng.
 
 ## Công nghệ
-React Native CLI, TypeScript, React Navigation (native-stack + bottom-tabs), react-native-safe-area-context, react-native-screens, react-native-svg, lucide-react-native (icon), react-native-reanimated, react-native-keychain (lưu phiên), react-native-bootsplash, react-native-image-picker (chọn ảnh để tải lên Cloudinary), `Linking` mở Google Maps. Không dùng Expo, không dùng thư viện UI dựng sẵn.
+React Native CLI, TypeScript, React Navigation (native-stack + bottom-tabs), react-native-safe-area-context, react-native-screens, react-native-svg, lucide-react-native (icon), react-native-reanimated, react-native-keychain (lưu phiên), react-native-bootsplash, react-native-image-picker (chọn ảnh để tải lên Cloudinary), react-native-nitro-share-intent + react-native-nitro-modules (nhận liên kết Google Maps từ nút Chia sẻ, chỉ Android), `Linking` mở Google Maps. Không dùng Expo, không dùng thư viện UI dựng sẵn.
 
 ## Cấu trúc thư mục
 ```

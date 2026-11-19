@@ -5,6 +5,7 @@ import { TimelineEvent, GalleryImage } from '@/types/database.type';
 import { optimizeCloudinaryUrl } from '@/lib/cloudinary';
 import { useAuth } from '@/components/auth/AuthContext';
 import { TimelineRouteMap } from './TimelineRouteMap';
+import { WEB_MAP_ENABLED } from '@/lib/featureFlags';
 import { categoryLabel, splitTimeSlot } from '@/lib/tripFormat';
 import { PhotoFrame, photoKind, photoTagDetail } from '@/components/ui/PhotoFrame';
 import { PhotoNav, stepIndex, useSwipe } from '@/components/ui/PhotoNav';
@@ -59,7 +60,7 @@ export function TimelineItemCard({
     () => setPhotoIdx((i) => stepIndex(i, -1, allPhotos.length)),
     () => setPhotoIdx((i) => stepIndex(i, 1, allPhotos.length))
   );
-  const hasMap = !!item.map_embed_url && item.map_embed_url.trim().length > 0;
+  const hasMap = WEB_MAP_ENABLED && !!item.map_embed_url && item.map_embed_url.trim().length > 0;
   const { start, rest, end, endNote, duration } = splitTimeSlot(item.time_slot);
 
   return (

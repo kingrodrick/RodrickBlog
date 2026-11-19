@@ -33,6 +33,8 @@ type DbEvent = {
   id: number;
   day_number: number;
   trip_date: string;
+  /** 'HH:MM:SS', cột có cấu trúc; trống thì rơi về time_slot. */
+  start_time: string | null;
   time_slot: string | null;
   location_name: string;
   images?: DbImage[];
@@ -92,7 +94,9 @@ function toTrip(row: DbTrip): Trip {
   const events = rawEvents
     .map(e => ({
       e,
-      at: `${e.trip_date.slice(0, 10)}T${slotStartTime(e.time_slot)}`,
+      at: `${e.trip_date.slice(0, 10)}T${
+        e.start_time ? e.start_time.slice(0, 5) : slotStartTime(e.time_slot)
+      }`,
     }))
     .sort(
       (a, b) =>
@@ -128,7 +132,7 @@ export async function fetchTrips(): Promise<Trip[]> {
   const rows = await selectRows<DbTrip>(
     'trips',
     'select=id,slug,title,cover_image,start_date,end_date,cities,status,' +
-      'timeline_events(id,day_number,trip_date,time_slot,location_name,images(cloudinary_url,is_real_photo))' +
+      'timeline_events(id,day_number,trip_date,start_time,time_slot,location_name,images(cloudinary_url,is_real_photo))' +
       '&order=start_date.desc',
   );
   return rows.map(toTrip);

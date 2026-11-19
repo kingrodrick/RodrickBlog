@@ -201,7 +201,8 @@ export const ItineraryService = {
         city: eventData.city,
         category_tag: eventData.category_tag,
         notes: eventData.notes || null,
-        map_embed_url: eventData.map_embed_url || null,
+        // Chỉ gửi khi có (bản đồ web đã tắt mặc định, xem lib/featureFlags.ts).
+        ...(eventData.map_embed_url ? { map_embed_url: eventData.map_embed_url } : {}),
       })
       .select()
       .single();

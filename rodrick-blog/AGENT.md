@@ -57,7 +57,10 @@ Hệ thống Database tập trung hoàn toàn vào **Du lịch** và **Nhiếp �
 1. **`collections`**: Lưu các bộ sưu tập / album ảnh có hỗ trợ ảnh bìa (`id`, `slug`, `title`, `description`, `cover_image`, `location_tag`, `display_order`)[cite: 13].
 2. **`trips`**: Lưu thông tin tổng quan chuyến đi có hỗ trợ ảnh banner/đại diện (`id`, `slug`, `title`, `summary`, `cover_image`, `start_date`, `end_date`, `cities`, `status`)[cite: 13].
 3. **`timeline_events`**: Lưu các mốc thời gian chi tiết trong chuyến đi (`id`, `trip_id`, `day_number`, `trip_date`, `time_slot`, `location_name`, `city`, `category_tag`, `notes`, `map_embed_url`)[cite: 13].
-   - `map_embed_url` (`TEXT`): Lưu URL nhúng Google Maps (`https://www.google.com/maps?q=...&output=embed` hoặc URL tùy chọn) hiển thị trực quan qua thẻ `<iframe>` và liên kết dẫn đường trực tiếp trên app.
+   - `map_embed_url` (`TEXT`): dữ liệu cũ, từ 20/11 web không hiển thị và không ghi nữa (giữ cột, chưa xoá). Lộ trình chuyển sang bảng `event_maps` và chỉ sửa trên app mobile.
+   - `start_time`, `end_time` (`TIME`), `end_day_offset` (`SMALLINT`, 1 nếu kết thúc sang hôm sau): giờ có cấu trúc cho mobile; `time_slot` vẫn là nguồn của web.
+5. **`event_maps`** (1-n với `timeline_events`): lộ trình chỉ đường (`seq`, `origin_*`, `destination_*`, `travel_mode`, `waypoints`). Chỉ app mobile ghi.
+6. **`documents`**: giấy tờ theo chuyến/mốc (`trip_id`, `event_id`, `name`, `type` FLIGHT/TRANSPORT/BOOKING, `url` Cloudinary).
 4. **`images`**: Bảng trung tâm lưu ảnh/video từ Cloudinary (`id`, `cloudinary_url`, `caption`, `city`, `camera_gear`, `exif_info`, `collection_id`, `timeline_event_id`, `is_featured`, `is_real_photo`, `taken_at`)[cite: 13].
    - `is_real_photo = true`: Ảnh chụp thực tế từ máy Sony A6400 (kèm thông số EXIF, nhãn xanh lục)[cite: 13].
    - `is_real_photo = false`: Ảnh minh họa / tư liệu tham khảo web cho kế hoạch lịch trình (nhãn xanh dương)[cite: 13].
@@ -258,6 +261,7 @@ export const GalleryService = {
    - **BẮT BUỘC dùng `@theme inline`** thay vì `@theme` thông thường để tránh lỗi trình biên dịch trên Vercel làm đứt gãy biến CSS từ `next/font/google`.
    - Khai báo đầy đủ mảng `weight` trong `app/layout.tsx` và không để bất kỳ font fallback có đuôi nào (`Georgia`, `Times New Roman`, `ui-serif`) trong `globals.css`.
 2. **Quy tắc tích hợp Bản đồ Google Maps (Pure Google Maps Embed / URL):**
+   - **Từ 20/11: web không hiển thị bản đồ, không có ô dán link, không ghi `map_embed_url`.** Bật lại bằng cờ `WEB_MAP_ENABLED` (`lib/featureFlags.ts`, biến `NEXT_PUBLIC_ENABLE_WEB_MAP=true`). Lộ trình chỉ sửa trên app mobile (bảng `event_maps`). Các quy tắc dưới đây chỉ áp dụng khi bật cờ.
    - Sử dụng thẻ `<iframe>` chuẩn mực với URL `https://www.google.com/maps?q=...&output=embed` hoặc URL từ trường `map_embed_url` kết hợp nút bấm dẫn đường "Mở trên Google Maps App" (`https://www.google.com/maps/search/?api=1&query=...`).
    - Không sử dụng Google Maps JavaScript API hoặc `@vis.gl/react-google-maps` để tránh hoàn toàn các lỗi `ApiTargetBlockedMapError`, `ERR_BLOCKED_BY_CLIENT` và không tốn chi phí API Key.
 3. **Biến môi trường Supabase (`.env.local` & Vercel)[cite: 13]:**

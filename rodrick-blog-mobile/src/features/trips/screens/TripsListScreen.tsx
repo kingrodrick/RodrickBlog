@@ -1,6 +1,8 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { HomeStackParamList } from '../../../navigation/type';
 import { ChevronLeft } from 'lucide-react-native';
 import {
   EmptyState,
@@ -24,7 +26,13 @@ const renderBack = (c: string) => (
   />
 );
 
-function TripSections({ trips }: { trips: Trip[] }) {
+function TripSections({
+  trips,
+  onOpen,
+}: {
+  trips: Trip[];
+  onOpen: (trip: Trip) => void;
+}) {
   const upcoming = trips
     .filter(t => t.status !== 'completed')
     .sort((a, b) => a.startDate.localeCompare(b.startDate));
@@ -38,7 +46,9 @@ function TripSections({ trips }: { trips: Trip[] }) {
         Sắp tới
       </Text>
       {upcoming.length > 0 ? (
-        upcoming.map(trip => <TripCard key={trip.id} trip={trip} />)
+        upcoming.map(trip => (
+          <TripCard key={trip.id} trip={trip} onPress={() => onOpen(trip)} />
+        ))
       ) : (
         <EmptyState message="Chưa có chuyến đi nào sắp tới." />
       )}
@@ -48,7 +58,9 @@ function TripSections({ trips }: { trips: Trip[] }) {
         Đã đi
       </Text>
       {past.length > 0 ? (
-        past.map(trip => <TripCard key={trip.id} trip={trip} />)
+        past.map(trip => (
+          <TripCard key={trip.id} trip={trip} onPress={() => onOpen(trip)} />
+        ))
       ) : (
         <Text tone="muted">
           Chuyến đã hoàn thành sẽ xếp ở đây, mới nhất lên trước.
@@ -58,8 +70,10 @@ function TripSections({ trips }: { trips: Trip[] }) {
   );
 }
 
+type Nav = NativeStackNavigationProp<HomeStackParamList, 'TripsList'>;
+
 export function TripsListScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<Nav>();
   const { data, loading, error, reload } = useAsync(fetchTrips);
 
   return (
@@ -79,7 +93,10 @@ export function TripsListScreen() {
       ) : error ? (
         <ErrorState message="Không tải được chuyến đi." onRetry={reload} />
       ) : (
-        <TripSections trips={data ?? []} />
+        <TripSections
+          trips={data ?? []}
+          onOpen={trip => navigation.navigate('TripDetail', { tripId: trip.id })}
+        />
       )}
     </Screen>
   );

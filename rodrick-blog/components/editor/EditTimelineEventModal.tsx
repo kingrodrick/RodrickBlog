@@ -12,6 +12,7 @@ import {
 } from '@/lib/timeUtils';
 import { categoryLabel, splitTimeSlot } from '@/lib/tripFormat';
 import { AdminRoutePickerMap } from '@/components/itinerary/AdminRoutePickerMap';
+import { WEB_MAP_ENABLED } from '@/lib/featureFlags';
 import { PhotoFrame } from '@/components/ui/PhotoFrame';
 
 interface EditTimelineEventModalProps {
@@ -154,7 +155,7 @@ export function EditTimelineEventModal({
       setCity(event.city || 'Kyoto');
       setCategoryTag(event.category_tag || 'SIGHTSEEING');
       setNotes(event.notes || '');
-      setMapEmbedUrl(event.map_embed_url || '');
+      if (WEB_MAP_ENABLED) setMapEmbedUrl(event.map_embed_url || '');
 
       const initialImages: TimelineImageItem[] = (event.images || []).map((img, idx) => ({
         id: `img-${img.id || idx}`,
@@ -293,7 +294,8 @@ export function EditTimelineEventModal({
           city: city.trim(),
           category_tag: categoryTag,
           notes: notes.trim() || null,
-          map_embed_url: mapEmbedUrl.trim() || null,
+          // Cờ tắt: không gửi khoá này, để không ghi null đè dữ liệu bản đồ cũ.
+          ...(WEB_MAP_ENABLED ? { map_embed_url: mapEmbedUrl.trim() || null } : {}),
         },
         validImages
       );
@@ -353,7 +355,9 @@ export function EditTimelineEventModal({
 
   const tabs: { key: EditorTab; label: string; meta?: string }[] = [
     { key: 'info', label: 'Thông tin chung' },
-    { key: 'map', label: 'Bản đồ', meta: hasMap ? 'đã gắn' : undefined },
+    ...(WEB_MAP_ENABLED
+      ? [{ key: 'map' as const, label: 'Bản đồ', meta: hasMap ? 'đã gắn' : undefined }]
+      : []),
     { key: 'photos', label: 'Ảnh', meta: validPhotos.length > 0 ? String(validPhotos.length) : undefined },
   ];
 
@@ -646,7 +650,7 @@ export function EditTimelineEventModal({
           )}
 
           {/* 02: BẢN ĐỒ */}
-          {activeTab === 'map' && (
+          {WEB_MAP_ENABLED && activeTab === 'map' && (
             <div className="space-y-6">
               <Field label="Link Google Maps" hint="Tùy chọn">
                 <input
