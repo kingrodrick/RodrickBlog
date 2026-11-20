@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ItineraryService, TripWithDetails } from '@/services/itinerary.service';
 import { Trip } from '@/types/database.type';
 import { EditTripModal } from './EditTripModal';
+import { getErrorMessage, isRlsError } from '@/lib/errors';
 
 interface TripsManagerProps {
   onSelectTripToAddEvent: (tripId: number) => void;
@@ -26,9 +27,9 @@ export function TripsManager({
       setIsLoading(true);
       const data = await ItineraryService.getAllTrips();
       setTrips(data);
-    } catch (err: any) {
+    } catch (err) {
       console.error('Lỗi khi tải danh sách chuyến đi:', err);
-      setMessage(err?.message || 'Không thể tải danh sách chuyến đi.');
+      setMessage(getErrorMessage(err, 'Không thể tải danh sách chuyến đi.'));
     } finally {
       setIsLoading(false);
     }
@@ -49,9 +50,9 @@ export function TripsManager({
       await ItineraryService.deleteTrip(id);
       setTrips((prev) => prev.filter((t) => t.id !== id));
       setMessage(`Đã xóa chuyến đi "${title}" thành công.`);
-    } catch (err: any) {
+    } catch (err) {
       console.error('Lỗi khi xóa chuyến đi:', err);
-      if (err?.code === '42501' || err?.message?.includes('row-level security')) {
+      if (isRlsError(err)) {
         setMessage(
           'Supabase chặn quyền xóa dữ liệu (RLS). Vui lòng cấu hình lệnh SQL để mở quyền.'
         );
@@ -59,7 +60,7 @@ export function TripsManager({
           onOpenSqlModal();
         }
       } else {
-        setMessage(err?.message || 'Không thể xóa chuyến đi này.');
+        setMessage(getErrorMessage(err, 'Không thể xóa chuyến đi này.'));
       }
     } finally {
       setDeletingId(null);
@@ -169,7 +170,7 @@ export function TripsManager({
                         {trip.title}
                       </h3>
                       <p className="text-xs font-mono text-[#78756E]">
-                        🗓 {formatDate(trip.start_date)} — {formatDate(trip.end_date)}
+                        🗓 {formatDate(trip.start_date)} - {formatDate(trip.end_date)}
                       </p>
                     </div>
                   </div>

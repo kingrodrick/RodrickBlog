@@ -61,7 +61,7 @@ export function CollectionGrid({
       <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-[#E5E0D8] pb-4 gap-4">
         <div>
           <span className="font-mono text-[10px] uppercase tracking-widest text-[#B93829]">
-            — MODULE 02 • BỘ SƯU TẬP NHIẾP ẢNH (COLLECTIONS & IMAGES)
+            MODULE 02 • BỘ SƯU TẬP NHIẾP ẢNH (COLLECTIONS & IMAGES)
           </span>
           <h2 className="font-serif text-2xl sm:text-3xl font-semibold mt-1 text-[#1C1B18]">
             Triển Lãm & Kho Lưu Trữ Nhiếp Ảnh

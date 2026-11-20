@@ -1,5 +1,5 @@
 import { NavigatorScreenParams } from '@react-navigation/native';
-import type { ParsedRoute } from '../features/trips/parseMapsLink';
+import type { ParsedRoute } from '../features/trips';
 
 export type RootStackParamList = {
   Login: undefined;

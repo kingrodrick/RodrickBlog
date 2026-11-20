@@ -4,3 +4,4 @@ export * from './screens/EventDetailScreen';
 export * from './screens/RouteEditScreen';
 export * from './screens/PickEventScreen';
 export * from './ShareReceiver';
+export type { ParsedRoute } from './parseMapsLink';

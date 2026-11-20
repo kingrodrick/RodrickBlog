@@ -11,17 +11,24 @@ Two independent projects in one git repo (no root package.json; run commands ins
 
 The user communicates in Vietnamese; project docs are in Vietnamese.
 
+## Verification (required before reporting a task done)
+
+Run `npm run verify` inside every project you changed and read the real output; fix root causes, do not add `eslint-disable` or `any`.
+- Web: typecheck, lint (no errors, warnings capped at today's count), then a clean production build (`scripts/build-check.mjs`; uses placeholder env if `.env.local` is missing and says so).
+- Mobile: typecheck, lint (warnings capped), Jest.
+- Old web lint errors are recorded in `rodrick-blog/eslint-suppressions.json`. After fixing one, run `npx eslint . --prune-suppressions`. When you remove a warning, lower the `--max-warnings` number in that project's `verify` script.
+
 ## Commands
 
 Web (`cd rodrick-blog`):
 - `npm run dev` - dev server on port 3000 (also configured in `.claude/launch.json`)
-- `npm run build` / `npm run start` - production build and serve; before pushing to Vercel, delete `.next` first and verify the build
-- `npm run lint`
+- `npm run build` / `npm run start` - production build and serve
+- `npm run lint`, `npm run typecheck`
 - No test runner is configured for the web app.
 - Needs `.env.local` with `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`, `NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`.
 - If Tailwind v4 reports a missing `@tailwindcss/oxide-win32-x64-msvc` on Windows: `npm install @tailwindcss/oxide-win32-x64-msvc --save-optional`.
 
-Mobile (`cd rodrick-blog-mobile`): `npm start` (Metro), `npm run android`, `npm run ios`, `npm run lint`, `npm test` (single test: `npx jest __tests__/App.test.tsx`), `npx tsc --noEmit`.
+Mobile (`cd rodrick-blog-mobile`): `npm start` (Metro), `npm run android`, `npm run ios`, `npm run lint`, `npm test` (single test: `npx jest __tests__/App.test.tsx`; native modules are mocked in `jest.setup.js`), `npm run typecheck`.
 
 ## Web architecture
 

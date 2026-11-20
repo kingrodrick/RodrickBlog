@@ -2,10 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Trip } from '@/types/database.type';
+import { Trip, TripStatus, isTripStatus } from '@/types/database.type';
 import { ItineraryService } from '@/services/itinerary.service';
 import { ImageUploadInput } from './ImageUploadInput';
 import { slugifyFolderName } from '@/lib/cloudinary';
+import { getErrorMessage, isRlsError, isDuplicateKeyError } from '@/lib/errors';
 
 interface EditTripModalProps {
   trip: Trip | null;
@@ -43,7 +44,7 @@ export function EditTripModal({
   const [cities, setCities] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [status, setStatus] = useState<'PLANNING' | 'ONGOING' | 'COMPLETED'>('PLANNING');
+  const [status, setStatus] = useState<TripStatus>('PLANNING');
   const [summary, setSummary] = useState('');
   const [coverImage, setCoverImage] = useState('');
 
@@ -63,7 +64,7 @@ export function EditTripModal({
       setCities(trip.cities || '');
       setStartDate(trip.start_date || '');
       setEndDate(trip.end_date || '');
-      setStatus((trip.status as any) || 'PLANNING');
+      setStatus(isTripStatus(trip.status) ? trip.status : 'PLANNING');
       setSummary(trip.summary || '');
       setCoverImage(trip.cover_image || '');
       setErrorMessage(null);
@@ -133,19 +134,19 @@ export function EditTripModal({
 
       onTripUpdated(updatedTrip);
       onClose();
-    } catch (err: any) {
+    } catch (err) {
       console.error('Lỗi khi cập nhật chuyến đi:', err);
-      if (err?.code === '42501' || err?.message?.includes('row-level security')) {
+      if (isRlsError(err)) {
         setErrorMessage(
           'Supabase đang chặn quyền ghi dữ liệu (Row-Level Security). Vui lòng nhấn vào "Cấu hình SQL Supabase" để mở quyền.'
         );
         if (onOpenSqlModal) {
           onOpenSqlModal();
         }
-      } else if (err?.code === '23505' || err?.message?.includes('duplicate key')) {
+      } else if (isDuplicateKeyError(err)) {
         setErrorMessage('Đường dẫn Slug này đã được sử dụng bởi chuyến đi khác. Vui lòng chọn slug khác.');
       } else {
-        setErrorMessage(err?.message || 'Không thể lưu thay đổi. Vui lòng kiểm tra lại kết nối mạng.');
+        setErrorMessage(getErrorMessage(err, 'Không thể lưu thay đổi. Vui lòng kiểm tra lại kết nối mạng.'));
       }
     } finally {
       setIsSubmitting(false);
@@ -165,9 +166,9 @@ export function EditTripModal({
         onTripDeleted(trip.id);
       }
       onClose();
-    } catch (err: any) {
+    } catch (err) {
       console.error('Lỗi khi xóa chuyến đi:', err);
-      if (err?.code === '42501' || err?.message?.includes('row-level security')) {
+      if (isRlsError(err)) {
         setErrorMessage(
           'Supabase chặn quyền xóa dữ liệu (RLS). Vui lòng cấu hình lệnh SQL để mở quyền.'
         );
@@ -175,7 +176,7 @@ export function EditTripModal({
           onOpenSqlModal();
         }
       } else {
-        setErrorMessage(err?.message || 'Không thể xóa chuyến đi này.');
+        setErrorMessage(getErrorMessage(err, 'Không thể xóa chuyến đi này.'));
       }
     } finally {
       setIsDeleting(false);
@@ -342,15 +343,15 @@ export function EditTripModal({
                 Trạng thái chuyến đi
               </label>
               <div className="grid grid-cols-3 gap-3">
-                {[
+                {([
                   { key: 'PLANNING', label: '📋 Đang Lên Kế Hoạch', desc: 'Chưa khởi hành' },
                   { key: 'ONGOING', label: '✈️ Đang Diễn Ra', desc: 'Đang trong hành trình' },
                   { key: 'COMPLETED', label: '✓ Đã Hoàn Thành', desc: 'Đã hoàn tất chuyến đi' },
-                ].map((st) => (
+                ] satisfies { key: TripStatus; label: string; desc: string }[]).map((st) => (
                   <button
                     key={st.key}
                     type="button"
-                    onClick={() => setStatus(st.key as any)}
+                    onClick={() => setStatus(st.key)}
                     className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
                       status === st.key
                         ? 'border-[#B93829] bg-rose-50/60 ring-2 ring-[#B93829]/20 shadow-xs'

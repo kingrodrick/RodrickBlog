@@ -67,16 +67,16 @@ export function weekdayVN(dateStr?: string | null): string {
   return WEEKDAYS[new Date(p[0], p[1] - 1, p[2]).getDay()];
 }
 
-/** Khoảng ngày gọn: '11–18/12/2026', hoặc '28/12/2026–02/01/2027' khi khác tháng */
+/** Khoảng ngày gọn: '11-18/12/2026', hoặc '28/12/2026-02/01/2027' khi khác tháng */
 export function formatDateRangeVN(start?: string | null, end?: string | null): string {
   const s = splitDate(start);
   const e = splitDate(end);
   if (!s) return formatDateVN(end);
   if (!e) return formatDateVN(start);
   if (s[0] === e[0] && s[1] === e[1]) {
-    return `${pad(s[2])}–${pad(e[2])}/${pad(e[1])}/${e[0]}`;
+    return `${pad(s[2])}-${pad(e[2])}/${pad(e[1])}/${e[0]}`;
   }
-  return `${formatDateVN(start)}–${formatDateVN(end)}`;
+  return `${formatDateVN(start)}-${formatDateVN(end)}`;
 }
 
 /** Số ngày của chuyến đi, tính cả ngày đầu và ngày cuối */
@@ -145,6 +145,7 @@ export function splitTimeSlot(timeSlot?: string | null): TimeSlotParts {
   const first = raw.match(/(\d{1,2})[:hH.](\d{2})/);
   if (!first) return { start: raw, rest: '', end: '', endNote: '', duration: '' };
   const start = `${first[1].padStart(2, '0')}:${first[2]}`;
+  // Dữ liệu cũ có thể còn en-dash; nhận cả '-' và '–'
   const dash = raw.search(/\s[-–]\s|-(?=\s*\d)/);
   const restRaw = dash >= 0 ? raw.slice(dash).replace(/^\s*[-–]\s*/, '').trim() : '';
 

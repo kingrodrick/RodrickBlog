@@ -58,7 +58,7 @@ export function HeroSection({ photos }: HeroSectionProps) {
             <a href="#footer" className="text-link font-semibold">
               Về tôi
             </a>
-            <span className="text-muted">Máy ảnh Sony A6400, ống kính 18–135mm</span>
+            <span className="text-muted">Máy ảnh Sony A6400, ống kính 18-135mm</span>
           </div>
         </div>
       </div>

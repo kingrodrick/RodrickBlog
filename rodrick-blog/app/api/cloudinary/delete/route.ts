@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
+import { getErrorMessage } from '@/lib/errors';
 
 export async function POST(request: Request) {
   try {
@@ -71,8 +72,8 @@ export async function POST(request: Request) {
 
     const result = await res.json();
     return NextResponse.json({ success: true, result });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Lỗi khi xóa ảnh Cloudinary:', error);
-    return NextResponse.json({ success: false, error: error?.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: getErrorMessage(error, 'Lỗi không xác định') }, { status: 500 });
   }
 }

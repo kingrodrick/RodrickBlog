@@ -733,7 +733,7 @@ export function ItinerarySinglePageView({
         </div>
 
         <div data-reveal style={{ '--d': '120ms' } as React.CSSProperties} className="lg:col-start-9 lg:col-span-4 bg-paper p-8 sm:p-10 self-start">
-          <p className="text-head leading-none tabular">15.000–25.000</p>
+          <p className="text-head leading-none tabular">15.000-25.000</p>
           <p className="mt-3 text-lead">bước mỗi ngày</p>
           <p className="mt-8">Tối ưu hóa trọng lượng để đi bộ 15.000 - 25.000 bước/ngày.</p>
         </div>

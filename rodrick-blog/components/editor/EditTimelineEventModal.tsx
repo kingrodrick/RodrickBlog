@@ -14,6 +14,7 @@ import { categoryLabel, splitTimeSlot } from '@/lib/tripFormat';
 import { AdminRoutePickerMap } from '@/components/itinerary/AdminRoutePickerMap';
 import { WEB_MAP_ENABLED } from '@/lib/featureFlags';
 import { PhotoFrame } from '@/components/ui/PhotoFrame';
+import { getErrorMessage, isRlsError } from '@/lib/errors';
 
 interface EditTimelineEventModalProps {
   event: TimelineEvent | null;
@@ -302,9 +303,9 @@ export function EditTimelineEventModal({
 
       onEventUpdated(updatedEvent);
       onClose();
-    } catch (err: any) {
+    } catch (err) {
       console.error('Lỗi khi cập nhật sự kiện timeline:', err);
-      if (err?.code === '42501' || err?.message?.includes('row-level security')) {
+      if (isRlsError(err)) {
         setErrorMessage(
           'Supabase đang chặn quyền ghi dữ liệu (Row-Level Security). Vui lòng nhấn vào "Cấu hình SQL Supabase" để mở quyền.'
         );
@@ -312,7 +313,7 @@ export function EditTimelineEventModal({
           onOpenSqlModal();
         }
       } else {
-        setErrorMessage(err?.message || 'Không thể lưu thay đổi. Vui lòng kiểm tra lại kết nối.');
+        setErrorMessage(getErrorMessage(err, 'Không thể lưu thay đổi. Vui lòng kiểm tra lại kết nối.'));
       }
     } finally {
       setIsSubmitting(false);
@@ -333,15 +334,15 @@ export function EditTimelineEventModal({
         onEventDeleted(event.id);
       }
       onClose();
-    } catch (err: any) {
+    } catch (err) {
       console.error('Lỗi khi xóa sự kiện timeline:', err);
-      if (err?.code === '42501' || err?.message?.includes('row-level security')) {
+      if (isRlsError(err)) {
         setErrorMessage('Supabase đang chặn quyền xóa dữ liệu (RLS). Vui lòng kiểm tra quyền trong Supabase.');
         if (onOpenSqlModal) {
           onOpenSqlModal();
         }
       } else {
-        setErrorMessage(err?.message || 'Không thể xóa sự kiện này.');
+        setErrorMessage(getErrorMessage(err, 'Không thể xóa sự kiện này.'));
       }
     } finally {
       setIsDeleting(false);

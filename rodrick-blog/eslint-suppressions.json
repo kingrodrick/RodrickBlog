@@ -1,0 +1,72 @@
+{
+  ".agents/skills/design-taste-frontend/scripts/assets.mjs": {
+    "react-hooks/rules-of-hooks": {
+      "count": 3
+    }
+  },
+  ".claude/skills/design-taste-frontend/scripts/assets.mjs": {
+    "react-hooks/rules-of-hooks": {
+      "count": 3
+    }
+  },
+  "components/auth/AuthContext.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "components/auth/LoginModal.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 2
+    }
+  },
+  "components/editor/AddTimelineEventModal.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "components/editor/CreateTripModal.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "components/editor/EditTimelineEventModal.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 3
+    }
+  },
+  "components/editor/EditTripModal.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 2
+    }
+  },
+  "components/editor/SqlInstructionModal.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "components/editor/TimelineEventForm.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 3
+    }
+  },
+  "components/editor/TimelinePhotosManager.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "components/editor/TripsManager.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "components/itinerary/AdminRoutePickerMap.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "components/itinerary/ItinerarySinglePageView.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 2
+    }
+  }
+}

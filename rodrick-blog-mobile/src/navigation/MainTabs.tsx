@@ -8,7 +8,7 @@ import {
 import { Circle, Path } from 'react-native-svg';
 import { House, FileText, Image, Settings } from 'lucide-react-native';
 import { darkColors, iconSize, iconStroke, useTheme } from '../theme';
-import { useAuth } from '../features/auth/AuthProvider';
+import { useAuth } from '../features/auth';
 import { SettingsScreen } from '../features/settings';
 import { HomeStack } from './HomeStack';
 import { MainTabParamList } from './type';

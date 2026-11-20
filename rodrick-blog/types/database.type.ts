@@ -39,6 +39,14 @@ export interface TimelineEvent {
   images?: GalleryImage[]; // Danh sách ảnh nối từ bảng images sang
 }
 
+export const TRIP_STATUSES = ['PLANNING', 'ONGOING', 'COMPLETED'] as const;
+export type TripStatus = (typeof TRIP_STATUSES)[number];
+
+/** `Trip.status` trong DB là chuỗi tự do; thu hẹp về TripStatus trước khi đưa vào state của form. */
+export function isTripStatus(value: unknown): value is TripStatus {
+  return typeof value === 'string' && (TRIP_STATUSES as readonly string[]).includes(value);
+}
+
 export interface Trip {
   id: number;
   slug: string;

@@ -88,7 +88,7 @@ export function TripCard({ trip, onEdit }: TripCardProps) {
 
         {/* Date Tag */}
         <div className="absolute bottom-3.5 left-3.5 bg-black/75 backdrop-blur-xs text-white text-[11px] font-mono px-3 py-1 rounded-md">
-          🗓 {formatDate(trip.start_date)} — {formatDate(trip.end_date)}
+          🗓 {formatDate(trip.start_date)} - {formatDate(trip.end_date)}
         </div>
       </div>
 

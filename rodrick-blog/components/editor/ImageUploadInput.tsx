@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { uploadToCloudinary } from '@/lib/cloudinary';
+import { getErrorMessage } from '@/lib/errors';
 
 interface ImageUploadInputProps {
   label: string;
@@ -108,10 +109,9 @@ export function ImageUploadInput({
       const cloudUrl = await uploadToCloudinary(file, targetFolder);
       onChange(cloudUrl);
       setUploadError(null);
-    } catch (cloudErr: any) {
+    } catch (cloudErr) {
       const errorMsg =
-        cloudErr?.message ||
-        'Không thể tải ảnh lên Cloudinary. Vui lòng kiểm tra lại cấu hình hoặc kết nối mạng.';
+        getErrorMessage(cloudErr, 'Không thể tải ảnh lên Cloudinary. Vui lòng kiểm tra lại cấu hình hoặc kết nối mạng.');
       console.error('Lỗi khi tải ảnh lên Cloudinary:', cloudErr);
       setUploadError(errorMsg);
     } finally {
@@ -142,10 +142,10 @@ export function ImageUploadInput({
 
       const cloudUrl = await uploadToCloudinary(blob, targetFolder);
       onChange(cloudUrl);
-    } catch (err: any) {
+    } catch (err) {
       console.error('Lỗi khi chuyển Base64 lên Cloudinary:', err);
       setUploadError(
-        `Không thể chuyển ảnh lên Cloudinary: ${err?.message || 'Lỗi không xác định'}`
+        `Không thể chuyển ảnh lên Cloudinary: ${getErrorMessage(err, 'Lỗi không xác định')}`
       );
     } finally {
       setIsConvertingBase64(false);

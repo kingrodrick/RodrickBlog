@@ -8,6 +8,7 @@ import {
   slugifyFolderName,
 } from '@/lib/cloudinary';
 import { PhotoFrame } from '@/components/ui/PhotoFrame';
+import { getErrorMessage } from '@/lib/errors';
 
 export interface TimelineImageItem {
   id: string;
@@ -118,8 +119,8 @@ export function TimelinePhotosManager({
       const cloudinaryUrl = await uploadToCloudinary(file, folder);
       setCloudinaryError(null);
       return cloudinaryUrl;
-    } catch (err: any) {
-      const msg = err?.message || 'Không thể tải ảnh lên Cloudinary';
+    } catch (err) {
+      const msg = getErrorMessage(err, 'Không thể tải ảnh lên Cloudinary');
       console.warn('Upload Cloudinary không thành công:', msg);
       setCloudinaryError(msg);
       return await compressImageFile(file);

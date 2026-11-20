@@ -268,7 +268,7 @@ export const GalleryService = {
    - `NEXT_PUBLIC_SUPABASE_URL=https://brnvhhehummrrixzkxen.supabase.co`[cite: 13]
    - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...`[cite: 13]
    - Trong `lib/supabase.ts` luôn gọi đúng `process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!`[cite: 13].
-4. **Quy tắc Fetch dữ liệu trên Next.js 16.4.2 (`cacheComponents`)[cite: 13]:**
+4. **Quy tắc Fetch dữ liệu trên Next.js 16.4.6 (`cacheComponents`)[cite: 13]:**
    - **KHÔNG dùng:** `export const revalidate = 60;` (gây lỗi xung đột với `cacheComponents`)[cite: 13].
    - **Bắt buộc dùng:** Đặt `export const instant = false;` ở đầu file `app/page.tsx` (hoặc dùng `"use cache";` trong thân hàm async) để cho phép Server Component truy vấn Supabase[cite: 13].
 5. **Tối ưu ảnh từ Cloudinary[cite: 13]:**
@@ -278,9 +278,4 @@ export const GalleryService = {
      `npm install @tailwindcss/oxide-win32-x64-msvc --save-optional`[cite: 13]
 7. **Quy trình Kiểm tra Build Production tại Local (trên Windows CMD) & Cấu hình Vercel:**
    - **Vercel Root Directory:** `rodrick-blog` | **Framework Preset:** `Next.js`[cite: 13]
-   - Trước khi push lên Vercel, luôn xóa cache và kiểm tra bản build bằng cụm lệnh CMD:
-     ```cmd
-     rmdir /s /q .next
-     npm run build
-     npm run start
-     ```
+   - Trước khi push lên Vercel và trước khi báo xong việc: chạy `npm run verify` (typecheck, lint, build sạch có xoá `.next`).

@@ -7,7 +7,7 @@ App di động (React Native CLI thuần, KHÔNG Expo) cho blog ảnh/du lịch 
 - Thiết kế duyệt trước, code sau. Không tự thêm màn hình, component hay thư viện ngoài danh sách dưới đây; cần thêm thì hỏi.
 - Chủ dự án tự làm tay từng bước: mỗi lần chỉ đề xuất một bước nhỏ, chờ kết quả rồi mới sang bước tiếp.
 - Làm trực tiếp trên nhánh `main`, không tạo nhánh, không PR.
-- Chạy `npx tsc --noEmit` sau mỗi thay đổi; không sửa file ngoài phạm vi yêu cầu.
+- Chạy `npm run verify` (typecheck + lint + Jest) sau mỗi thay đổi và đọc kết quả thật; không sửa file ngoài phạm vi yêu cầu.
 
 ## Nguồn thiết kế (đọc trước khi viết UI)
 - Canvas thiết kế (màn hình + nền tảng + component, sáng/tối): https://claude.ai/artifact/WQTtcPWhH5USR4RwML8wYh

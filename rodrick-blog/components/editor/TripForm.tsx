@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { ItineraryService } from '@/services/itinerary.service';
 import { ImageUploadInput } from './ImageUploadInput';
 import { slugifyFolderName } from '@/lib/cloudinary';
-import { Trip } from '@/types/database.type';
+import { Trip, TripStatus, isTripStatus } from '@/types/database.type';
+import { getErrorMessage, isRlsError, isDuplicateKeyError } from '@/lib/errors';
 
 interface TripFormProps {
   onTripCreated?: (newTrip: Trip) => void;
@@ -36,7 +37,7 @@ export function TripForm({
   const [cities, setCities] = useState('Tokyo • Kyoto');
   const [startDate, setStartDate] = useState('2026-12-12');
   const [endDate, setEndDate] = useState('2026-12-18');
-  const [status, setStatus] = useState<'PLANNING' | 'ONGOING' | 'COMPLETED'>('PLANNING');
+  const [status, setStatus] = useState<TripStatus>('PLANNING');
   const [summary, setSummary] = useState('');
   const [coverImage, setCoverImage] = useState('');
 
@@ -93,19 +94,19 @@ export function TripForm({
       if (onTripCreated) {
         onTripCreated(newTrip);
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Lỗi khi tạo chuyến đi:', err);
-      if (err?.code === '42501' || err?.message?.includes('row-level security')) {
+      if (isRlsError(err)) {
         setErrorMessage(
           'Supabase đang chặn quyền ghi dữ liệu (Row-Level Security). Vui lòng nhấn vào "Cấu hình SQL Supabase" ở góc trên để mở quyền trong 10 giây.'
         );
         if (onOpenSqlModal) {
           onOpenSqlModal();
         }
-      } else if (err?.code === '23505' || err?.message?.includes('duplicate key')) {
+      } else if (isDuplicateKeyError(err)) {
         setErrorMessage('Slug này đã tồn tại! Vui lòng chọn slug khác.');
       } else {
-        setErrorMessage(err?.message || 'Không thể tạo chuyến đi. Vui lòng kiểm tra lại kết nối mạng.');
+        setErrorMessage(getErrorMessage(err, 'Không thể tạo chuyến đi. Vui lòng kiểm tra lại kết nối mạng.'));
       }
     } finally {
       setIsSubmitting(false);
@@ -294,7 +295,9 @@ export function TripForm({
             </label>
             <select
               value={status}
-              onChange={(e) => setStatus(e.target.value as any)}
+              onChange={(e) => {
+                if (isTripStatus(e.target.value)) setStatus(e.target.value);
+              }}
               className="w-full bg-[#FAF8F5] focus:bg-white border border-[#E6E2DA] focus:border-[#B93829] rounded-xl px-4 py-2.5 text-xs font-mono text-[#1C1B18] outline-hidden shadow-xs transition-colors cursor-pointer"
             >
               <option value="PLANNING">● Đang Lên Kế Hoạch</option>

@@ -11,6 +11,7 @@ import {
 } from '@/lib/timeUtils';
 import { AdminRoutePickerMap } from '@/components/itinerary/AdminRoutePickerMap';
 import { WEB_MAP_ENABLED } from '@/lib/featureFlags';
+import { getErrorMessage, isRlsError } from '@/lib/errors';
 
 interface TimelineEventFormProps {
   initialTripId?: number;
@@ -231,9 +232,9 @@ export function TimelineEventForm({
       if (onEventCreated) {
         onEventCreated(newEvent);
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Lỗi khi thêm sự kiện timeline:', err);
-      if (err?.code === '42501' || err?.message?.includes('row-level security')) {
+      if (isRlsError(err)) {
         setErrorMessage(
           'Supabase đang chặn quyền ghi dữ liệu (Row-Level Security). Vui lòng nhấn vào "Cấu hình SQL Supabase" ở góc trên để mở quyền trong 10 giây.'
         );
@@ -241,7 +242,7 @@ export function TimelineEventForm({
           onOpenSqlModal();
         }
       } else {
-        setErrorMessage(err?.message || 'Không thể tạo sự kiện timeline. Vui lòng thử lại.');
+        setErrorMessage(getErrorMessage(err, 'Không thể tạo sự kiện timeline. Vui lòng thử lại.'));
       }
     } finally {
       setIsSubmitting(false);

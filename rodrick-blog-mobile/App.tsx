@@ -7,8 +7,7 @@ import {
   ThemeProvider,
   useTheme,
 } from './src/theme';
-import { AuthProvider, useAuth } from './src/features/auth/AuthProvider';
-import { LoginScreen } from './src/features/auth';
+import { AuthProvider, LoginScreen, useAuth } from './src/features/auth';
 import {
   DarkTheme,
   DefaultTheme,

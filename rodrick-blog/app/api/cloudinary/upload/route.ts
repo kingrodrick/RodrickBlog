@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
+import { getErrorMessage } from '@/lib/errors';
 
 export async function POST(request: Request) {
   try {
@@ -59,7 +60,7 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ success: true, secure_url: data.secure_url });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error?.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: getErrorMessage(error, 'Lỗi không xác định') }, { status: 500 });
   }
 }
