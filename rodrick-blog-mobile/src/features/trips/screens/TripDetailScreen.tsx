@@ -7,6 +7,7 @@ import {
   ScrollView,
   ScrollViewInstance,
   StyleSheet,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
@@ -111,6 +112,8 @@ function Timeline({ trip, onOpen }: { trip: TripDetail; onOpen: (eventId: number
   const today = toIsoDay(new Date());
   const [day, setDay] = useState(days.includes(today) ? today : days[0]);
   const header = useCollapsingHeader();
+  const { width: winW, height: winH } = useWindowDimensions();
+  const portrait = winW <= winH;
   const scrollRef = useRef<ScrollViewInstance>(null);
   const events = trip.timeline_events.filter(e => e.trip_date === day);
   const navigation = useNavigation<Nav>();
@@ -126,7 +129,7 @@ function Timeline({ trip, onOpen }: { trip: TripDetail; onOpen: (eventId: number
     <View style={styles.fill}>
       <Animated.View style={[styles.headerClip, header.style]}>
         <View
-          style={styles.header}
+          style={[styles.header, portrait && styles.headerPortrait]}
           onLayout={e => header.onContentLayout(e.nativeEvent.layout.height)}
         >
           <IconButton variant="ghost" accessibilityLabel="Quay lại" onPress={() => navigation.goBack()} icon={renderBack} />
@@ -226,6 +229,8 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 12,
   },
+  // Dọc: nút quay lại sát mép trái hơn (đệm trái 20 xuống 8); ngang giữ 20.
+  headerPortrait: { paddingLeft: 8 },
   headerText: { flex: 1, minWidth: 0 },
   title: { fontSize: 22, lineHeight: 28 },
   body: { paddingHorizontal: layout.screenMargin, paddingTop: 4, paddingBottom: 24 },

@@ -27,6 +27,11 @@ export async function saveEventRoute(eventId: number, r: RouteInput): Promise<vo
   await deleteRows('event_maps', `event_id=eq.${eventId}&seq=eq.1&id=neq.${created.id}`);
 }
 
+/** Xoá đúng một lộ trình theo id (event có thể có nhiều lộ trình). */
+export async function deleteEventRouteById(id: number): Promise<void> {
+  await deleteRows('event_maps', `id=eq.${id}`);
+}
+
 export async function deleteEventRoute(eventId: number): Promise<void> {
   await deleteRows('event_maps', `event_id=eq.${eventId}&seq=eq.1`);
 }

@@ -5,19 +5,21 @@ import {
   ScrollView,
   ScrollViewInstance,
   StyleSheet,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ChevronLeft } from 'lucide-react-native';
-import { ErrorState, IconButton, Screen, Skeleton, Text, Toast } from '../../../shared/ui';
+import { Dialog, ErrorState, IconButton, Screen, Skeleton, Text, Toast } from '../../../shared/ui';
 import { useAsync } from '../../../shared/hooks/useAsync';
 import { iconSize, iconStroke, layout, radius, useTheme } from '../../../theme';
 import { HomeStackParamList } from '../../../navigation/type';
 import { fetchTripDetail } from '../api/tripDetail';
+import { deleteEventRouteById } from '../api/routeApi';
 import { DocsPage, InfoPage, PhotosPage } from '../components/EventPages';
 import { PhotoViewer } from '../components/PhotoViewer';
-import { DetailEvent, EventImage } from '../types';
+import { DetailEvent, EventImage, EventMap } from '../types';
 
 type Nav = NativeStackNavigationProp<HomeStackParamList, 'EventDetail'>;
 type Route = RouteProp<HomeStackParamList, 'EventDetail'>;
@@ -47,15 +49,34 @@ function useReduceMotion() {
   return reduce;
 }
 
+/** Trang ngang trang Thông tin tự chia cột và tự cuộn; các trang còn lại cuộn dọc một cột. */
+function PageShell({ width, full, children }: { width: number; full: boolean; children: React.ReactNode }) {
+  if (full) {
+    return <View style={[styles.pageFull, { width: width || undefined }]}>{children}</View>;
+  }
+  return (
+    <ScrollView
+      style={{ width: width || undefined }}
+      contentContainerStyle={styles.pageBody}
+      showsVerticalScrollIndicator={false}
+    >
+      {children}
+    </ScrollView>
+  );
+}
+
 type PagerProps = {
   event: DetailEvent;
   onBack: () => void;
-  onEditRoute: () => void;
+  onEditRoute: (m?: EventMap) => void;
+  onDeleteRoute: (m: EventMap) => void;
 };
 
-function Pager({ event, onBack, onEditRoute }: PagerProps) {
+function Pager({ event, onBack, onEditRoute, onDeleteRoute }: PagerProps) {
   const { colors } = useTheme();
   const reduce = useReduceMotion();
+  const { width: winW, height: winH } = useWindowDimensions();
+  const landscape = winW > winH;
   const [width, setWidth] = useState(0);
   const scrollX = useRef(new Animated.Value(0)).current;
   const [viewer, setViewer] = useState<{ images: EventImage[]; index: number } | null>(null);
@@ -75,16 +96,54 @@ function Pager({ event, onBack, onEditRoute }: PagerProps) {
   }, [width]);
 
   const pages = [
-    <InfoPage key="info" event={event} onOpenPhoto={openPhoto} onEditRoute={onEditRoute} />,
-    <DocsPage key="docs" event={event} />,
-    <PhotosPage key="photos" event={event} onOpenPhoto={openPhoto} />,
+    <InfoPage
+      key="info"
+      event={event}
+      landscape={landscape}
+      onOpenPhoto={openPhoto}
+      onAddRoute={() => onEditRoute()}
+      onEditRoute={onEditRoute}
+      onDeleteRoute={onDeleteRoute}
+    />,
+    <DocsPage key="docs" event={event} landscape={landscape} />,
+    <PhotosPage key="photos" event={event} onOpenPhoto={openPhoto} landscape={landscape} />,
   ];
+
+  const progress = (
+    <View style={[styles.progress, landscape && styles.progressLand]}>
+          {CHAPTERS.map((label, i) => (
+            <View key={label} style={[styles.bar, { backgroundColor: colors.surfaceMuted }]}>
+              <Animated.View
+                style={[
+                  styles.barFill,
+                  { backgroundColor: colors.accent },
+                  {
+                    transform: [
+                      {
+                        scaleX: width
+                          ? scrollX.interpolate({
+                              inputRange: [(i - 1) * width, i * width],
+                              outputRange: [0, 1],
+                              extrapolate: 'clamp',
+                            })
+                          : i === 0
+                          ? 1
+                          : 0,
+                      },
+                    ],
+                  },
+                ]}
+              />
+            </View>
+          ))}
+        </View>
+  );
 
   return (
     <View style={styles.fill}>
-      <View style={styles.top}>
+      <View style={[styles.top, landscape ? styles.topLand : styles.topPort]}>
         <IconButton variant="ghost" accessibilityLabel="Quay lại" onPress={onBack} icon={renderBack} />
-        <View style={styles.chapters} accessibilityRole="header">
+        <View style={[styles.chapters, landscape && styles.chaptersLand]} accessibilityRole="header">
           {CHAPTERS.map((label, i) => (
             <Animated.View
               key={label}
@@ -107,35 +166,10 @@ function Pager({ event, onBack, onEditRoute }: PagerProps) {
             </Animated.View>
           ))}
         </View>
+        {landscape ? progress : null}
       </View>
 
-      <View style={styles.progress}>
-        {CHAPTERS.map((label, i) => (
-          <View key={label} style={[styles.bar, { backgroundColor: colors.surfaceMuted }]}>
-            <Animated.View
-              style={[
-                styles.barFill,
-                { backgroundColor: colors.accent },
-                {
-                  transform: [
-                    {
-                      scaleX: width
-                        ? scrollX.interpolate({
-                            inputRange: [(i - 1) * width, i * width],
-                            outputRange: [0, 1],
-                            extrapolate: 'clamp',
-                          })
-                        : i === 0
-                        ? 1
-                        : 0,
-                    },
-                  ],
-                },
-              ]}
-            />
-          </View>
-        ))}
-      </View>
+      {landscape ? null : progress}
 
       <Animated.ScrollView
         ref={pagerRef}
@@ -153,14 +187,10 @@ function Pager({ event, onBack, onEditRoute }: PagerProps) {
         style={styles.fill}
       >
         {pages.map((page, i) => (
-          <ScrollView
-            key={i}
-            style={{ width: width || undefined }}
-            contentContainerStyle={styles.pageBody}
-            showsVerticalScrollIndicator={false}
-          >
+          <PageShell key={i} width={width} full={landscape && i === 0}>
             <Animated.View
-              style={
+              style={[
+                landscape && i === 0 ? styles.fill : null,
                 width && !reduce
                   ? {
                       opacity: around(scrollX, width, i, [0.15, 1, 0.15]),
@@ -169,12 +199,12 @@ function Pager({ event, onBack, onEditRoute }: PagerProps) {
                         { scale: around(scrollX, width, i, [0.95, 1, 0.95]) },
                       ],
                     }
-                  : null
-              }
+                  : null,
+              ]}
             >
               {page}
             </Animated.View>
-          </ScrollView>
+          </PageShell>
         ))}
       </Animated.ScrollView>
 
@@ -194,10 +224,30 @@ export function EventDetailScreen() {
   const { data, loading, error, reload } = useAsync(load);
   const event = data?.timeline_events.find(e => e.id === Number(eventId));
   const [toast, setToast] = useState<string | null>(null);
+  const [toastKind, setToastKind] = useState<'success' | 'error'>('success');
+  const [askDelete, setAskDelete] = useState<EventMap | null>(null);
+
+  const confirmDelete = async () => {
+    const m = askDelete;
+    setAskDelete(null);
+    if (!m) {
+      return;
+    }
+    try {
+      await deleteEventRouteById(m.id);
+      setToastKind('success');
+      setToast('Đã xoá lộ trình');
+      reload();
+    } catch (e) {
+      setToastKind('error');
+      setToast(e instanceof Error ? e.message : 'Không xoá được lộ trình.');
+    }
+  };
 
   // Quay về từ màn Sửa lộ trình: tải lại dữ liệu và báo kết quả bằng toast.
   useEffect(() => {
     if (notice) {
+      setToastKind('success');
       setToast(notice);
       reload();
       navigation.setParams({ notice: undefined });
@@ -229,12 +279,23 @@ export function EventDetailScreen() {
           event={event}
           onBack={() => navigation.goBack()}
           onEditRoute={() => navigation.navigate('RouteEdit', { tripId, eventId })}
+          onDeleteRoute={setAskDelete}
         />
         <Toast
           message={toast ?? ''}
           visible={toast !== null}
-          kind="success"
+          kind={toastKind}
           onDismiss={() => setToast(null)}
+        />
+        <Dialog
+          visible={askDelete !== null}
+          title="Xoá lộ trình?"
+          description={askDelete ? `${askDelete.origin_name || 'Vị trí hiện tại'} đến ${askDelete.destination_name}` : undefined}
+          cancelLabel="Huỷ"
+          confirmLabel="Xoá"
+          destructive
+          onCancel={() => setAskDelete(null)}
+          onConfirm={confirmDelete}
         />
       </View>
     </Screen>
@@ -251,11 +312,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: layout.screenMargin,
     paddingTop: 8,
   },
+  topLand: { paddingTop: 2 },
+  // Dọc: nút quay lại sát cạnh trái hơn (đệm trái 20 xuống 8).
+  topPort: { paddingLeft: 8 },
   chapters: { flex: 1, height: 44 },
+  chaptersLand: { flex: 0, width: 190 },
   chapter: { position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, justifyContent: 'center' },
   hidden: { opacity: 0 },
   progress: { flexDirection: 'row', gap: 6, paddingHorizontal: layout.screenMargin, paddingTop: 12, paddingBottom: 4 },
+  progressLand: { flex: 1, paddingTop: 0, paddingBottom: 0, paddingHorizontal: 0 },
   bar: { flex: 1, height: 3, borderRadius: 2, overflow: 'hidden' },
   barFill: { position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, transformOrigin: 'left' },
+  pageFull: { paddingHorizontal: layout.screenMargin, paddingTop: 12, paddingBottom: 12 },
   pageBody: { paddingHorizontal: layout.screenMargin, paddingTop: 20, paddingBottom: 28 },
 });
