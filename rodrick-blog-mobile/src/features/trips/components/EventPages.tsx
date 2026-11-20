@@ -44,12 +44,12 @@ type InfoProps = {
   landscape: boolean;
   onOpenPhoto: (images: EventImage[], index: number) => void;
   onAddRoute: () => void;
-  onEditRoute: (m: EventMap) => void;
+  onViewRoute: (m: EventMap) => void;
   onDeleteRoute: (m: EventMap) => void;
 };
 
 /** Trang 1: Thông tin. Dọc một cột; ngang hai cột (trái: thông tin chung cố định + lộ trình, phải: mô tả + ảnh minh họa). */
-export function InfoPage({ event, landscape, onOpenPhoto, onAddRoute, onEditRoute, onDeleteRoute }: InfoProps) {
+export function InfoPage({ event, landscape, onOpenPhoto, onAddRoute, onViewRoute, onDeleteRoute }: InfoProps) {
   const { colors } = useTheme();
   const type = eventType(event.category_tag);
   const { start, end } = eventTimes(event);
@@ -90,7 +90,7 @@ export function InfoPage({ event, landscape, onOpenPhoto, onAddRoute, onEditRout
       event={event}
       presetDestination={!isFlight(event)}
       onAdd={onAddRoute}
-      onEdit={onEditRoute}
+      onView={onViewRoute}
       onDelete={onDeleteRoute}
     />
   );

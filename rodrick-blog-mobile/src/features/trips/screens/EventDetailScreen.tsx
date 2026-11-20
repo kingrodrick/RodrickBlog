@@ -68,11 +68,12 @@ function PageShell({ width, full, children }: { width: number; full: boolean; ch
 type PagerProps = {
   event: DetailEvent;
   onBack: () => void;
-  onEditRoute: (m?: EventMap) => void;
+  onAddRoute: () => void;
+  onViewRoute: (m: EventMap) => void;
   onDeleteRoute: (m: EventMap) => void;
 };
 
-function Pager({ event, onBack, onEditRoute, onDeleteRoute }: PagerProps) {
+function Pager({ event, onBack, onAddRoute, onViewRoute, onDeleteRoute }: PagerProps) {
   const { colors } = useTheme();
   const reduce = useReduceMotion();
   const { width: winW, height: winH } = useWindowDimensions();
@@ -101,8 +102,8 @@ function Pager({ event, onBack, onEditRoute, onDeleteRoute }: PagerProps) {
       event={event}
       landscape={landscape}
       onOpenPhoto={openPhoto}
-      onAddRoute={() => onEditRoute()}
-      onEditRoute={onEditRoute}
+      onAddRoute={onAddRoute}
+      onViewRoute={onViewRoute}
       onDeleteRoute={onDeleteRoute}
     />,
     <DocsPage key="docs" event={event} landscape={landscape} />,
@@ -278,7 +279,8 @@ export function EventDetailScreen() {
         <Pager
           event={event}
           onBack={() => navigation.goBack()}
-          onEditRoute={m => navigation.navigate('RouteEdit', { tripId, eventId, mapId: m?.id })}
+          onAddRoute={() => navigation.navigate('RouteEdit', { tripId, eventId })}
+          onViewRoute={m => navigation.navigate('RouteEdit', { tripId, eventId, mapId: m.id, view: true })}
           onDeleteRoute={setAskDelete}
         />
         <Toast

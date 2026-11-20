@@ -53,6 +53,18 @@ export async function insertRow<T>(table: string, row: object): Promise<T> {
   return rows[0];
 }
 
+/** Cập nhật các dòng khớp `filter` (cú pháp PostgREST, ví dụ 'id=eq.12'). */
+export async function updateRows(table: string, filter: string, patch: object): Promise<void> {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${filter}`, {
+    method: 'PATCH',
+    headers: { ...headers(), 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+    body: JSON.stringify(patch),
+  });
+  if (!res.ok) {
+    return fail(res, 'Lỗi cập nhật dữ liệu');
+  }
+}
+
 /** Xoá các dòng khớp `filter` (cú pháp PostgREST, ví dụ 'event_id=eq.12&seq=eq.1'). */
 export async function deleteRows(table: string, filter: string): Promise<void> {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${filter}`, {

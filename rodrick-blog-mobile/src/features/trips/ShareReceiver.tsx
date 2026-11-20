@@ -8,6 +8,7 @@ import {
 import { Toast } from '../../shared/ui';
 import { navigationRef } from '../../navigation/navigationRef';
 import { ParsedRoute, parseMapsLink, resolveMapsLink } from './parseMapsLink';
+import { clearRouteEdit, takeRouteEdit } from './pendingRouteEdit';
 
 const URL_RE = /https?:\/\/\S+/i;
 
@@ -29,13 +30,16 @@ function openRoute(route: ParsedRoute) {
     const cur = navigationRef.getCurrentRoute();
     const p = cur?.params as { tripId?: string; eventId?: string; mapId?: number } | undefined;
     if ((cur?.name === 'EventDetail' || cur?.name === 'RouteEdit') && p?.tripId && p.eventId) {
-      // Từ Chi tiết event: thêm lộ trình mới. Đang ở màn Sửa một lộ trình: điền vào lộ trình đó.
-      const mapId = cur.name === 'RouteEdit' ? p.mapId : undefined;
+      // Lộ trình vừa mở sang Google Maps từ danh sách (chạm vào lộ trình) thì cập nhật lộ trình
+      // đó; đang ở hộp thoại một lộ trình thì điền vào lộ trình đó; còn lại thêm lộ trình mới.
+      const pendingId = takeRouteEdit(Number(p.eventId));
+      const mapId = pendingId ?? (cur.name === 'RouteEdit' ? p.mapId : undefined);
       navigationRef.navigate('Home', {
         screen: 'RouteEdit',
-        params: { tripId: p.tripId, eventId: p.eventId, mapId, route },
+        params: { tripId: p.tripId, eventId: p.eventId, mapId, route, view: false },
       });
     } else {
+      clearRouteEdit();
       navigationRef.navigate('Home', { screen: 'PickEvent', params: { route } });
     }
   });
@@ -52,20 +56,29 @@ export function ShareReceiver() {
     if (!p || p.type !== 'text' || !p.text) {
       return;
     }
-    const url = p.text.match(URL_RE)?.[0];
-    if (!url) {
+    // Ghi lại văn bản nhận được khi đọc lỗi (xem bằng `adb logcat -s ReactNativeJS`), để biết
+    // Google Maps gửi định dạng nào mà app chưa hiểu.
+    const fail = (why: string, extra?: string) => {
+      console.warn(`[ShareReceiver] ${why}`, JSON.stringify({ text: p.text, extra }));
       setFailed(true);
+    };
+    // Bỏ dấu câu dính ở cuối liên kết (ví dụ ")" hay "." khi Google Maps gửi kèm câu mô tả).
+    const url = p.text.match(URL_RE)?.[0]?.replace(/[)\].,;]+$/, '');
+    if (!url) {
+      fail('không có liên kết');
       return;
     }
+    let resolved = url;
     try {
-      const route = parseMapsLink(await resolveMapsLink(url));
+      resolved = await resolveMapsLink(url);
+      const route = parseMapsLink(resolved);
       if (route) {
         openRoute({ ...route, link: url });
       } else {
-        setFailed(true);
+        fail('không đọc được', resolved);
       }
-    } catch {
-      setFailed(true);
+    } catch (e) {
+      fail('lỗi khi mở liên kết', `${resolved} | ${e instanceof Error ? e.message : String(e)}`);
     }
   }, []);
 

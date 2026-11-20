@@ -20,6 +20,11 @@ export type EventMap = {
   destination_lng: number | null;
   travel_mode: TravelMode | null;
   waypoints: string[];
+  /**
+   * Giờ xuất phát đặt trong Google Maps, giờ địa phương nơi đi, dạng 'YYYY-MM-DDTHH:MM:SS'
+   * (cột timestamp không múi giờ). null: đi ngay.
+   */
+  depart_at: string | null;
 };
 
 export type EventDocument = {

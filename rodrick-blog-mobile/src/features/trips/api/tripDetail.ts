@@ -24,7 +24,7 @@ export async function fetchTripDetail(id: number): Promise<TripDetail> {
     trip_date: e.trip_date.slice(0, 10),
     end_day_offset: e.end_day_offset ?? 0,
     event_maps: (e.event_maps ?? [])
-      .map(m => ({ ...m, waypoints: m.waypoints ?? [] }))
+      .map(m => ({ ...m, waypoints: m.waypoints ?? [], depart_at: m.depart_at?.slice(0, 19) ?? null }))
       .sort((x, y) => x.seq - y.seq),
     images: e.images ?? [],
     documents: e.documents ?? [],

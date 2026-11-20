@@ -1,14 +1,19 @@
-import { deleteRows, insertRow } from '../../../shared/api/supabase';
+import { deleteRows, insertRow, updateRows } from '../../../shared/api/supabase';
 import { EventMap } from '../types';
 
 export type RouteInput = Omit<EventMap, 'id' | 'seq'>;
 
-function toRow(eventId: number, seq: number, r: RouteInput) {
+/**
+ * Dòng ghi vào event_maps. `depart_at` chỉ gửi khi có giá trị hoặc cần xoá giá trị cũ, để app
+ * vẫn lưu được lộ trình không có giờ xuất phát kể cả khi bảng chưa thêm cột này.
+ */
+function toRow(eventId: number, seq: number, r: RouteInput, clearDepart = false) {
   const destination = r.destination_name.trim();
   if (!destination) {
     throw new Error('Cần nhập điểm đến.');
   }
   return {
+    ...(r.depart_at || clearDepart ? { depart_at: r.depart_at } : {}),
     event_id: eventId,
     seq,
     origin_name: r.origin_name?.trim() || null,
@@ -29,12 +34,11 @@ export async function addEventRoute(eventId: number, existing: EventMap[], r: Ro
 }
 
 /**
- * Sửa một lộ trình: ghi bản mới (cùng seq) trước rồi mới xoá bản cũ theo id, để nếu ghi lỗi
- * thì lộ trình cũ vẫn còn. Toạ độ chỉ có khi điểm giữ nguyên tên so với bản cũ.
+ * Sửa một lộ trình: cập nhật thẳng dòng cũ theo id (một lệnh, nên lỗi thì dòng cũ vẫn nguyên).
+ * Không ghi bản mới rồi xoá bản cũ được vì bảng có ràng buộc duy nhất (event_id, seq).
  */
 export async function replaceEventRoute(eventId: number, old: EventMap, r: RouteInput): Promise<void> {
-  await insertRow('event_maps', toRow(eventId, old.seq, r));
-  await deleteRows('event_maps', `id=eq.${old.id}`);
+  await updateRows('event_maps', `id=eq.${old.id}`, toRow(eventId, old.seq, r, !!old.depart_at));
 }
 
 /** Xoá đúng một lộ trình theo id (event có thể có nhiều lộ trình). */
