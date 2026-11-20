@@ -9,6 +9,7 @@ import {
   View,
   useWindowDimensions,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RotateCw, X } from 'lucide-react-native';
 import { IconButton, Text } from '../../../shared/ui';
 import { cloudinaryUrl } from '../../../shared/utils/cloudinary';
@@ -63,6 +64,8 @@ function ViewerImage({ uri, extra }: { uri: string; extra: number }) {
 /** Xem ảnh toàn màn hình nền tối, vuốt ngang qua các ảnh, có nút xoay. */
 export function PhotoViewer({ images, index, onClose }: Props) {
   const { width, height } = useWindowDimensions();
+  // Nút và chú thích tránh tai thỏ / thanh hệ thống, nhất là khi xoay ngang.
+  const insets = useSafeAreaInsets();
   const [current, setCurrent] = useState(index ?? 0);
   // Số độ xoay thêm theo từng ảnh (id), giữ khi vuốt qua lại.
   const [extra, setExtra] = useState<Record<number, number>>({});
@@ -107,7 +110,17 @@ export function PhotoViewer({ images, index, onClose }: Props) {
           />
         ) : null}
 
-        <View style={styles.caption} pointerEvents="none">
+        <View
+          style={[
+            styles.caption,
+            {
+              bottom: insets.bottom + 24,
+              left: insets.left + layout.screenMargin,
+              right: insets.right + layout.screenMargin,
+            },
+          ]}
+          pointerEvents="none"
+        >
           <Text variant="caption" style={styles.light} numberOfLines={2}>
             {shown?.caption ?? ''}
           </Text>
@@ -116,7 +129,7 @@ export function PhotoViewer({ images, index, onClose }: Props) {
           </Text>
         </View>
 
-        <View style={styles.actions}>
+        <View style={[styles.actions, { top: Math.max(insets.top, 16) + 8, right: insets.right + 12 }]}>
           <IconButton accessibilityLabel="Xoay ảnh" variant="ghost" onPress={rotate} icon={renderRotate} />
           <IconButton accessibilityLabel="Đóng" variant="ghost" onPress={onClose} icon={renderClose} />
         </View>
@@ -130,13 +143,10 @@ const styles = StyleSheet.create({
   page: { alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
   caption: {
     position: 'absolute',
-    left: layout.screenMargin,
-    right: layout.screenMargin,
-    bottom: 32,
     flexDirection: 'row',
     justifyContent: 'space-between',
     gap: 12,
   },
   light: { color: LIGHT, flexShrink: 1 },
-  actions: { position: 'absolute', top: 40, right: 12, flexDirection: 'row', gap: 4 },
+  actions: { position: 'absolute', flexDirection: 'row', gap: 4 },
 });

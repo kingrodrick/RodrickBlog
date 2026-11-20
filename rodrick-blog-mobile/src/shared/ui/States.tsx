@@ -24,7 +24,7 @@ function Enso() {
 export function EmptyState({ message }: { message: string }) {
   return (
     <View style={styles.wrap}>
-      <Enso />
+      {/* <Enso /> */}
       <Text tone="secondary" style={styles.msg}>
         {message}
       </Text>

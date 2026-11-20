@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { ChevronLeft, EllipsisVertical } from 'lucide-react-native';
+import { ChevronLeft } from 'lucide-react-native';
 import { ErrorState, IconButton, Screen, Skeleton, Text } from '../../../shared/ui';
 import { useAsync } from '../../../shared/hooks/useAsync';
 import { tripLength } from '../../../shared/utils/format';
@@ -29,7 +29,6 @@ type Route = RouteProp<HomeStackParamList, 'TripDetail'>;
 const icon = (Icon: typeof ChevronLeft) => (c: string) =>
   <Icon color={c} size={iconSize.control} strokeWidth={iconStroke.normal} strokeLinecap="round" />;
 const renderBack = icon(ChevronLeft);
-const renderMore = icon(EllipsisVertical);
 
 // Ngưỡng ẩn/hiện header theo đặc tả: ẩn khi y > 60 và đã cuộn xuống quá 6; hiện khi cuộn ngược quá 8 hoặc về đầu.
 const HIDE_AFTER_Y = 60;
@@ -130,7 +129,7 @@ function Timeline({ trip, onOpen }: { trip: TripDetail; onOpen: (eventId: number
           style={styles.header}
           onLayout={e => header.onContentLayout(e.nativeEvent.layout.height)}
         >
-          <IconButton accessibilityLabel="Quay lại" onPress={() => navigation.goBack()} icon={renderBack} />
+          <IconButton variant="ghost" accessibilityLabel="Quay lại" onPress={() => navigation.goBack()} icon={renderBack} />
           <View style={styles.headerText}>
             <Text variant="title" numberOfLines={1} accessibilityRole="header" style={styles.title}>
               {trip.title}
@@ -139,8 +138,6 @@ function Timeline({ trip, onOpen }: { trip: TripDetail; onOpen: (eventId: number
               {compactRange(trip.start_date, trip.end_date)} · {tripLength(trip.start_date, trip.end_date)}
             </Text>
           </View>
-          {/* Chưa có hành động; giữ chỗ theo mockup. */}
-          <IconButton accessibilityLabel="Tuỳ chọn" onPress={() => {}} icon={renderMore} />
         </View>
       </Animated.View>
 

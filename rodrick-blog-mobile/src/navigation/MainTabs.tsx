@@ -1,5 +1,6 @@
 import React from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   createBottomTabNavigator,
   BottomTabBarProps,
@@ -13,6 +14,11 @@ import { HomeStack } from './HomeStack';
 import { MainTabParamList } from './type';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
+
+function useLandscape() {
+  const { width, height } = useWindowDimensions();
+  return width > height;
+}
 
 /** Thanh tab: nền đen hơi trong, icon sáng. */
 const BAR_ALPHA = 0.6;
@@ -84,9 +90,20 @@ const ITEMS = {
 function FooterBar({ state, navigation }: BottomTabBarProps) {
   const { colors } = useTheme();
   const knockoutColor = barColorOver(colors.background);
+  const landscape = useLandscape();
+  const insets = useSafeAreaInsets();
 
   return (
-    <View style={styles.bar}>
+    <View
+      style={[
+        styles.bar,
+        landscape && [
+          styles.side,
+          // Thanh nằm sát mép phải: tránh tai thỏ / thanh điều hướng hệ thống ở mép phải, trên, dưới.
+          { paddingTop: insets.top + 8, paddingBottom: insets.bottom + 8, paddingRight: insets.right },
+        ],
+      ]}
+    >
       {state.routes.map((route, index) => {
         const focused = state.index === index;
         const name = route.name as keyof typeof ITEMS;
@@ -98,7 +115,7 @@ function FooterBar({ state, navigation }: BottomTabBarProps) {
             accessibilityLabel={label}
             accessibilityState={{ selected: focused }}
             onPress={() => !focused && navigation.navigate(route.name)}
-            style={styles.item}
+            style={[styles.item, landscape && styles.sideItem]}
           >
             <Icon
               size={iconSize.control}
@@ -127,12 +144,20 @@ function SettingsTab() {
   return <SettingsScreen username={username} onSignOut={signOut} />;
 }
 
+/** Tab Giấy tờ / Ảnh chưa dựng; khai báo ngoài MainTabs để không bị dựng lại khi xoay màn. */
+const EmptyTab = () => null;
+
 export function MainTabs() {
+  const landscape = useLandscape();
   return (
-    <Tab.Navigator tabBar={renderTabBar} screenOptions={{ headerShown: false }}>
+    <Tab.Navigator
+      tabBar={renderTabBar}
+      // Xoay ngang: thanh tab chuyển sang mép phải, 4 nút xếp dọc từ trên xuống.
+      screenOptions={{ headerShown: false, tabBarPosition: landscape ? 'right' : 'bottom' }}
+    >
       <Tab.Screen name="Home" component={HomeStack} />
-      <Tab.Screen name="Documents" component={() => <></>} />
-      <Tab.Screen name="Photos" component={() => <></>} />
+      <Tab.Screen name="Documents" component={EmptyTab} />
+      <Tab.Screen name="Photos" component={EmptyTab} />
       <Tab.Screen name="Settings" component={SettingsTab} />
     </Tab.Navigator>
   );
@@ -146,4 +171,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     minHeight: 60,
   },
+  side: { flexDirection: 'column', paddingVertical: 0, paddingLeft: 0 },
+  sideItem: { minHeight: 44, width: 64 },
 });

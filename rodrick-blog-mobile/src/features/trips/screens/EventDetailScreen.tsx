@@ -3,12 +3,13 @@ import {
   AccessibilityInfo,
   Animated,
   ScrollView,
+  ScrollViewInstance,
   StyleSheet,
   View,
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { ChevronLeft, EllipsisVertical } from 'lucide-react-native';
+import { ChevronLeft } from 'lucide-react-native';
 import { ErrorState, IconButton, Screen, Skeleton, Text, Toast } from '../../../shared/ui';
 import { useAsync } from '../../../shared/hooks/useAsync';
 import { iconSize, iconStroke, layout, radius, useTheme } from '../../../theme';
@@ -16,7 +17,6 @@ import { HomeStackParamList } from '../../../navigation/type';
 import { fetchTripDetail } from '../api/tripDetail';
 import { DocsPage, InfoPage, PhotosPage } from '../components/EventPages';
 import { PhotoViewer } from '../components/PhotoViewer';
-import { hhmm } from '../eventCategory';
 import { DetailEvent, EventImage } from '../types';
 
 type Nav = NativeStackNavigationProp<HomeStackParamList, 'EventDetail'>;
@@ -25,7 +25,6 @@ type Route = RouteProp<HomeStackParamList, 'EventDetail'>;
 const icon = (Icon: typeof ChevronLeft) => (c: string) =>
   <Icon color={c} size={iconSize.control} strokeWidth={iconStroke.normal} strokeLinecap="round" />;
 const renderBack = icon(ChevronLeft);
-const renderMore = icon(EllipsisVertical);
 
 const CHAPTERS = ['Thông tin', 'Giấy tờ', 'Ảnh thực tế'];
 
@@ -66,7 +65,15 @@ function Pager({ event, onBack, onEditRoute }: PagerProps) {
     useNativeDriver: true,
   });
 
-  const ghosts = [hhmm(event.start_time)?.slice(0, 2) ?? '01', '02', '03'];
+  // Xoay màn làm đổi bề ngang trang: cuộn lại đúng trang đang xem, tránh lệch giữa hai trang.
+  const pagerRef = useRef<ScrollViewInstance>(null);
+  const currentPage = useRef(0);
+  useEffect(() => {
+    if (width) {
+      pagerRef.current?.scrollTo({ x: currentPage.current * width, animated: false });
+    }
+  }, [width]);
+
   const pages = [
     <InfoPage key="info" event={event} onOpenPhoto={openPhoto} onEditRoute={onEditRoute} />,
     <DocsPage key="docs" event={event} />,
@@ -76,7 +83,7 @@ function Pager({ event, onBack, onEditRoute }: PagerProps) {
   return (
     <View style={styles.fill}>
       <View style={styles.top}>
-        <IconButton accessibilityLabel="Quay lại" onPress={onBack} icon={renderBack} />
+        <IconButton variant="ghost" accessibilityLabel="Quay lại" onPress={onBack} icon={renderBack} />
         <View style={styles.chapters} accessibilityRole="header">
           {CHAPTERS.map((label, i) => (
             <Animated.View
@@ -91,8 +98,8 @@ function Pager({ event, onBack, onEditRoute }: PagerProps) {
                   : i === 0 ? null : styles.hidden,
               ]}
             >
-              <Text variant="overline" tone="secondary">
-                <Text variant="overline" tone="accent">
+              <Text variant="heading">
+                <Text variant="heading" tone="accent">
                   {i + 1}/3{'  '}
                 </Text>
                 {label}
@@ -100,8 +107,6 @@ function Pager({ event, onBack, onEditRoute }: PagerProps) {
             </Animated.View>
           ))}
         </View>
-        {/* Chưa có hành động; giữ chỗ theo mockup. */}
-        <IconButton accessibilityLabel="Tuỳ chọn" onPress={() => {}} icon={renderMore} />
       </View>
 
       <View style={styles.progress}>
@@ -133,10 +138,16 @@ function Pager({ event, onBack, onEditRoute }: PagerProps) {
       </View>
 
       <Animated.ScrollView
+        ref={pagerRef}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         onLayout={e => setWidth(e.nativeEvent.layout.width)}
+        onMomentumScrollEnd={e => {
+          if (width) {
+            currentPage.current = Math.round(e.nativeEvent.contentOffset.x / width);
+          }
+        }}
         onScroll={onScroll}
         scrollEventThrottle={16}
         style={styles.fill}
@@ -148,19 +159,6 @@ function Pager({ event, onBack, onEditRoute }: PagerProps) {
             contentContainerStyle={styles.pageBody}
             showsVerticalScrollIndicator={false}
           >
-            <Animated.Text
-              style={[
-                styles.ghost,
-                { color: colors.surfaceMuted },
-                width && !reduce
-                  ? { transform: [{ translateX: around(scrollX, width, i, [120, 0, -120]) }] }
-                  : null,
-              ]}
-              accessibilityElementsHidden
-              importantForAccessibility="no-hide-descendants"
-            >
-              {ghosts[i]}
-            </Animated.Text>
             <Animated.View
               style={
                 width && !reduce
@@ -260,14 +258,4 @@ const styles = StyleSheet.create({
   bar: { flex: 1, height: 3, borderRadius: 2, overflow: 'hidden' },
   barFill: { position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, transformOrigin: 'left' },
   pageBody: { paddingHorizontal: layout.screenMargin, paddingTop: 20, paddingBottom: 28 },
-  ghost: {
-    position: 'absolute',
-    right: -6,
-    top: 8,
-    fontSize: 150,
-    lineHeight: 160,
-    fontWeight: '800',
-    letterSpacing: -6,
-    opacity: 0.7,
-  },
 });
