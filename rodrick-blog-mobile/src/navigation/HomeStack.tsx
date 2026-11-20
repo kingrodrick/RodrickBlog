@@ -22,7 +22,8 @@ export function HomeStack() {
       <Stack.Screen
         name="RouteEdit"
         component={RouteEditScreen}
-        options={{ animation: 'slide_from_bottom' }}
+        // Hộp thoại: màn chi tiết mốc vẫn hiện phía sau lớp phủ mờ.
+        options={{ presentation: 'transparentModal', animation: 'fade' }}
       />
       <Stack.Screen
         name="PickEvent"

@@ -27,11 +27,13 @@ function whenReady(run: () => void, tries = 50) {
 function openRoute(route: ParsedRoute) {
   whenReady(() => {
     const cur = navigationRef.getCurrentRoute();
-    const p = cur?.params as { tripId?: string; eventId?: string } | undefined;
+    const p = cur?.params as { tripId?: string; eventId?: string; mapId?: number } | undefined;
     if ((cur?.name === 'EventDetail' || cur?.name === 'RouteEdit') && p?.tripId && p.eventId) {
+      // Từ Chi tiết event: thêm lộ trình mới. Đang ở màn Sửa một lộ trình: điền vào lộ trình đó.
+      const mapId = cur.name === 'RouteEdit' ? p.mapId : undefined;
       navigationRef.navigate('Home', {
         screen: 'RouteEdit',
-        params: { tripId: p.tripId, eventId: p.eventId, route },
+        params: { tripId: p.tripId, eventId: p.eventId, mapId, route },
       });
     } else {
       navigationRef.navigate('Home', { screen: 'PickEvent', params: { route } });
@@ -58,7 +60,7 @@ export function ShareReceiver() {
     try {
       const route = parseMapsLink(await resolveMapsLink(url));
       if (route) {
-        openRoute(route);
+        openRoute({ ...route, link: url });
       } else {
         setFailed(true);
       }

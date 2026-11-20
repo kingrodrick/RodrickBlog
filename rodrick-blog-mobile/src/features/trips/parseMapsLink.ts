@@ -6,6 +6,8 @@ export type ParsedRoute = {
   waypoints: string[];
   destination: string;
   mode: TravelMode | null;
+  /** Liên kết gốc đã đọc (ví dụ nhận từ nút Chia sẻ), để điền lại vào ô "Dán liên kết". */
+  link?: string;
 };
 
 const MODES: TravelMode[] = ['driving', 'walking', 'bicycling', 'transit'];

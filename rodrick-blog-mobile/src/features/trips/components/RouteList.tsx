@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Easing, Linking, Pressable, StyleSheet, View } from 'react-native';
+import { Animated, Easing, Linking, Platform, Pressable, StyleSheet, View } from 'react-native';
 import {
   ArrowRight,
   Bike,
@@ -13,7 +13,7 @@ import {
 } from 'lucide-react-native';
 import { Text } from '../../../shared/ui';
 import { iconSize, iconStroke, layout, radius, useTheme } from '../../../theme';
-import { buildDirectionsUrl, buildSearchUrl, TRAVEL_MODE_LABEL } from '../maps';
+import { buildDirectionsUrl, buildPickRouteUrl, TRAVEL_MODE_LABEL } from '../maps';
 import { DetailEvent, EventMap, TravelMode } from '../types';
 
 const MODE_ICON = {
@@ -128,15 +128,16 @@ function RouteRow({ map, open, onToggle, onShare, onEdit, onDelete }: RowProps) 
 
 type Props = {
   event: DetailEvent;
-  /** Tên mốc không phải chuyến bay mà chưa có lộ trình thì cho chỉ đường theo tên địa điểm. */
-  searchFallback: boolean;
+  /** Mốc không phải chuyến bay: Google Maps mở sẵn điểm đến là tên địa điểm của mốc. */
+  presetDestination: boolean;
+  /** Mở màn Thêm lộ trình (dán liên kết tay), dùng trên iOS. */
   onAdd: () => void;
   onEdit: (m: EventMap) => void;
   onDelete: (m: EventMap) => void;
 };
 
 /** Mục "Lộ trình": danh sách các lộ trình của mốc (1-n) + nút thêm ở cuối. */
-export function RouteList({ event, searchFallback, onAdd, onEdit, onDelete }: Props) {
+export function RouteList({ event, presetDestination, onAdd, onEdit, onDelete }: Props) {
   const { colors } = useTheme();
   const maps = event.event_maps;
   const [openId, setOpenId] = useState<number | null>(null);
@@ -179,19 +180,25 @@ export function RouteList({ event, searchFallback, onAdd, onEdit, onDelete }: Pr
         </Text>
       )}
 
-      {!maps.length && searchFallback ? (
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => Linking.openURL(buildSearchUrl(event.location_name, event.city))}
-          style={[styles.add, { backgroundColor: colors.surfaceMuted }]}
-        >
-          <Text style={styles.addText}>Chỉ đường theo tên địa điểm</Text>
-        </Pressable>
-      ) : null}
-
+      {/*
+        Android: mở thẳng Google Maps; chọn xong đường, bấm Chia sẻ rồi chọn app này thì
+        ShareReceiver mở màn Thêm lộ trình đã điền sẵn. iOS chưa nhận được Chia sẻ nên vào màn
+        Thêm lộ trình để dán liên kết.
+      */}
       <Pressable
         accessibilityRole="button"
-        onPress={onAdd}
+        accessibilityHint={
+          Platform.OS === 'android'
+            ? 'Mở Google Maps. Chọn xong đường đi, bấm Chia sẻ rồi chọn ứng dụng này'
+            : undefined
+        }
+        onPress={() =>
+          Platform.OS === 'android'
+            ? Linking.openURL(
+                presetDestination ? buildPickRouteUrl(event.location_name, event.city) : buildPickRouteUrl(),
+              )
+            : onAdd()
+        }
         style={[styles.add, { backgroundColor: colors.surfaceMuted }]}
       >
         <Text style={styles.addText}>Thêm lộ trình</Text>

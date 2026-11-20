@@ -88,7 +88,7 @@ export function InfoPage({ event, landscape, onOpenPhoto, onAddRoute, onEditRout
   const routes = (
     <RouteList
       event={event}
-      searchFallback={!isFlight(event)}
+      presetDestination={!isFlight(event)}
       onAdd={onAddRoute}
       onEdit={onEditRoute}
       onDelete={onDeleteRoute}

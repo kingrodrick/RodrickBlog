@@ -68,11 +68,16 @@ export function buildDirectionsUrl(m: EventMap, city: string): string {
   return `https://www.google.com/maps/dir/?${q.join('&')}`;
 }
 
-/** Dự phòng khi event không có event_maps (và không phải chuyến bay). */
-export function buildSearchUrl(locationName: string, city: string): string {
-  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-    `${locationName}, ${city}`,
-  )}`;
+/**
+ * Mở Google Maps ở chế độ chỉ đường để chọn lộ trình mới. Có tên địa điểm thì đặt sẵn làm
+ * điểm đến (điểm đi để trống = vị trí hiện tại); không có thì mở trang chỉ đường trống.
+ */
+export function buildPickRouteUrl(locationName?: string, city?: string): string {
+  if (!locationName) {
+    return 'https://www.google.com/maps/dir/?api=1';
+  }
+  const dest = city ? `${locationName}, ${city}` : locationName;
+  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(dest)}`;
 }
 
 export const TRAVEL_MODE_LABEL: Record<TravelMode, string> = {

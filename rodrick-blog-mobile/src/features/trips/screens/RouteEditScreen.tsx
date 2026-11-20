@@ -1,5 +1,14 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Linking, Pressable, StyleSheet, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Linking,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { X } from 'lucide-react-native';
@@ -9,18 +18,17 @@ import {
   Dialog,
   ErrorState,
   IconButton,
-  Screen,
   Segmented,
   Skeleton,
   Text,
   TextField,
 } from '../../../shared/ui';
 import { useAsync } from '../../../shared/hooks/useAsync';
-import { iconSize, iconStroke, radius } from '../../../theme';
+import { iconSize, iconStroke, radius, useTheme } from '../../../theme';
 import { HomeStackParamList } from '../../../navigation/type';
 import { fetchTripDetail } from '../api/tripDetail';
-import { deleteEventRoute, RouteInput, saveEventRoute } from '../api/routeApi';
-import { buildDirectionsUrl } from '../maps';
+import { addEventRoute, deleteEventRouteById, replaceEventRoute, RouteInput } from '../api/routeApi';
+import { buildDirectionsUrl, buildPickRouteUrl } from '../maps';
 import { ParsedRoute, parseMapsLink, resolveMapsLink } from '../parseMapsLink';
 import { DetailEvent, TravelMode } from '../types';
 
@@ -67,10 +75,11 @@ function Section({ title, meta }: { title: string; meta?: string }) {
 
 function RouteForm({ event, initial }: { event: DetailEvent; initial?: ParsedRoute }) {
   const navigation = useNavigation<Nav>();
-  const { tripId } = useRoute<Route>().params;
-  const existing = event.event_maps[0];
+  const { tripId, mapId } = useRoute<Route>().params;
+  // Có mapId: sửa lộ trình đó. Không có: thêm mới.
+  const existing = mapId !== undefined ? event.event_maps.find(m => m.id === mapId) : undefined;
 
-  const [link, setLink] = useState('');
+  const [link, setLink] = useState(initial?.link ?? '');
   const [origin, setOrigin] = useState(initial?.origin ?? existing?.origin_name ?? '');
   const [waypoints, setWaypoints] = useState<string[]>(initial?.waypoints ?? existing?.waypoints ?? []);
   const [destination, setDestination] = useState(initial?.destination ?? existing?.destination_name ?? '');
@@ -83,6 +92,9 @@ function RouteForm({ event, initial }: { event: DetailEvent; initial?: ParsedRou
   const [askDelete, setAskDelete] = useState(false);
 
   const fill = (r: ParsedRoute) => {
+    if (r.link) {
+      setLink(r.link);
+    }
     setOrigin(r.origin ?? '');
     setWaypoints(r.waypoints);
     setDestination(r.destination);
@@ -138,7 +150,11 @@ function RouteForm({ event, initial }: { event: DetailEvent; initial?: ParsedRou
     setSaving(true);
     setSaveError(null);
     try {
-      await saveEventRoute(event.id, current());
+      if (existing) {
+        await replaceEventRoute(event.id, existing, current());
+      } else {
+        await addEventRoute(event.id, event.event_maps, current());
+      }
       backWith('Đã lưu lộ trình');
     } catch (e) {
       setSaveError(e instanceof Error ? e.message : 'Không lưu được lộ trình.');
@@ -148,9 +164,12 @@ function RouteForm({ event, initial }: { event: DetailEvent; initial?: ParsedRou
 
   const remove = async () => {
     setAskDelete(false);
+    if (!existing) {
+      return;
+    }
     setSaving(true);
     try {
-      await deleteEventRoute(event.id);
+      await deleteEventRouteById(existing.id);
       backWith('Đã xoá lộ trình');
     } catch (e) {
       setSaveError(e instanceof Error ? e.message : 'Không xoá được lộ trình.');
@@ -166,21 +185,30 @@ function RouteForm({ event, initial }: { event: DetailEvent; initial?: ParsedRou
   return (
     <>
       <View style={styles.head}>
-        <Text variant="title" accessibilityRole="header">
-          Sửa lộ trình
-        </Text>
-        <Text variant="body" tone="secondary">
-          {event.location_name}
-        </Text>
+        <View style={styles.flex}>
+          <Text variant="heading" accessibilityRole="header" style={styles.dialogTitle}>
+            {existing ? 'Sửa lộ trình' : 'Thêm lộ trình'}
+          </Text>
+          <Text variant="caption" tone="secondary" numberOfLines={1}>
+            {event.location_name}
+          </Text>
+        </View>
+        <IconButton variant="ghost" accessibilityLabel="Đóng" onPress={() => navigation.goBack()} icon={renderClose} />
       </View>
 
       <Section title="Lấy lộ trình từ Google Maps" />
       <View style={styles.steps}>
-        {[
-          'Mở Google Maps, chọn điểm đi, điểm đến và phương tiện.',
-          'Bấm Chia sẻ, chọn Sao chép liên kết.',
-          'Quay lại đây, dán vào ô bên dưới.',
-        ].map((s, i) => (
+        {(Platform.OS === 'android'
+          ? [
+              'Mở Google Maps, chọn điểm đi, điểm đến và phương tiện.',
+              'Bấm Chia sẻ, chọn ứng dụng này. Các ô sẽ tự điền.',
+            ]
+          : [
+              'Mở Google Maps, chọn điểm đi, điểm đến và phương tiện.',
+              'Bấm Chia sẻ, chọn Sao chép liên kết.',
+              'Quay lại đây, dán vào ô bên dưới.',
+            ]
+        ).map((s, i) => (
           <Text key={s} tone="secondary">
             {i + 1}. {s}
           </Text>
@@ -190,7 +218,7 @@ function RouteForm({ event, initial }: { event: DetailEvent; initial?: ParsedRou
         variant="secondary"
         size="md"
         title="Mở Google Maps"
-        onPress={() => Linking.openURL('https://www.google.com/maps')}
+        onPress={() => Linking.openURL(buildPickRouteUrl(event.location_name, event.city))}
       />
 
       <TextField
@@ -259,33 +287,51 @@ function RouteForm({ event, initial }: { event: DetailEvent; initial?: ParsedRou
   );
 }
 
+/**
+ * Thêm/Sửa lộ trình dạng hộp thoại: màn được khai báo `transparentModal` trong HomeStack nên
+ * màn chi tiết mốc vẫn hiện mờ phía sau. Chạm vùng phủ mờ hoặc nút X để đóng.
+ */
 export function RouteEditScreen() {
   const navigation = useNavigation<Nav>();
+  const { colors } = useTheme();
+  const { height } = useWindowDimensions();
   const { tripId, eventId, route } = useRoute<Route>().params;
   const load = useCallback(() => fetchTripDetail(Number(tripId)), [tripId]);
   const { data, loading, error, reload } = useAsync(load);
   const event = data?.timeline_events.find(e => e.id === Number(eventId));
 
   return (
-    <Screen
-      headerLeft={
-        <IconButton accessibilityLabel="Đóng" onPress={() => navigation.goBack()} icon={renderClose} />
-      }
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      style={[styles.scrim, { backgroundColor: colors.overlay }]}
     >
-      {event ? (
-        <RouteForm event={event} initial={route} />
-      ) : loading ? (
-        <Skeleton height={320} borderRadius={radius.card} />
-      ) : (
-        <ErrorState message={error ?? 'Không tìm thấy mốc này.'} onRetry={reload} />
-      )}
-    </Screen>
+      <Pressable accessibilityLabel="Đóng hộp thoại" style={StyleSheet.absoluteFill} onPress={() => navigation.goBack()} />
+      <View accessibilityViewIsModal style={[styles.box, { backgroundColor: colors.surface, maxHeight: height * 0.88 }]}>
+        <ScrollView
+          contentContainerStyle={styles.body}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          {event ? (
+            <RouteForm event={event} initial={route} />
+          ) : loading ? (
+            <Skeleton height={320} borderRadius={radius.card} />
+          ) : (
+            <ErrorState message={error ?? 'Không tìm thấy mốc này.'} onRetry={reload} />
+          )}
+        </ScrollView>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  head: { gap: 4 },
+  scrim: { flex: 1, justifyContent: 'center', padding: 20 },
+  box: { borderRadius: radius.sheet, overflow: 'hidden' },
+  body: { padding: 20, gap: 12 },
+  head: { flexDirection: 'row', alignItems: 'center', gap: 8, marginRight: -8 },
+  dialogTitle: { fontSize: 20, lineHeight: 26, fontWeight: '700' },
   sec: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 16 },
   steps: { gap: 4 },
   link: { minHeight: 44, justifyContent: 'center', alignSelf: 'flex-start' },

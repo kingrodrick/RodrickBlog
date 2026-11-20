@@ -278,7 +278,7 @@ export function EventDetailScreen() {
         <Pager
           event={event}
           onBack={() => navigation.goBack()}
-          onEditRoute={() => navigation.navigate('RouteEdit', { tripId, eventId })}
+          onEditRoute={m => navigation.navigate('RouteEdit', { tripId, eventId, mapId: m?.id })}
           onDeleteRoute={setAskDelete}
         />
         <Toast

@@ -15,8 +15,11 @@ export type HomeStackParamList = {
   TripDetail: { tripId: string };
   /** Kèm tripId để màn chi tiết event tìm event trong chuyến đã tải; `notice` là toast khi quay về. */
   EventDetail: { tripId: string; eventId: string; notice?: string };
-  /** `route` có sẵn khi đến từ liên kết đã đọc (ví dụ nhận từ nút Chia sẻ). */
-  RouteEdit: { tripId: string; eventId: string; route?: ParsedRoute };
+  /**
+   * Có `mapId`: sửa đúng lộ trình đó. Không có: thêm lộ trình mới (không đụng lộ trình cũ).
+   * `route` có sẵn khi đến từ liên kết đã đọc (ví dụ nhận từ nút Chia sẻ).
+   */
+  RouteEdit: { tripId: string; eventId: string; mapId?: number; route?: ParsedRoute };
   /** Chọn event để gán lộ trình vừa nhận từ nút Chia sẻ của Google Maps. */
   PickEvent: { route: ParsedRoute };
 };
