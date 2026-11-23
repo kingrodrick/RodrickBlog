@@ -1,9 +1,10 @@
 import React from 'react';
-import { Image, Linking, Pressable, StyleSheet, View } from 'react-native';
+import { Image, Pressable, StyleSheet, View } from 'react-native';
+import { LocalDocument } from '../../../shared/api/localDocuments';
 import { Text } from '../../../shared/ui';
-import { cloudinaryUrl } from '../../../shared/utils/cloudinary';
 import { radius, useTheme } from '../../../theme';
-import { DocumentType, EventDocument } from '../types';
+import { isPdfDocument, openDocument } from '../documentFile';
+import { DocumentType } from '../types';
 
 export const DOC_TYPE_LABEL: Record<DocumentType, string> = {
   FLIGHT: 'Vé máy bay',
@@ -11,11 +12,21 @@ export const DOC_TYPE_LABEL: Record<DocumentType, string> = {
   BOOKING: 'Booking',
 };
 
-const isPdf = (url: string) => /\.pdf($|\?)/i.test(url);
 const NOTCH = 20;
 
-/** Vé giấy tờ: ảnh (mã QR có sẵn trong tệp) hoặc ô PDF, tên, loại; chạm để mở tệp Cloudinary. */
-export function DocumentTicket({ doc }: { doc: EventDocument }) {
+/**
+ * Vé giấy tờ lưu trên máy: ảnh (mã QR có sẵn trong tệp) hoặc ô PDF, tên, loại.
+ * Chạm để mở bằng trình xem của hệ thống; chạm giữ để xoá.
+ */
+export function DocumentTicket({
+  doc,
+  onLongPress,
+  onError,
+}: {
+  doc: LocalDocument;
+  onLongPress?: () => void;
+  onError?: (message: string) => void;
+}) {
   const { colors } = useTheme();
   const label = DOC_TYPE_LABEL[doc.type] ?? doc.type;
 
@@ -23,11 +34,12 @@ export function DocumentTicket({ doc }: { doc: EventDocument }) {
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={`${label}, ${doc.name}`}
-      onPress={() => Linking.openURL(doc.url)}
+      onPress={() => openDocument(doc).catch(() => onError?.('Không mở được tệp. Cần một app xem PDF/ảnh trên máy.'))}
+      onLongPress={onLongPress}
       style={({ pressed }) => [styles.ticket, { backgroundColor: colors.surface }, pressed && styles.pressed]}
     >
       <View style={styles.top}>
-        {isPdf(doc.url) ? (
+        {isPdfDocument(doc) ? (
           <View style={[styles.thumb, styles.pdf, { backgroundColor: colors.surfaceMuted }]}>
             <Text variant="label" tone="secondary">
               PDF
@@ -35,7 +47,7 @@ export function DocumentTicket({ doc }: { doc: EventDocument }) {
           </View>
         ) : (
           <Image
-            source={{ uri: cloudinaryUrl(doc.url, { w: 288, h: 288 }) }}
+            source={{ uri: doc.uri }}
             style={[styles.thumb, { backgroundColor: colors.surfaceMuted }]}
           />
         )}
@@ -60,7 +72,7 @@ export function DocumentTicket({ doc }: { doc: EventDocument }) {
 
       <View style={styles.bottom}>
         <Text variant="caption" tone="secondary" numberOfLines={1} style={styles.rowLabel}>
-          Chạm để mở tệp
+          Chạm để mở • giữ để xoá
         </Text>
         <Text variant="label" tone="accent">
           Mở

@@ -15,7 +15,7 @@ App di động (React Native CLI thuần, KHÔNG Expo) cho blog ảnh/du lịch 
 Mọi giá trị dưới đây lấy từ hai nguồn này; nếu lệch thì canvas thắng.
 
 ## Công nghệ
-React Native CLI, TypeScript, React Navigation (native-stack + bottom-tabs), react-native-safe-area-context, react-native-screens, react-native-svg, lucide-react-native (icon), react-native-reanimated, react-native-keychain (lưu phiên), react-native-bootsplash, react-native-image-picker (chọn ảnh để tải lên Cloudinary), react-native-nitro-share-intent + react-native-nitro-modules (nhận liên kết Google Maps từ nút Chia sẻ, chỉ Android), `Linking` mở Google Maps. Không dùng Expo, không dùng thư viện UI dựng sẵn.
+React Native CLI, TypeScript, React Navigation (native-stack + bottom-tabs), react-native-safe-area-context, react-native-screens, react-native-svg, lucide-react-native (icon), react-native-reanimated, react-native-keychain (lưu phiên), react-native-bootsplash, react-native-image-picker (chọn ảnh để tải lên Cloudinary), @react-native-documents/picker + @react-native-documents/viewer (chọn và mở giấy tờ PDF/ảnh), @react-native-async-storage/async-storage (kho giấy tờ cục bộ), react-native-webview (trình duyệt tìm ảnh minh họa trên Pinterest/Google), react-native-nitro-share-intent + react-native-nitro-modules (nhận liên kết Google Maps từ nút Chia sẻ, chỉ Android), `Linking` mở Google Maps. Không dùng Expo, không dùng thư viện UI dựng sẵn.
 
 ## Cấu trúc thư mục
 ```
@@ -44,7 +44,7 @@ Màn hình chỉ ghép component từ `shared/ui` (và component của chính fe
 5. Không viền, không bóng. Thẻ nổi lên bằng bước tông màu so với nền. Ngoại lệ có chủ đích: ô chọn giao diện ở Cài đặt, ô đang chọn có khung màu nhấn dày 3 bao ngoài (dựng bằng `View` đệm 3 nền màu nhấn, không dùng `borderWidth`).
 6. Một màu nhấn duy nhất: Torii #b61c25.
 7. Giấy tờ, ảnh, bản đồ gắn theo từng mốc (event) ở màn chi tiết mốc. Tab Giấy tờ/Ảnh là tổng hợp mọi thứ. Bản đồ không nhúng: nút "Chỉ đường" mở app Google Maps.
-8. Bảng giấy tờ chưa có trên server: tab Giấy tờ hiện trạng thái trống ở giai đoạn đầu.
+8. Giấy tờ chỉ lưu trên điện thoại (sao chép vào thư mục riêng của app, thông tin ở AsyncStorage), chỉ xem, không tải lên Cloudinary hay Supabase vì bảo mật. Bảng `documents` trên Supabase không dùng ở mobile.
 9. Vùng chạm tối thiểu 44×44pt. Mọi nút icon có `accessibilityLabel`.
 
 ## Token màu

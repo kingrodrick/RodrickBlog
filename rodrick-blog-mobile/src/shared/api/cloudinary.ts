@@ -56,21 +56,40 @@ export async function uploadToCloudinary(
   image: LocalImage,
   folder = 'rodrick-blog/timeline',
 ): Promise<string> {
-  if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_UPLOAD_PRESET) {
-    throw new Error('Chưa cấu hình Cloudinary trong src/shared/api/config.ts.');
-  }
-
   const publicId = generateTimestampId();
   const type = image.mimeType || 'image/jpeg';
   const ext = type.split('/')[1]?.replace('jpeg', 'jpg') || 'jpg';
 
-  const form = new FormData();
   // React Native gửi tệp qua FormData bằng object { uri, type, name }.
-  form.append('file', {
+  const file = {
     uri: image.uri,
     type,
     name: `${publicId}.${ext}`,
-  } as unknown as Blob);
+  } as unknown as Blob;
+  return postUpload(file, publicId, folder);
+}
+
+/**
+ * Nhờ Cloudinary tự tải ảnh từ một địa chỉ ảnh công khai (dùng cho ảnh lấy từ Pinterest/Google).
+ * App không tải ảnh về máy; Cloudinary lưu bản sao nên ảnh không hết hạn như link gốc.
+ */
+export async function uploadRemoteToCloudinary(
+  imageUrl: string,
+  folder = 'rodrick-blog/timeline',
+): Promise<string> {
+  if (!/^https?:\/\//i.test(imageUrl)) {
+    throw new Error('Địa chỉ ảnh không hợp lệ.');
+  }
+  return postUpload(imageUrl, generateTimestampId(), folder);
+}
+
+async function postUpload(file: string | Blob, publicId: string, folder: string): Promise<string> {
+  if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_UPLOAD_PRESET) {
+    throw new Error('Chưa cấu hình Cloudinary trong src/shared/api/config.ts.');
+  }
+
+  const form = new FormData();
+  form.append('file', file);
   form.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
   form.append('public_id', publicId);
   form.append('filename_override', publicId);

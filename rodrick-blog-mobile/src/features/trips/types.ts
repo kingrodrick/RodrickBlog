@@ -39,6 +39,8 @@ export type EventImage = {
   cloudinary_url: string;
   caption: string | null;
   is_real_photo: boolean;
+  /** Nguồn ảnh ngoài (Pinterest, Google...); null với ảnh tự chụp. */
+  source_url?: string | null;
 };
 
 export type DetailEvent = {

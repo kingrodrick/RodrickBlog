@@ -5,7 +5,7 @@ const SELECT =
   'select=id,title,start_date,end_date,status,' +
   'timeline_events(id,day_number,trip_date,start_time,end_time,end_day_offset,time_slot,' +
   'location_name,city,category_tag,notes,event_maps(*),' +
-  'images(id,cloudinary_url,caption,is_real_photo),documents(id,name,type,url))';
+  'images(id,cloudinary_url,caption,is_real_photo,source_url),documents(id,name,type,url))';
 
 /** Sắp theo ngày, rồi start_time (trống xuống cuối). */
 const byTime = (a: DetailEvent, b: DetailEvent) =>

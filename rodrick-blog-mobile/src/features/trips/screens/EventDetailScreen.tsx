@@ -10,14 +10,20 @@ import {
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { ChevronLeft } from 'lucide-react-native';
+import { ChevronLeft, Pencil, Plus } from 'lucide-react-native';
 import { Dialog, ErrorState, IconButton, Screen, Skeleton, Text, Toast } from '../../../shared/ui';
 import { useAsync } from '../../../shared/hooks/useAsync';
 import { iconSize, iconStroke, layout, radius, useTheme } from '../../../theme';
 import { HomeStackParamList } from '../../../navigation/type';
 import { fetchTripDetail } from '../api/tripDetail';
 import { deleteEventRouteById } from '../api/routeApi';
+import { LocalDocument, removeLocalDocument } from '../../../shared/api/localDocuments';
+import { AddDocumentSheet } from '../components/AddDocumentSheet';
+import { AddPhotosFlow } from '../components/AddPhotosFlow';
+import { EditEventModal } from '../components/EditEventModal';
 import { DocsPage, InfoPage, PhotosPage } from '../components/EventPages';
+import { PickedDocument, pickDocument } from '../documentFile';
+import { useLocalDocuments } from '../useLocalDocuments';
 import { PhotoViewer } from '../components/PhotoViewer';
 import { DetailEvent, EventImage, EventMap } from '../types';
 
@@ -27,6 +33,15 @@ type Route = RouteProp<HomeStackParamList, 'EventDetail'>;
 const icon = (Icon: typeof ChevronLeft) => (c: string) =>
   <Icon color={c} size={iconSize.control} strokeWidth={iconStroke.normal} strokeLinecap="round" />;
 const renderBack = icon(ChevronLeft);
+const renderPencil = icon(Pencil);
+const renderPlus = icon(Plus);
+
+/** Nút thao tác của từng trang: bút chì sửa mốc, dấu cộng thêm giấy tờ, dấu cộng thêm ảnh thực tế. */
+const PAGE_ACTIONS = [
+  { label: 'Sửa mốc', render: renderPencil },
+  { label: 'Thêm giấy tờ', render: renderPlus },
+  { label: 'Thêm ảnh thực tế', render: renderPlus },
+];
 
 const CHAPTERS = ['Thông tin', 'Giấy tờ', 'Ảnh thực tế'];
 
@@ -67,13 +82,18 @@ function PageShell({ width, full, children }: { width: number; full: boolean; ch
 
 type PagerProps = {
   event: DetailEvent;
+  docs: LocalDocument[];
   onBack: () => void;
+  /** Bấm nút thao tác của trang hiện tại (0: sửa mốc, 1: thêm giấy tờ, 2: thêm ảnh thực tế). */
+  onAction: (page: number) => void;
+  onDeleteDoc: (doc: LocalDocument) => void;
+  onError: (message: string) => void;
   onAddRoute: () => void;
   onViewRoute: (m: EventMap) => void;
   onDeleteRoute: (m: EventMap) => void;
 };
 
-function Pager({ event, onBack, onAddRoute, onViewRoute, onDeleteRoute }: PagerProps) {
+function Pager({ event, docs, onBack, onAction, onDeleteDoc, onError, onAddRoute, onViewRoute, onDeleteRoute }: PagerProps) {
   const { colors } = useTheme();
   const reduce = useReduceMotion();
   const { width: winW, height: winH } = useWindowDimensions();
@@ -90,6 +110,7 @@ function Pager({ event, onBack, onAddRoute, onViewRoute, onDeleteRoute }: PagerP
   // Xoay màn làm đổi bề ngang trang: cuộn lại đúng trang đang xem, tránh lệch giữa hai trang.
   const pagerRef = useRef<ScrollViewInstance>(null);
   const currentPage = useRef(0);
+  const [pageIndex, setPageIndex] = useState(0);
   useEffect(() => {
     if (width) {
       pagerRef.current?.scrollTo({ x: currentPage.current * width, animated: false });
@@ -106,7 +127,7 @@ function Pager({ event, onBack, onAddRoute, onViewRoute, onDeleteRoute }: PagerP
       onViewRoute={onViewRoute}
       onDeleteRoute={onDeleteRoute}
     />,
-    <DocsPage key="docs" event={event} landscape={landscape} />,
+    <DocsPage key="docs" docs={docs} landscape={landscape} onDelete={onDeleteDoc} onError={onError} />,
     <PhotosPage key="photos" event={event} onOpenPhoto={openPhoto} landscape={landscape} />,
   ];
 
@@ -168,6 +189,12 @@ function Pager({ event, onBack, onAddRoute, onViewRoute, onDeleteRoute }: PagerP
           ))}
         </View>
         {landscape ? progress : null}
+        <IconButton
+          variant="ghost"
+          accessibilityLabel={PAGE_ACTIONS[pageIndex].label}
+          onPress={() => onAction(pageIndex)}
+          icon={PAGE_ACTIONS[pageIndex].render}
+        />
       </View>
 
       {landscape ? null : progress}
@@ -181,6 +208,7 @@ function Pager({ event, onBack, onAddRoute, onViewRoute, onDeleteRoute }: PagerP
         onMomentumScrollEnd={e => {
           if (width) {
             currentPage.current = Math.round(e.nativeEvent.contentOffset.x / width);
+            setPageIndex(currentPage.current);
           }
         }}
         onScroll={onScroll}
@@ -227,6 +255,48 @@ export function EventDetailScreen() {
   const [toast, setToast] = useState<string | null>(null);
   const [toastKind, setToastKind] = useState<'success' | 'error'>('success');
   const [askDelete, setAskDelete] = useState<EventMap | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [addingPhotos, setAddingPhotos] = useState(false);
+  const [pickedDoc, setPickedDoc] = useState<PickedDocument | null>(null);
+  const [askDeleteDoc, setAskDeleteDoc] = useState<LocalDocument | null>(null);
+  const { docs, reload: reloadDocs } = useLocalDocuments(Number(eventId));
+
+  const notify = useCallback((text: string, kind: 'success' | 'error' = 'success') => {
+    setToastKind(kind);
+    setToast(text);
+  }, []);
+
+  const onAction = async (page: number) => {
+    if (page === 0) {
+      setEditing(true);
+    } else if (page === 1) {
+      try {
+        const doc = await pickDocument();
+        if (doc) {
+          setPickedDoc(doc);
+        }
+      } catch (e) {
+        notify(e instanceof Error ? e.message : 'Không mở được bộ chọn tệp.', 'error');
+      }
+    } else {
+      setAddingPhotos(true);
+    }
+  };
+
+  const confirmDeleteDoc = async () => {
+    const d = askDeleteDoc;
+    setAskDeleteDoc(null);
+    if (!d) {
+      return;
+    }
+    try {
+      await removeLocalDocument(d.id);
+      notify('Đã xoá giấy tờ');
+      reloadDocs();
+    } catch (e) {
+      notify(e instanceof Error ? e.message : 'Không xoá được giấy tờ.', 'error');
+    }
+  };
 
   const confirmDelete = async () => {
     const m = askDelete;
@@ -278,7 +348,11 @@ export function EventDetailScreen() {
       <View style={styles.bleed}>
         <Pager
           event={event}
+          docs={docs}
           onBack={() => navigation.goBack()}
+          onAction={onAction}
+          onDeleteDoc={setAskDeleteDoc}
+          onError={text => notify(text, 'error')}
           onAddRoute={() => navigation.navigate('RouteEdit', { tripId, eventId })}
           onViewRoute={m => navigation.navigate('RouteEdit', { tripId, eventId, mapId: m.id, view: true })}
           onDeleteRoute={setAskDelete}
@@ -299,6 +373,50 @@ export function EventDetailScreen() {
           onCancel={() => setAskDelete(null)}
           onConfirm={confirmDelete}
         />
+        <Dialog
+          visible={askDeleteDoc !== null}
+          title="Xoá giấy tờ?"
+          description={askDeleteDoc ? `${askDeleteDoc.name} sẽ bị xoá khỏi điện thoại này.` : undefined}
+          cancelLabel="Huỷ"
+          confirmLabel="Xoá"
+          destructive
+          onCancel={() => setAskDeleteDoc(null)}
+          onConfirm={confirmDeleteDoc}
+        />
+        <AddDocumentSheet
+          picked={pickedDoc}
+          eventId={event.id}
+          onClose={() => setPickedDoc(null)}
+          onError={text => notify(text, 'error')}
+          onSaved={() => {
+            setPickedDoc(null);
+            notify('Đã thêm giấy tờ');
+            reloadDocs();
+          }}
+        />
+        <AddPhotosFlow
+          open={addingPhotos}
+          kind="real"
+          event={event}
+          tripTitle={data?.title ?? ''}
+          onClose={() => setAddingPhotos(false)}
+          onError={text => notify(text, 'error')}
+          onAdded={count => {
+            notify(`Đã thêm ${count} ảnh`);
+            reload();
+          }}
+        />
+        <EditEventModal
+          event={event}
+          siblings={data?.timeline_events ?? []}
+          tripTitle={data?.title ?? ''}
+          visible={editing}
+          onClose={() => setEditing(false)}
+          onDataChanged={message => {
+            notify(message);
+            reload();
+          }}
+        />
       </View>
     </Screen>
   );
@@ -316,7 +434,7 @@ const styles = StyleSheet.create({
   },
   topLand: { paddingTop: 2 },
   // Dọc: nút quay lại sát cạnh trái hơn (đệm trái 20 xuống 8).
-  topPort: { paddingLeft: 8 },
+  topPort: { paddingLeft: 8, paddingRight: 8 },
   chapters: { flex: 1, height: 44 },
   chaptersLand: { flex: 0, width: 190 },
   chapter: { position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, justifyContent: 'center' },

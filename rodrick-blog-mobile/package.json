@@ -12,6 +12,9 @@
     "verify": "npm run typecheck && eslint . --max-warnings=2 && jest --ci"
   },
   "dependencies": {
+    "@react-native-async-storage/async-storage": "^3.1.1",
+    "@react-native-documents/picker": "^12.1.0",
+    "@react-native-documents/viewer": "^4.1.0",
     "@react-native/new-app-screen": "0.88.1",
     "@react-navigation/bottom-tabs": "^7.22.0",
     "@react-navigation/native": "^7.5.2",
@@ -25,7 +28,8 @@
     "react-native-nitro-share-intent": "^0.6.2",
     "react-native-safe-area-context": "^5.11.1",
     "react-native-screens": "^4.30.1",
-    "react-native-svg": "^15.16.1"
+    "react-native-svg": "^15.16.1",
+    "react-native-webview": "^14.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

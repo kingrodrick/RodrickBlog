@@ -7,7 +7,9 @@ import { radius, useTheme } from '../../../theme';
 import { shortDate } from '../dayFormat';
 import { EVENT_TYPE_LABEL, eventTimes, eventType, isFlight } from '../eventCategory';
 import { DetailEvent, EventImage, EventMap } from '../types';
+import { LocalDocument } from '../../../shared/api/localDocuments';
 import { DocumentTicket } from './DocumentTicket';
+import { NotesView } from './NotesView';
 import { RouteList } from './RouteList';
 
 const tabular = { fontVariant: ['tabular-nums' as const] };
@@ -79,9 +81,7 @@ export function InfoPage({ event, landscape, onOpenPhoto, onAddRoute, onViewRout
 
   const notes = event.notes ? (
     <Card style={landscape ? undefined : styles.block}>
-      <Text tone="secondary" style={styles.note}>
-        {event.notes}
-      </Text>
+      <NotesView notes={event.notes} />
     </Card>
   ) : null;
 
@@ -209,9 +209,18 @@ export function InfoPage({ event, landscape, onOpenPhoto, onAddRoute, onViewRout
   );
 }
 
-/** Trang 2: Giấy tờ. */
-export function DocsPage({ event, landscape }: { event: DetailEvent; landscape?: boolean }) {
-  const docs = event.documents;
+/** Trang 2: Giấy tờ (lưu trên máy). */
+export function DocsPage({
+  docs,
+  landscape,
+  onDelete,
+  onError,
+}: {
+  docs: LocalDocument[];
+  landscape?: boolean;
+  onDelete: (doc: LocalDocument) => void;
+  onError: (message: string) => void;
+}) {
   return (
     <>
       <PageHead
@@ -223,11 +232,11 @@ export function DocsPage({ event, landscape }: { event: DetailEvent; landscape?:
       {docs.length ? (
         <View style={styles.stack}>
           {docs.map(d => (
-            <DocumentTicket key={d.id} doc={d} />
+            <DocumentTicket key={d.id} doc={d} onLongPress={() => onDelete(d)} onError={onError} />
           ))}
         </View>
       ) : (
-        <EmptyState message="Mốc này chưa có giấy tờ" />
+        <EmptyState message="Mốc này chưa có giấy tờ. Bấm dấu cộng để thêm." />
       )}
     </>
   );
@@ -309,7 +318,6 @@ const styles = StyleSheet.create({
   timeRow: { flexDirection: 'row', alignItems: 'center', gap: 4, flexShrink: 0 },
   time: { fontSize: 22, lineHeight: 28, fontWeight: '700', letterSpacing: -0.5 },
   name: { fontSize: 22, lineHeight: 28, fontWeight: '700', marginTop: 10 },
-  note: { fontSize: 15, lineHeight: 22 },
   block: { marginTop: 20 },
   sec: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 16, marginBottom: 8 },
   secBig: { marginTop: 28, marginBottom: 12 },

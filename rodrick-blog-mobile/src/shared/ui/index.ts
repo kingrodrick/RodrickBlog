@@ -14,3 +14,4 @@ export * from './Skeleton';
 export * from './States';
 export * from './Screen';
 export * from './PatternBackground';
+export * from './Sheet';
