@@ -194,7 +194,7 @@ export function RouteList({ event, presetDestination, onAdd, onView, onDelete }:
   return (
     <View>
       <View style={styles.sec}>
-        <Text variant="overline" tone="muted">
+        <Text variant="overline" tone="muted" numberOfLines={1} style={styles.rowLabel}>
           Lộ trình
         </Text>
         <Text variant="overline" tone="muted">
@@ -258,6 +258,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 8,
   },
+  rowLabel: { flex: 1 },
   list: { gap: 8 },
   none: { fontWeight: '400', paddingVertical: 4 },
   row: { flexDirection: 'row', alignItems: 'center' },

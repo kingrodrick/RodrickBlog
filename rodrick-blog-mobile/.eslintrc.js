@@ -15,6 +15,7 @@ module.exports = {
       },
     ],
     'rodrick/feature-boundaries': 'error',
+    'rodrick/row-text-fit': 'error',
   },
   overrides: [
     {

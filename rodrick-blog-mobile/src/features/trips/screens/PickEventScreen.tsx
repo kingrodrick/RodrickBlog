@@ -92,7 +92,7 @@ function Picker({ trip, route }: { trip: TripDetail; route: ParsedRoute }) {
   return (
     <>
       <View style={styles.sec}>
-        <Text variant="overline" tone="muted">
+        <Text variant="overline" tone="muted" numberOfLines={1} style={styles.rowLabel}>
           Chọn event
         </Text>
         <Text variant="overline" tone="muted">
@@ -179,6 +179,7 @@ const styles = StyleSheet.create({
   summary: { gap: 2 },
   summaryTitle: { fontSize: 16, lineHeight: 22 },
   sec: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 },
+  rowLabel: { flex: 1 },
   bleed: { marginHorizontal: -20 },
   list: { gap: 8 },
   pick: { borderRadius: radius.card, paddingHorizontal: 16, paddingVertical: 14, gap: 2 },

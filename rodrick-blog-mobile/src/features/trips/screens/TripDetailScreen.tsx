@@ -155,7 +155,9 @@ function Timeline({ trip, onOpen }: { trip: TripDetail; onOpen: (eventId: number
         scrollEventThrottle={16}
       >
         <View style={styles.dayHead}>
-          <Text variant="heading">{dayTitle(day)}</Text>
+          <Text variant="heading" numberOfLines={1} style={styles.dayTitle}>
+            {dayTitle(day)}
+          </Text>
           <Text variant="caption" tone="secondary">
             {events.length} mốc
           </Text>
@@ -241,4 +243,5 @@ const styles = StyleSheet.create({
     marginTop: 4,
     marginBottom: 14,
   },
+  dayTitle: { flex: 1 },
 });

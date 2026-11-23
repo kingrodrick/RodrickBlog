@@ -59,7 +59,7 @@ export function DocumentTicket({ doc }: { doc: EventDocument }) {
       </View>
 
       <View style={styles.bottom}>
-        <Text variant="caption" tone="secondary">
+        <Text variant="caption" tone="secondary" numberOfLines={1} style={styles.rowLabel}>
           Chạm để mở tệp
         </Text>
         <Text variant="label" tone="accent">
@@ -84,4 +84,5 @@ const styles = StyleSheet.create({
   dashes: { flexDirection: 'row', justifyContent: 'space-between', marginHorizontal: 20, overflow: 'hidden' },
   dash: { width: 8, height: 2 },
   bottom: { flexDirection: 'row', justifyContent: 'space-between', padding: 20, paddingTop: 12 },
+  rowLabel: { flex: 1 },
 });

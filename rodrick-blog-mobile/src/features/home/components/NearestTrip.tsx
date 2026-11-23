@@ -27,7 +27,7 @@ export function NearestTripStatus({ trip }: { trip: Trip }) {
   }
   return (
     <View style={styles.statusRow}>
-      <Text variant="overline" tone={ongoing ? 'accent' : 'secondary'}>
+      <Text variant="overline" tone={ongoing ? 'accent' : 'secondary'} numberOfLines={1} style={styles.rowLabel}>
         {ongoing ? 'Đang diễn ra' : 'Sắp tới'}
       </Text>
       <Text variant="caption" tone="accent" style={styles.tabular}>
@@ -117,6 +117,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: 12,
   },
+  rowLabel: { flex: 1 },
   tabular: { fontVariant: ['tabular-nums'] },
   card: { padding: 0, overflow: 'hidden' },
   cover: { height: 210, alignItems: 'center', justifyContent: 'center' },

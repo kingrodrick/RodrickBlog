@@ -97,7 +97,7 @@ export function InfoPage({ event, landscape, onOpenPhoto, onAddRoute, onViewRout
 
   const refHead = (
     <View style={styles.sec}>
-      <Text variant="overline" tone="muted">
+      <Text variant="overline" tone="muted" numberOfLines={1} style={styles.flex}>
         Ảnh minh họa
       </Text>
       <Text variant="overline" tone="muted">
@@ -170,7 +170,7 @@ export function InfoPage({ event, landscape, onOpenPhoto, onAddRoute, onViewRout
       {refs.length ? (
         <>
           <View style={[styles.sec, styles.secBig]}>
-            <Text variant="overline" tone="muted">
+            <Text variant="overline" tone="muted" numberOfLines={1} style={styles.flex}>
               Ảnh minh họa
             </Text>
             <Text variant="overline" tone="muted">
