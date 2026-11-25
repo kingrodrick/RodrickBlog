@@ -130,7 +130,10 @@ npm run android
 Lần build đầu mất 5–15 phút vì Gradle tải thư viện.
 
 Build release
+
+```powershell
 npx react-native run-android --mode release
+```
 
 ### Xử lý lỗi thường gặp
 
