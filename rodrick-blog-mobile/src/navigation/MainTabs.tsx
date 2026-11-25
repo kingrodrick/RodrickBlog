@@ -11,6 +11,7 @@ import { darkColors, iconSize, iconStroke, useTheme } from '../theme';
 import { useAuth } from '../features/auth';
 import { SettingsScreen } from '../features/settings';
 import { HomeStack } from './HomeStack';
+import { PhotosStack } from './PhotosStack';
 import { ToolsStack } from './ToolsStack';
 import { MainTabParamList } from './type';
 
@@ -136,9 +137,6 @@ function SettingsTab() {
   return <SettingsScreen username={username} onSignOut={signOut} />;
 }
 
-/** Tab Ảnh chưa dựng; khai báo ngoài MainTabs để không bị dựng lại khi xoay màn. */
-const EmptyTab = () => null;
-
 export function MainTabs() {
   const landscape = useLandscape();
   return (
@@ -149,7 +147,7 @@ export function MainTabs() {
     >
       <Tab.Screen name="Home" component={HomeStack} />
       <Tab.Screen name="Tools" component={ToolsStack} />
-      <Tab.Screen name="Photos" component={EmptyTab} />
+      <Tab.Screen name="Photos" component={PhotosStack} />
       <Tab.Screen name="Settings" component={SettingsTab} />
     </Tab.Navigator>
   );

@@ -1,6 +1,6 @@
 # CLAUDE.md — Rodrick Mobile
 
-App di động (React Native CLI thuần, KHÔNG Expo) cho blog ảnh/du lịch Next.js của chủ dự án. Chức năng: đăng nhập, danh sách chuyến đi, chi tiết chuyến (timeline mốc), ảnh thật/ảnh tham khảo, giấy tờ, mở Google Maps, công cụ (đổi tiền VND ⇄ Yên, mở Google Dịch).
+App di động (React Native CLI thuần, KHÔNG Expo) cho blog ảnh/du lịch Next.js của chủ dự án. Chức năng: đăng nhập, danh sách chuyến đi, chi tiết chuyến (timeline mốc), ảnh thật/ảnh tham khảo, tab Ảnh (lưới ảnh, bộ sưu tập, xoá ảnh), giấy tờ, mở Google Maps, công cụ (đổi tiền VND ⇄ Yên, mở Google Dịch).
 
 ## Cách làm việc với chủ dự án
 - Giao tiếp bằng tiếng Việt, gọi chủ dự án là "sir", xưng "tôi". Ngắn gọn, thẳng vào việc.
@@ -98,3 +98,11 @@ Icon Lucide nét 1.75, đầu nét tròn; cỡ 16 (trong dòng chữ), 22 (nút,
 - Màn Công cụ: 2 thẻ. "Đổi tiền" mở màn Đổi tiền; "Dịch" mở thẳng app Google Dịch (link translate.google.com, mặc định Việt → Nhật), không có màn dịch trong app. App Google Dịch bỏ qua chữ gắn trong link, nên không gửi chữ sang; muốn gửi chữ phải viết module native (ACTION_SEND vào package Google Dịch), hỏi trước khi làm.
 - Đổi tiền: ô nhập và ô quy đổi (chỉ đọc) xếp dọc, nhãn bên trái; nút icon đảo VND ⇄ Yên bên phải; chip số nhanh dưới ô nhập (thêm chip "000" khi nhập VND); dòng "Đọc ¥... là" (romaji, phiên âm Việt, kanji); dòng nói rõ tỉ giá mới nhất hay tỉ giá đã lưu; mất mạng thì Banner "đang dùng tỉ giá lưu lúc ..."; cuối màn là thẻ "Cách đọc tiền Nhật".
 - Logic thuần có test: `currency.ts` (đọc/định dạng số kiểu Việt, đổi tiền), `yenReading.ts` (`readYen`, nhóm 4 số man/oku, số biến âm), `api/exchangeRate.ts` (nguồn chính, dự phòng, cache).
+
+## Tab Ảnh (`features/galleries`)
+- Màn Ảnh: thanh chọn **Ảnh | Bộ sưu tập** (nhớ lựa chọn ở AsyncStorage `galleries.mode`; Trang chủ "Xem tất cả" mở thẳng Bộ sưu tập qua tham số `mode`).
+- Lưới ảnh (`PhotoGrid`): ô vuông 3 cột (màn rộng thêm cột), khe 2, tràn sát mép, chỉ có ảnh. Ảnh mới chụp nhất trước (`taken_at` desc, rồi `created_at`), tải theo trang 60 ảnh. Ảnh thu nhỏ lỗi thì tự thử lại 3 lần (lần đầu Cloudinary phải dựng bản thu nhỏ, nhiều ảnh cùng lúc hay lỗi), hết lượt hiện icon ảnh hỏng.
+- Nút lọc (góc phải trên): Cả hai / Ảnh thực tế / Ảnh tham khảo; `is_real_photo` trống tính là ảnh thực tế. Khi xem cả hai, ảnh tham khảo có nhãn icon địa cầu nền giấy vàng ở góc ảnh.
+- Nhấn giữ một ảnh để chọn nhiều, nút xoá (chỉ icon, màu lỗi) cạnh nút lọc, hỏi lại bằng Dialog. Xoá file Cloudinary qua route web `/api/cloudinary/delete` rồi xoá dòng `images`; Cloudinary lỗi thì vẫn xoá DB và báo số file còn sót. Mất mạng không cho chọn.
+- Bộ sưu tập: thẻ bìa 16:9 (cover_image, không có thì ảnh mới nhất), tên chuyến đã gán (`collections.trip_id`), mô tả, số ảnh. Bấm mở màn lưới của bộ sưu tập (cùng lọc/chọn/xoá, `usePhotoBrowser`).
+- Màn xem ảnh (`PhotoViewer` của galleries, nền đen): vuốt ngang; chạm hiện dải đen mờ (nút đóng, số thứ tự, nút xoay và chia sẻ ở trên; caption và dòng phụ ở đáy), chạm lần nữa ẩn. `PhotoPager` (PanResponder + Animated, không thư viện) tự xử lý cả vuốt ngang lẫn thu phóng trong một bộ nhận chạm; KHÔNG dùng FlatList cuộn ngang vì trên Android nó giành mất cử chỉ chụm hai ngón. Chụm hai ngón thu phóng tới 4x, chạm đúp phóng 2.5x tại chỗ chạm, đang phóng to thì kéo trong ảnh. Không tự xoay ảnh theo tỉ lệ ảnh; chỉ xoay bằng nút, cầm máy ngang thì theo cài đặt xoay màn hình của máy. Chia sẻ dùng `Share` của React Native, gửi caption + link ảnh (không gửi tệp; muốn gửi tệp phải thêm thư viện, hỏi trước).

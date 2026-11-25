@@ -1,4 +1,4 @@
-import { selectRows } from '../src/shared/api/supabase';
+import { selectRows, updateRows } from '../src/shared/api/supabase';
 import { cacheHitSince, clearReadCache, loadRead } from '../src/shared/api/readCache';
 
 jest.mock('../src/shared/api/config', () => ({
@@ -68,5 +68,12 @@ describe('lưu dữ liệu đã đọc để xem khi mất mạng', () => {
     await clearReadCache();
     expect(await loadRead(KEY)).toBeNull();
     expect(await loadRead('trips?select=id,title&id=eq.9')).toBeNull();
+  });
+
+  it('ghi dữ liệu khi mất mạng báo rõ là chưa lưu', async () => {
+    mockFetch(offline);
+    await expect(updateRows('timeline_events', 'id=eq.1', { notes: 'x' })).rejects.toThrow(
+      'Không có mạng, chưa lưu được thay đổi.',
+    );
   });
 });

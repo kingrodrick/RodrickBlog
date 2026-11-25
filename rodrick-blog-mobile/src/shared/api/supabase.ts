@@ -20,6 +20,15 @@ function headers(): Record<string, string> {
   return h;
 }
 
+/** Gửi lệnh ghi (thêm/sửa/xoá); mất mạng thì báo rõ là chưa lưu. */
+async function send(url: string, init: RequestInit): Promise<Response> {
+  try {
+    return await fetch(url, init);
+  } catch {
+    throw new Error('Không có mạng, chưa lưu được thay đổi.');
+  }
+}
+
 async function fail(res: Response, fallback: string): Promise<never> {
   const body = await res.json().catch(() => null);
   throw new Error(body?.message ?? `${fallback} (HTTP ${res.status}).`);
@@ -61,7 +70,7 @@ export async function selectRows<T>(table: string, query: string): Promise<T[]> 
 
 /** Thêm một dòng, trả về dòng vừa ghi (có id). */
 export async function insertRow<T>(table: string, row: object): Promise<T> {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+  const res = await send(`${SUPABASE_URL}/rest/v1/${table}`, {
     method: 'POST',
     headers: {
       ...headers(),
@@ -79,7 +88,7 @@ export async function insertRow<T>(table: string, row: object): Promise<T> {
 
 /** Cập nhật các dòng khớp `filter` (cú pháp PostgREST, ví dụ 'id=eq.12'). */
 export async function updateRows(table: string, filter: string, patch: object): Promise<void> {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${filter}`, {
+  const res = await send(`${SUPABASE_URL}/rest/v1/${table}?${filter}`, {
     method: 'PATCH',
     headers: { ...headers(), 'Content-Type': 'application/json', Prefer: 'return=minimal' },
     body: JSON.stringify(patch),
@@ -91,7 +100,7 @@ export async function updateRows(table: string, filter: string, patch: object): 
 
 /** Xoá các dòng khớp `filter` (cú pháp PostgREST, ví dụ 'event_id=eq.12&seq=eq.1'). */
 export async function deleteRows(table: string, filter: string): Promise<void> {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${filter}`, {
+  const res = await send(`${SUPABASE_URL}/rest/v1/${table}?${filter}`, {
     method: 'DELETE',
     headers: headers(),
   });

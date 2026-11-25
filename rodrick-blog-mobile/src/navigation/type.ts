@@ -31,9 +31,17 @@ export type ToolsStackParamList = {
   Currency: undefined;
 };
 
+/** Stack trong tab Ảnh. */
+export type PhotosStackParamList = {
+  /** `mode`: mở thẳng chế độ này (ví dụ "Xem tất cả" ở Trang chủ mở Bộ sưu tập). */
+  PhotosMain: { mode?: 'photos' | 'collections' } | undefined;
+  /** Lưới ảnh của một bộ sưu tập; `title` hiện ngay trên header khi chưa tải xong. */
+  CollectionPhotos: { collectionId: number; title: string };
+};
+
 export type MainTabParamList = {
   Home: NavigatorScreenParams<HomeStackParamList> | undefined;
   Tools: NavigatorScreenParams<ToolsStackParamList> | undefined;
-  Photos: undefined;
+  Photos: NavigatorScreenParams<PhotosStackParamList> | undefined;
   Settings: undefined;
 };

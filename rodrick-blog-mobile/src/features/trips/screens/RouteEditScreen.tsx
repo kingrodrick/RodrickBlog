@@ -168,14 +168,19 @@ function RouteForm({
   initial,
   landscape,
   availableHeight,
+  readOnly,
 }: {
   event: DetailEvent;
   initial?: ParsedRoute;
   landscape: boolean;
   availableHeight: number;
+  /** Mất mạng, đang xem bản lưu: chỉ xem, không lưu/xoá. */
+  readOnly: boolean;
 }) {
   const navigation = useNavigation<Nav>();
-  const { tripId, mapId, view } = useRoute<Route>().params;
+  const params = useRoute<Route>().params;
+  const { tripId, mapId } = params;
+  const view = params.view || readOnly;
   // Có mapId: lộ trình đó. Không có: thêm mới. `view`: chỉ xem, không lưu/xoá.
   const existing = mapId !== undefined ? event.event_maps.find(m => m.id === mapId) : undefined;
   const seq = existing?.seq ?? event.event_maps.reduce((max, m) => Math.max(max, m.seq), 0) + 1;
@@ -467,7 +472,7 @@ export function RouteEditScreen() {
   const landscape = width > height;
   const { tripId, eventId, route } = useRoute<Route>().params;
   const load = useCallback(() => fetchTripDetail(Number(tripId)), [tripId]);
-  const { data, loading, error, reload } = useAsync(load);
+  const { data, loading, error, reload, cachedAt } = useAsync(load);
   const event = data?.timeline_events.find(e => e.id === Number(eventId));
   const availableHeight = Math.max(240, height - insets.top - insets.bottom - 24);
 
@@ -491,7 +496,13 @@ export function RouteEditScreen() {
         style={[styles.shell, { backgroundColor: colors.surface, maxHeight: availableHeight }]}
       >
         {event ? (
-          <RouteForm event={event} initial={route} landscape={landscape} availableHeight={availableHeight} />
+          <RouteForm
+            event={event}
+            initial={route}
+            landscape={landscape}
+            availableHeight={availableHeight}
+            readOnly={cachedAt !== null}
+          />
         ) : (
           <View style={styles.colBody}>
             {loading ? (

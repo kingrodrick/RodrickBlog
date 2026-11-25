@@ -102,9 +102,11 @@ type PagerProps = {
   onAddRoute: () => void;
   onViewRoute: (m: EventMap) => void;
   onDeleteRoute: (m: EventMap) => void;
+  /** Mất mạng, đang xem bản lưu: khoá sửa mốc, thêm ảnh, thêm/xoá lộ trình (giấy tờ vẫn sửa được vì chỉ nằm trên máy). */
+  readOnly: boolean;
 };
 
-function Pager({ event, docs, onBack, onAction, onEditDoc, onDeleteDoc, onError, onAddRoute, onViewRoute, onDeleteRoute }: PagerProps) {
+function Pager({ event, docs, onBack, onAction, onEditDoc, onDeleteDoc, onError, onAddRoute, onViewRoute, onDeleteRoute, readOnly }: PagerProps) {
   const { colors } = useTheme();
   const reduce = useReduceMotion();
   const { width: winW, height: winH } = useWindowDimensions();
@@ -137,6 +139,7 @@ function Pager({ event, docs, onBack, onAction, onEditDoc, onDeleteDoc, onError,
       onAddRoute={onAddRoute}
       onViewRoute={onViewRoute}
       onDeleteRoute={onDeleteRoute}
+      readOnly={readOnly}
     />,
     <DocsPage key="docs" docs={docs} landscape={landscape} onEdit={onEditDoc} onDelete={onDeleteDoc} onError={onError} />,
     <PhotosPage key="photos" event={event} onOpenPhoto={openPhoto} landscape={landscape} />,
@@ -200,12 +203,17 @@ function Pager({ event, docs, onBack, onAction, onEditDoc, onDeleteDoc, onError,
           ))}
         </View>
         {landscape ? progress : null}
-        <IconButton
-          variant="ghost"
-          accessibilityLabel={PAGE_ACTIONS[pageIndex].label}
-          onPress={() => onAction(pageIndex)}
-          icon={PAGE_ACTIONS[pageIndex].render}
-        />
+        {/* Trang 2 (giấy tờ) chỉ lưu trên máy nên vẫn thêm được khi mất mạng. */}
+        {readOnly && pageIndex !== 1 ? (
+          <View style={styles.actionSpacer} />
+        ) : (
+          <IconButton
+            variant="ghost"
+            accessibilityLabel={PAGE_ACTIONS[pageIndex].label}
+            onPress={() => onAction(pageIndex)}
+            icon={PAGE_ACTIONS[pageIndex].render}
+          />
+        )}
       </View>
 
       {landscape ? null : progress}
@@ -369,6 +377,7 @@ export function EventDetailScreen() {
           onAddRoute={() => navigation.navigate('RouteEdit', { tripId, eventId })}
           onViewRoute={m => navigation.navigate('RouteEdit', { tripId, eventId, mapId: m.id, view: true })}
           onDeleteRoute={setAskDelete}
+          readOnly={cachedAt !== null}
         />
         <Toast
           message={toast ?? ''}
@@ -446,6 +455,8 @@ export function EventDetailScreen() {
 }
 
 const styles = StyleSheet.create({
+  // Giữ chỗ nút thao tác (44) khi bị khoá, để tiêu đề không xô lệch.
+  actionSpacer: { width: 44, height: 44 },
   fill: { flex: 1 },
   bleed: { flex: 1, marginHorizontal: -layout.screenMargin, marginBottom: -24 },
   top: {

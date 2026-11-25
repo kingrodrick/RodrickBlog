@@ -4,6 +4,7 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { X } from 'lucide-react-native';
 import {
+  Alert,
   Button,
   Card,
   EmptyState,
@@ -76,7 +77,8 @@ function RouteSummary({ route }: { route: ParsedRoute }) {
   );
 }
 
-function Picker({ trip, route }: { trip: TripDetail; route: ParsedRoute }) {
+/** `readOnly`: mất mạng, vẫn xem được event nhưng không cho tiếp tục gán. */
+function Picker({ trip, route, readOnly }: { trip: TripDetail; route: ParsedRoute; readOnly: boolean }) {
   const navigation = useNavigation<Nav>();
   const { colors } = useTheme();
   const days = useMemo(() => tripDays(trip), [trip]);
@@ -129,7 +131,7 @@ function Picker({ trip, route }: { trip: TripDetail; route: ParsedRoute }) {
       </View>
       <Button
         title="Tiếp tục"
-        disabled={picked === null}
+        disabled={picked === null || readOnly}
         onPress={() =>
           picked !== null &&
           navigation.replace('RouteEdit', { tripId: String(trip.id), eventId: String(picked), route })
@@ -168,7 +170,16 @@ export function PickEventScreen() {
       ) : error ? (
         <ErrorState message={error} onRetry={reload} />
       ) : data ? (
-        <Picker trip={data} route={route} />
+        <>
+          {cachedAt ? (
+            <Alert
+              kind="warning"
+              title="Không có mạng"
+              description="Cần có mạng để gán lộ trình vào event. Thử lại khi có mạng."
+            />
+          ) : null}
+          <Picker trip={data} route={route} readOnly={cachedAt !== null} />
+        </>
       ) : (
         <EmptyState message="Chưa có chuyến đi nào đang diễn ra hoặc sắp tới." />
       )}

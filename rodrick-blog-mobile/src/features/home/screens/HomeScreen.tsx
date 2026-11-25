@@ -20,6 +20,7 @@ import { radius } from '../../../theme';
 import { HomeStackParamList, MainTabParamList } from '../../../navigation/type';
 import { fetchAlbums } from '../api/albums';
 import { pickNearestTrip } from '../pickNearestTrip';
+import { Album } from '../types';
 import { NearestTripCard, NearestTripStatus } from '../components/NearestTrip';
 import { AlbumStrip } from '../components/AlbumStrip';
 import { ChevronButton } from '../components/ChevronButton';
@@ -49,14 +50,20 @@ export function HomeScreen() {
 
   const openTripsList = () => navigation.navigate('TripsList');
 
-  const openPhotosTab = () => {
-    const tabs =
-      navigation.getParent<BottomTabNavigationProp<MainTabParamList>>();
-    // Tab Ảnh đang tắt trong MainTabs; chỉ điều hướng khi tab đã được đăng ký.
-    if (tabs?.getState().routeNames.includes('Photos')) {
-      tabs.navigate('Photos');
-    }
-  };
+  const tabs = () => navigation.getParent<BottomTabNavigationProp<MainTabParamList>>();
+
+  /** "Xem tất cả": tab Ảnh ở chế độ Bộ sưu tập. */
+  const openCollections = () =>
+    tabs()?.navigate('Photos', { screen: 'PhotosMain', params: { mode: 'collections' } });
+
+  /** Một album: mở thẳng lưới ảnh của bộ sưu tập đó; Back về danh sách bộ sưu tập. */
+  const openAlbum = (album: Album) =>
+    tabs()?.navigate('Photos', {
+      screen: 'CollectionPhotos',
+      params: { collectionId: Number(album.id), title: album.title },
+      // Dựng màn chính của tab Ảnh bên dưới, để Back không thoát khỏi tab.
+      initial: false,
+    });
 
   let tripSection: React.ReactNode;
   if (trips.loading) {
@@ -104,7 +111,11 @@ export function HomeScreen() {
     );
   } else {
     albumSection = (
-      <AlbumStrip albums={albums.data ?? []} onSeeAll={openPhotosTab} />
+      <AlbumStrip
+        albums={albums.data ?? []}
+        onAlbumPress={openAlbum}
+        onSeeAll={openCollections}
+      />
     );
   }
 

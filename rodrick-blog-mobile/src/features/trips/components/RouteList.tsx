@@ -176,10 +176,12 @@ type Props = {
   /** Mở hộp thoại chi tiết lộ trình; từ đó bấm "Mở trong Google Maps". */
   onView: (m: EventMap) => void;
   onDelete: (m: EventMap) => void;
+  /** Mất mạng: ẩn nút thêm, nhấn giữ không mở nút xoá; chạm vẫn xem chi tiết. */
+  readOnly?: boolean;
 };
 
 /** Mục "Lộ trình": danh sách các lộ trình của mốc (1-n) + nút thêm ở cuối. */
-export function RouteList({ event, presetDestination, onAdd, onView, onDelete }: Props) {
+export function RouteList({ event, presetDestination, onAdd, onView, onDelete, readOnly }: Props) {
   const { colors } = useTheme();
   const maps = event.event_maps;
   const [openId, setOpenId] = useState<number | null>(null);
@@ -209,7 +211,9 @@ export function RouteList({ event, presetDestination, onAdd, onView, onDelete }:
               key={m.id}
               map={m}
               open={openId === m.id}
-              onToggle={() => setOpenId(cur => (cur === m.id ? null : m.id))}
+              onToggle={() =>
+                readOnly ? undefined : setOpenId(cur => (cur === m.id ? null : m.id))
+              }
               onOpen={() => onView(m)}
               onDelete={() => onDelete(m)}
             />
@@ -226,28 +230,30 @@ export function RouteList({ event, presetDestination, onAdd, onView, onDelete }:
         ShareReceiver mở màn Thêm lộ trình đã điền sẵn. iOS chưa nhận được Chia sẻ nên vào màn
         Thêm lộ trình để dán liên kết.
       */}
-      <Pressable
-        accessibilityRole="button"
-        accessibilityHint={
-          Platform.OS === 'android'
-            ? 'Mở Google Maps. Chọn xong đường đi, bấm Chia sẻ rồi chọn ứng dụng này'
-            : undefined
-        }
-        onPress={() => {
-          if (Platform.OS !== 'android') {
-            onAdd();
-            return;
+      {readOnly ? null : (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityHint={
+            Platform.OS === 'android'
+              ? 'Mở Google Maps. Chọn xong đường đi, bấm Chia sẻ rồi chọn ứng dụng này'
+              : undefined
           }
-          // Thêm mới: bỏ lộ trình đang chờ sửa (nếu có) để Chia sẻ về sẽ tạo lộ trình mới.
-          clearRouteEdit();
-          Linking.openURL(
-            presetDestination ? buildPickRouteUrl(event.location_name, event.city) : buildPickRouteUrl(),
-          );
-        }}
-        style={[styles.add, { backgroundColor: colors.surfaceMuted }]}
-      >
-        <Text style={styles.addText}>Thêm lộ trình</Text>
-      </Pressable>
+          onPress={() => {
+            if (Platform.OS !== 'android') {
+              onAdd();
+              return;
+            }
+            // Thêm mới: bỏ lộ trình đang chờ sửa (nếu có) để Chia sẻ về sẽ tạo lộ trình mới.
+            clearRouteEdit();
+            Linking.openURL(
+              presetDestination ? buildPickRouteUrl(event.location_name, event.city) : buildPickRouteUrl(),
+            );
+          }}
+          style={[styles.add, { backgroundColor: colors.surfaceMuted }]}
+        >
+          <Text style={styles.addText}>Thêm lộ trình</Text>
+        </Pressable>
+      )}
     </View>
   );
 }

@@ -42,6 +42,8 @@ function PageHead({
 }
 
 type InfoProps = {
+  /** Mất mạng: không thêm/xoá lộ trình, vẫn xem được. */
+  readOnly?: boolean;
   event: DetailEvent;
   landscape: boolean;
   onOpenPhoto: (images: EventImage[], index: number) => void;
@@ -51,7 +53,7 @@ type InfoProps = {
 };
 
 /** Trang 1: Thông tin. Dọc một cột; ngang hai cột (trái: thông tin chung cố định + lộ trình, phải: mô tả + ảnh minh họa). */
-export function InfoPage({ event, landscape, onOpenPhoto, onAddRoute, onViewRoute, onDeleteRoute }: InfoProps) {
+export function InfoPage({ event, landscape, onOpenPhoto, onAddRoute, onViewRoute, onDeleteRoute, readOnly }: InfoProps) {
   const { colors } = useTheme();
   const type = eventType(event.category_tag);
   const { start, end } = eventTimes(event);
@@ -92,6 +94,7 @@ export function InfoPage({ event, landscape, onOpenPhoto, onAddRoute, onViewRout
       onAdd={onAddRoute}
       onView={onViewRoute}
       onDelete={onDeleteRoute}
+      readOnly={readOnly}
     />
   );
 
