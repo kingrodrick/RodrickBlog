@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   Animated,
   GestureResponderEvent,
@@ -8,7 +8,7 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import { cloudinaryUrl } from '../../../shared/utils/cloudinary';
+import { gridThumbUrl, viewerUrl } from '../photoUrls';
 import { Photo } from '../types';
 
 type Props = {
@@ -34,21 +34,45 @@ const ZOOMED = 1.01;
 const SWIPE_RATIO = 0.2;
 const SWIPE_VELOCITY = 0.5;
 
+/** Tải trước bao nhiêu ảnh mỗi bên (ngoài ảnh liền kề đã dựng sẵn) để vuốt nhanh không thấy nền đen. */
+const PREFETCH = 2;
+
 const distance = (t: readonly NativeTouchEvent[]) =>
   Math.hypot(t[0].pageX - t[1].pageX, t[0].pageY - t[1].pageY);
 
-/** Một ảnh vừa khung, xoay thêm theo nút (xoay 90° thì đổi rộng/cao để vẫn vừa khung). */
+/**
+ * Một ảnh vừa khung, xoay thêm theo nút (xoay 90° thì đổi rộng/cao để vẫn vừa khung).
+ * Hiện ngay ảnh nhỏ của lưới (đã có trong cache, không phải tải lại) rồi đè ảnh nét lên khi tải
+ * xong; mạng kém vẫn thấy ảnh ngay, chỉ mờ hơn một lúc. Ảnh nét lỗi thì giữ ảnh nhỏ.
+ */
 function Slide({ photo, width, height, deg }: { photo: Photo; width: number; height: number; deg: number }) {
   const sideways = deg % 180 !== 0;
+  const [sharp, setSharp] = useState(false);
   return (
-    <Image
-      source={{ uri: cloudinaryUrl(photo.url) }}
-      resizeMode="contain"
+    <View
       style={[
         sideways ? { width: height, height: width } : { width, height },
         { transform: [{ rotate: `${deg}deg` }] },
       ]}
-    />
+    >
+      {/* Bỏ ảnh nhỏ khi ảnh nét đã hiện: ảnh PNG trong suốt sẽ lộ ảnh nhỏ phía sau. */}
+      {sharp ? null : (
+        <Image
+          source={{ uri: gridThumbUrl(photo.url) }}
+          resizeMode="contain"
+          fadeDuration={0}
+          style={StyleSheet.absoluteFill}
+        />
+      )}
+      <Image
+        source={{ uri: viewerUrl(photo.url, width, height) }}
+        resizeMode="contain"
+        // Android mặc định cho ảnh mờ dần vào 300ms khi tải xong: trông như chớp khi vừa vuốt tới.
+        fadeDuration={0}
+        onLoad={() => setSharp(true)}
+        style={StyleSheet.absoluteFill}
+      />
+    </View>
   );
 }
 
@@ -61,8 +85,11 @@ function Slide({ photo, width, height, deg }: { photo: Photo; width: number; hei
  * - Chạm đúp: phóng 2.5x tại chỗ chạm hoặc về cỡ gốc. Chạm đơn: onTap.
  */
 export function PhotoPager({ photos, current, onChange, width, height, rotation, onTap }: Props) {
-  // Dải 3 ảnh (trước, đang xem, sau) dịch theo ngón tay.
-  const strip = useRef(new Animated.Value(0)).current;
+  // Dải ảnh: mỗi ảnh nằm cố định ở left = chỉ số × bề ngang, dải dịch tới -current × bề ngang
+  // (cộng thêm độ kéo của ngón tay). Vuốt xong dải đã đứng đúng chỗ của ảnh mới nên không phải
+  // đặt lại về 0 và các ảnh không đổi chỗ. Cách cũ (ảnh đổi left, dải đặt về 0 cùng lúc) bị lệch
+  // một khung hình trên Android vì hoạt ảnh chạy native: thấy ảnh nháy/lật trước khi đứng yên.
+  const strip = useRef(new Animated.Value(-current * width)).current;
   const scale = useRef(new Animated.Value(1)).current;
   const tx = useRef(new Animated.Value(0)).current;
   const ty = useRef(new Animated.Value(0)).current;
@@ -147,13 +174,13 @@ export function PhotoPager({ photos, current, onChange, width, height, rotation,
       }
       g.animating = true;
       Animated.timing(strip, {
-        toValue: -dir * w,
+        toValue: -(i + dir) * w,
         duration: 220,
         useNativeDriver: true,
       }).start(() => {
         g.animating = false;
         if (dir) {
-          // Dải về 0 sau khi ảnh mới đã vào giữa (useLayoutEffect bên dưới).
+          // Dải đã đứng đúng chỗ ảnh mới; chỉ báo đổi chỉ số, không dịch gì thêm.
           latest.current.onChange(i + dir);
         }
       });
@@ -184,7 +211,7 @@ export function PhotoPager({ photos, current, onChange, width, height, rotation,
           if (g.mode !== 'pinch') {
             // Đang vuốt dở mà đặt thêm ngón: bỏ vuốt, chuyển sang chụm.
             if (g.mode === 'swipe') {
-              strip.setValue(0);
+              strip.setValue(-latest.current.current * latest.current.width);
             }
             g.mode = 'pinch';
             g.moved = true;
@@ -211,10 +238,10 @@ export function PhotoPager({ photos, current, onChange, width, height, rotation,
           zoomTo(g.scale, g.startX + gs.dx, g.startY + gs.dy, false);
         } else if (g.mode === 'swipe' || (g.moved && Math.abs(gs.dx) > Math.abs(gs.dy))) {
           g.mode = 'swipe';
-          const { current: i, count } = latest.current;
+          const { current: i, count, width: w } = latest.current;
           // Ảnh đầu/cuối: kéo nặng tay, không có ảnh để sang.
           const edge = (gs.dx > 0 && i === 0) || (gs.dx < 0 && i === count - 1);
-          strip.setValue(edge ? gs.dx / 3 : gs.dx);
+          strip.setValue(-i * w + (edge ? gs.dx / 3 : gs.dx));
         }
       },
       onPanResponderRelease: (_, gs) => {
@@ -240,13 +267,30 @@ export function PhotoPager({ photos, current, onChange, width, height, rotation,
     });
   }, [g, strip, zoomTo]);
 
-  // Đổi ảnh (vuốt xong, hoặc mở ảnh khác) / xoay màn / xoay ảnh: dải về giữa, ảnh về cỡ gốc.
-  // useLayoutEffect để chạy trước khi vẽ, không chớp lại ảnh cũ.
+  // Đổi ảnh / xoay màn / xoay ảnh: dải đứng đúng chỗ ảnh đang xem, ảnh về cỡ gốc.
+  // Vuốt xong thì dải đã ở đúng giá trị này (đặt lại không làm gì); chỉ mở ảnh khác hay xoay màn
+  // mới thật sự dịch. useLayoutEffect để chạy trước khi vẽ.
   const deg = photos[current] ? rotation[photos[current].id] ?? 0 : 0;
   useLayoutEffect(() => {
-    strip.setValue(0);
+    strip.setValue(-current * width);
     zoomTo(1, 0, 0, false);
   }, [current, width, height, deg, strip, zoomTo]);
+
+  // Tải trước ảnh xa hơn ảnh liền kề (ảnh liền kề đã dựng sẵn trong dải nên tự tải):
+  // ảnh nhỏ trước (nhẹ, để vuốt tới là có ảnh), rồi ảnh nét.
+  useEffect(() => {
+    const ahead = [];
+    for (let k = 2; k <= 1 + PREFETCH; k++) {
+      ahead.push(photos[current + k], photos[current - k]);
+    }
+    const near = ahead.filter((x): x is Photo => !!x);
+    for (const x of near) {
+      Image.prefetch(gridThumbUrl(x.url)).catch(() => undefined);
+    }
+    for (const x of near) {
+      Image.prefetch(viewerUrl(x.url, width, height)).catch(() => undefined);
+    }
+  }, [photos, current, width, height]);
 
   useEffect(
     () => () => {
@@ -286,7 +330,7 @@ export function PhotoPager({ photos, current, onChange, width, height, rotation,
       <Animated.View style={[StyleSheet.absoluteFill, { transform: [{ translateX: strip }] }]}>
         {slots.map(({ offset, photo }) => (
           // key theo id: vuốt sang thì ảnh kế chỉ đổi chỗ, không tải lại.
-          <View key={photo.id} style={[styles.slot, { width, height, left: offset * width }]}>
+          <View key={photo.id} style={[styles.slot, { width, height, left: (current + offset) * width }]}>
             {/* Cùng một cây cho mọi vị trí (chỉ ảnh giữa có thu phóng), để vào giữa không dựng lại ảnh. */}
             <Animated.View
               style={

@@ -22,6 +22,7 @@ const event: DetailEvent = {
   event_maps: [],
   images: [
     { id: 1, cloudinary_url: 'https://res.cloudinary.com/x/image/upload/a.jpg', caption: 'Cửa quán', is_real_photo: false },
+    { id: 2, cloudinary_url: 'https://res.cloudinary.com/x/image/upload/b.jpg', caption: 'Ảnh tự chụp', is_real_photo: true },
   ],
   documents: [],
 };
@@ -71,7 +72,7 @@ test('NotesView vẽ gạch đầu dòng thành "•"', async () => {
   expect(all).toContain('Đi bộ 2 phút');
 });
 
-test('tab 2 liệt kê ảnh minh họa, mỗi ảnh có nút sửa và có nút thêm ảnh', async () => {
+test('tab 2 chỉ liệt kê ảnh minh họa (không có ảnh thực tế), có nút sửa và nút thêm', async () => {
   let tree!: ReactTestRenderer.ReactTestRenderer;
   await ReactTestRenderer.act(() => {
     tree = ReactTestRenderer.create(
@@ -87,11 +88,14 @@ test('tab 2 liệt kê ảnh minh họa, mỗi ảnh có nút sửa và có nút
       ),
     );
   });
-  const tab2 = tree.root.find(n => n.props.accessibilityLabel === '2/2 Ảnh' && typeof n.props.onPress === 'function');
+  const tab2 = tree.root.find(n => n.props.accessibilityLabel === '2/2 Ảnh minh họa' && typeof n.props.onPress === 'function');
   await ReactTestRenderer.act(() => {
     tab2.props.onPress();
   });
   const labels = tree.root.findAll(n => typeof n.props.accessibilityLabel === 'string').map(n => n.props.accessibilityLabel);
   expect(labels).toContain('Sửa ảnh 1');
-  expect(labels).toContain('Thêm ảnh');
+  // Chỉ một ảnh minh họa; ảnh thực tế (id 2) không hiện ở tab này.
+  expect(labels).not.toContain('Sửa ảnh 2');
+  expect(labels).toContain('Thêm ảnh minh họa');
+  expect(texts(tree)).not.toContain('Thực tế');
 });

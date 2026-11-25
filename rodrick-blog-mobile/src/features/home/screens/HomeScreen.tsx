@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
@@ -16,7 +16,7 @@ import { fetchTrips } from '../../../shared/api/trips';
 import { useAsync } from '../../../shared/hooks/useAsync';
 import { useNow } from '../../../shared/hooks/useNow';
 import { formatWeekdayDateTime } from '../../../shared/utils/format';
-import { radius } from '../../../theme';
+import { layout, radius } from '../../../theme';
 import { HomeStackParamList, MainTabParamList } from '../../../navigation/type';
 import { fetchAlbums } from '../api/albums';
 import { pickNearestTrip } from '../pickNearestTrip';
@@ -48,9 +48,10 @@ export function HomeScreen() {
   const albums = useAsync(fetchAlbums);
   const trip = trips.data ? pickNearestTrip(trips.data, now) : null;
 
-  const openTripsList = () => navigation.navigate('TripsList');
-
   const tabs = () => navigation.getParent<BottomTabNavigationProp<MainTabParamList>>();
+
+  /** "Danh sách chuyến đi": sang tab Chuyến đi, về đúng màn danh sách. */
+  const openTripsList = () => tabs()?.navigate('Trips', { screen: 'TripsList' });
 
   /** "Xem tất cả": tab Ảnh ở chế độ Bộ sưu tập. */
   const openCollections = () =>
@@ -114,7 +115,6 @@ export function HomeScreen() {
       <AlbumStrip
         albums={albums.data ?? []}
         onAlbumPress={openAlbum}
-        onSeeAll={openCollections}
       />
     );
   }
@@ -142,9 +142,21 @@ export function HomeScreen() {
         />
       </Card>
 
-      <Text variant="overline" tone="secondary" style={styles.sectionTitle}>
-        Bộ sưu tập ảnh
-      </Text>
+      <View style={styles.sectionHead}>
+        <Text variant="overline" tone="secondary" numberOfLines={1} style={styles.sectionTitle}>
+          Bộ sưu tập ảnh
+        </Text>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Xem tất cả bộ sưu tập"
+          onPress={openCollections}
+          style={({ pressed }) => [styles.seeAll, pressed && styles.pressed]}
+        >
+          <Text variant="label" tone="accent" numberOfLines={1} style={styles.seeAllText}>
+            Xem tất cả
+          </Text>
+        </Pressable>
+      </View>
       {albumSection}
     </Screen>
   );
@@ -154,6 +166,14 @@ const styles = StyleSheet.create({
   greeting: { paddingTop: 16, paddingBottom: 8, gap: 4 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   rowText: { flex: 1, gap: 2 },
-  sectionTitle: { marginTop: 8 },
+  // Tiêu đề mục bên trái, nút "Xem tất cả" bên phải trên cùng một dòng.
+  sectionHead: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 8 },
+  sectionTitle: { flex: 1 },
+  // Nút chiếm nửa phải, chữ giãn kín bề ngang rồi căn phải: không ôm đúng bề rộng đo được,
+  // vì font hệ thống tuỳ chỉnh (Samsung) đo thiếu làm chữ "cả" rơi xuống dòng 2 rồi bị cắt.
+  // Vùng chạm cao tối thiểu 44.
+  seeAll: { flex: 1, minHeight: layout.minTouch, justifyContent: 'center' },
+  seeAllText: { textAlign: 'right' },
+  pressed: { opacity: 0.6 },
   albumSkeleton: { flexDirection: 'row', gap: 12 },
 });

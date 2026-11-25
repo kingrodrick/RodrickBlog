@@ -13,48 +13,28 @@ import { Album } from '../types';
 const COVER_W = 150;
 const COVER_H = 190;
 
-type Item = Album | { id: '__all__' };
-
 type Props = {
   albums: Album[];
   onAlbumPress?: (album: Album) => void;
-  onSeeAll: () => void;
 };
 
-export function AlbumStrip({ albums, onAlbumPress, onSeeAll }: Props) {
+/** Dải bìa bộ sưu tập cuộn ngang; nút "Xem tất cả" nằm ở dòng tiêu đề mục của Trang chủ. */
+export function AlbumStrip({ albums, onAlbumPress }: Props) {
   const { colors } = useTheme();
 
   if (albums.length === 0) {
     return <EmptyState message="Chưa có bộ sưu tập ảnh nào." />;
   }
 
-  const data: Item[] = [...albums, { id: '__all__' }];
-
   return (
     <FlatList
       horizontal
-      data={data}
+      data={albums}
       keyExtractor={item => item.id}
       showsHorizontalScrollIndicator={false}
       style={styles.list}
       contentContainerStyle={styles.content}
       renderItem={({ item }) => {
-        if (!('title' in item)) {
-          return (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Xem tất cả ảnh"
-              onPress={onSeeAll}
-              style={[
-                styles.cover,
-                styles.center,
-                { backgroundColor: colors.surface },
-              ]}
-            >
-              <Text variant="label">Xem tất cả</Text>
-            </Pressable>
-          );
-        }
         const reference = item.kind === 'reference';
         return (
           <Pressable

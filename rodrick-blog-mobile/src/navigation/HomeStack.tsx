@@ -6,7 +6,6 @@ import {
   PickEventScreen,
   RouteEditScreen,
   TripDetailScreen,
-  TripsListScreen,
 } from '../features/trips';
 import { HomeStackParamList } from './type';
 
@@ -16,7 +15,6 @@ export function HomeStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="HomeMain" component={HomeScreen} />
-      <Stack.Screen name="TripsList" component={TripsListScreen} />
       <Stack.Screen name="TripDetail" component={TripDetailScreen} />
       <Stack.Screen name="EventDetail" component={EventDetailScreen} />
       <Stack.Screen

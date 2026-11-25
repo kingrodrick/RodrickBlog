@@ -1,20 +1,22 @@
 import React, { useCallback, useState } from 'react';
 import { ActivityIndicator, BackHandler, StyleSheet, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { ListFilter, Trash2, X } from 'lucide-react-native';
+import { FolderInput, ListFilter, Trash2, X } from 'lucide-react-native';
 import { Dialog, IconButton, offlineBanner, Toast } from '../../../shared/ui';
 import { iconSize, iconStroke, layout, useTheme } from '../../../theme';
-import { deletePhotos } from '../api/photos';
+import { deletePhotos, movePhotos } from '../api/photos';
 import { FilterSheet } from '../components/FilterSheet';
+import { MoveSheet } from '../components/MoveSheet';
 import { PhotoGrid } from '../components/PhotoGrid';
 import { PhotoViewer } from '../components/PhotoViewer';
-import { Photo, PhotoFilter } from '../types';
+import { Collection, Photo, PhotoFilter } from '../types';
 import { usePhotoPages } from './usePhotoPages';
 
 const icon = (Icon: typeof X) => (c: string) =>
   <Icon color={c} size={iconSize.control} strokeWidth={iconStroke.normal} strokeLinecap="round" />;
 const renderFilter = icon(ListFilter);
 const renderDelete = icon(Trash2);
+const renderMove = icon(FolderInput);
 const renderClose = icon(X);
 
 const NO_SELECTION: ReadonlySet<number> = new Set();
@@ -66,6 +68,8 @@ type Options = {
   emptyMessage: string;
   /** Phần trên lưới, cuộn cùng lưới. */
   gridHeader?: React.ReactElement;
+  /** Gọi sau khi xoá hoặc chuyển ảnh xong (ví dụ để tải lại số ảnh của các bộ sưu tập). */
+  onChanged?: () => void;
 };
 
 /**
@@ -79,13 +83,17 @@ export function usePhotoBrowser({
   active = true,
   emptyMessage,
   gridHeader,
+  onChanged,
 }: Options) {
   const { colors } = useTheme();
   const pages = usePhotoPages(collectionId, filter);
   const selection = useSelection(active);
   const [filterOpen, setFilterOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [deleting, setDeleting] = useState(false);
+  const [moveOpen, setMoveOpen] = useState(false);
+  // Đang xoá hoặc đang chuyển ảnh: khoá các nút, không cho chọn thêm.
+  const [working, setWorking] = useState<'delete' | 'move' | null>(null);
+  const deleting = working !== null;
   const [toast, setToast] = useState<ToastState>(null);
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
   // Mất mạng (đang xem bản lưu): không cho chọn để xoá.
@@ -113,11 +121,12 @@ export function usePhotoBrowser({
   const remove = async () => {
     setConfirmOpen(false);
     const picked: Photo[] = pages.photos.filter(p => selection.ids.has(p.id));
-    setDeleting(true);
+    setWorking('delete');
     try {
       const { cdnFailed } = await deletePhotos(picked);
       pages.removeLocal(picked.map(p => p.id));
       selection.clear();
+      onChanged?.();
       setToast(
         cdnFailed
           ? {
@@ -129,7 +138,27 @@ export function usePhotoBrowser({
     } catch (e) {
       setToast({ kind: 'error', message: e instanceof Error ? e.message : 'Không xoá được ảnh.' });
     } finally {
-      setDeleting(false);
+      setWorking(null);
+    }
+  };
+
+  const move = async (target: Collection) => {
+    setMoveOpen(false);
+    const ids = pages.photos.filter(p => selection.ids.has(p.id)).map(p => p.id);
+    setWorking('move');
+    try {
+      await movePhotos(ids, target.id);
+      // Đang xem một bộ sưu tập: ảnh đã sang bộ khác nên bỏ khỏi lưới này.
+      if (collectionId !== undefined) {
+        pages.removeLocal(ids);
+      }
+      selection.clear();
+      onChanged?.();
+      setToast({ kind: 'success', message: `Đã chuyển ${ids.length} ảnh sang ${target.title}` });
+    } catch (e) {
+      setToast({ kind: 'error', message: e instanceof Error ? e.message : 'Không chuyển được ảnh.' });
+    } finally {
+      setWorking(null);
     }
   };
 
@@ -152,12 +181,26 @@ export function usePhotoBrowser({
     headerRight = (
       <View style={styles.actions}>
         {filterButton}
-        {deleting ? (
+        {working === 'move' ? (
+          <View style={styles.busy}>
+            <ActivityIndicator color={colors.text} />
+          </View>
+        ) : (
+          <IconButton
+            accessibilityLabel={`Chuyển ${count} ảnh đã chọn sang bộ sưu tập khác`}
+            variant="ghost"
+            disabled={deleting}
+            onPress={() => setMoveOpen(true)}
+            icon={renderMove}
+          />
+        )}
+        {working === 'delete' ? (
           <View style={styles.busy}>
             <ActivityIndicator color={colors.error} />
           </View>
         ) : (
           <IconButton
+            disabled={deleting}
             accessibilityLabel={`Xoá ${count} ảnh đã chọn`}
             // Chỉ icon, không nền; giữ màu lỗi để biết là nút phá huỷ.
             variant="ghost"
@@ -186,6 +229,8 @@ export function usePhotoBrowser({
       />
     ) : null,
     clearSelection: selection.clear,
+    /** Hiện toast chung của màn (ví dụ báo đã lưu bộ sưu tập). */
+    notify: setToast,
     headerRight,
     banner: active ? offlineBanner(pages.cachedAt) : undefined,
     grid: (
@@ -224,6 +269,13 @@ export function usePhotoBrowser({
           value={filter}
           onChange={setFilter}
           onClose={() => setFilterOpen(false)}
+        />
+        <MoveSheet
+          visible={moveOpen}
+          count={count}
+          currentId={collectionId}
+          onPick={move}
+          onClose={() => setMoveOpen(false)}
         />
         <Dialog
           visible={confirmOpen}

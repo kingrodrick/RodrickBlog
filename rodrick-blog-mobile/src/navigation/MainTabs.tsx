@@ -6,13 +6,14 @@ import {
   BottomTabBarProps,
 } from '@react-navigation/bottom-tabs';
 import { Circle, Path } from 'react-native-svg';
-import { House, Wrench, Image, Settings } from 'lucide-react-native';
+import { House, Plane, Wrench, Image, Settings } from 'lucide-react-native';
 import { darkColors, iconSize, iconStroke, useTheme } from '../theme';
 import { useAuth } from '../features/auth';
 import { SettingsScreen } from '../features/settings';
 import { HomeStack } from './HomeStack';
 import { PhotosStack } from './PhotosStack';
 import { ToolsStack } from './ToolsStack';
+import { TripsStack } from './TripsStack';
 import { MainTabParamList } from './type';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -54,6 +55,8 @@ const KNOCKOUT: Record<
       stroke="none"
     />
   ),
+  // Máy bay là một hình kín: khi chọn chỉ cần tô đặc.
+  Trips: () => null,
   // Cờ lê là một nét liền: khi chọn chỉ cần tô đặc, không có chi tiết để khoét.
   Tools: () => null,
   Photos: (bg, w) => [
@@ -75,6 +78,7 @@ const KNOCKOUT: Record<
 
 const ITEMS = {
   Home: { Icon: House, label: 'Trang chủ' },
+  Trips: { Icon: Plane, label: 'Chuyến đi' },
   Tools: { Icon: Wrench, label: 'Công cụ' },
   Photos: { Icon: Image, label: 'Ảnh' },
   Settings: { Icon: Settings, label: 'Cài đặt' },
@@ -142,10 +146,11 @@ export function MainTabs() {
   return (
     <Tab.Navigator
       tabBar={renderTabBar}
-      // Xoay ngang: thanh tab chuyển sang mép phải, 4 nút xếp dọc từ trên xuống.
+      // Xoay ngang: thanh tab chuyển sang mép phải, các nút xếp dọc từ trên xuống.
       screenOptions={{ headerShown: false, tabBarPosition: landscape ? 'right' : 'bottom' }}
     >
       <Tab.Screen name="Home" component={HomeStack} />
+      <Tab.Screen name="Trips" component={TripsStack} />
       <Tab.Screen name="Tools" component={ToolsStack} />
       <Tab.Screen name="Photos" component={PhotosStack} />
       <Tab.Screen name="Settings" component={SettingsTab} />

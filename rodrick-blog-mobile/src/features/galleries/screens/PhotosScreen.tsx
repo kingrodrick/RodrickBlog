@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import { RouteProp, useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { PhotosStackParamList } from '../../../navigation/type';
@@ -8,6 +8,8 @@ import { offlineBanner, Screen, Segmented } from '../../../shared/ui';
 import { useAsync } from '../../../shared/hooks/useAsync';
 import { fetchCollections } from '../api/collections';
 import { CollectionList } from '../components/CollectionList';
+import { takeCollectionsStale } from '../hooks/collectionsStale';
+import { useCollectionOrder } from '../hooks/useCollectionOrder';
 import { usePhotoBrowser } from '../hooks/usePhotoBrowser';
 import { GalleryMode, PhotoFilter } from '../types';
 
@@ -64,6 +66,25 @@ export function PhotosScreen() {
     onFilterChange: setFilter,
     active: mode === 'photos',
     emptyMessage: 'Chưa có ảnh nào. Ảnh thêm vào các mốc sẽ hiện ở đây.',
+    // Xoá hay chuyển ảnh làm đổi số ảnh của các bộ sưu tập.
+    onChanged: collections.refresh,
+  });
+
+  // Quay về từ màn bộ sưu tập vừa xoá/chuyển ảnh: cập nhật ngầm số ảnh trên các thẻ.
+  const { refresh: refreshCollections } = collections;
+  useFocusEffect(
+    useCallback(() => {
+      if (takeCollectionsStale()) {
+        refreshCollections();
+      }
+    }, [refreshCollections]),
+  );
+
+  const order = useCollectionOrder({
+    collections: collections.data,
+    canEdit: collections.cachedAt === null,
+    onSaved: collections.refresh,
+    notify: browser.notify,
   });
 
   const { clearSelection } = browser;
@@ -87,19 +108,22 @@ export function PhotosScreen() {
   return (
     <View style={styles.root}>
       <Screen
-        title={browser.selectionTitle ?? 'Ảnh'}
+        title={browser.selectionTitle ?? (order.ordering ? 'Sắp xếp' : 'Ảnh')}
         scroll={false}
         banner={mode === 'photos' ? browser.banner : offlineBanner(collections.cachedAt)}
-        headerLeft={browser.clearButton}
-        headerRight={browser.headerRight}
+        headerLeft={mode === 'photos' ? browser.clearButton : order.headerLeft}
+        headerRight={mode === 'photos' ? browser.headerRight : order.headerRight}
       >
-        <Segmented options={MODES} value={mode} onChange={setMode} />
+        {/* Đang sắp xếp thì ẩn thanh chọn chế độ để không rời màn giữa chừng. */}
+        {order.ordering ? null : <Segmented options={MODES} value={mode} onChange={setMode} />}
         <View style={styles.body}>
           {mode === 'photos' ? (
             browser.grid
+          ) : order.list ? (
+            order.list
           ) : (
             <CollectionList
-              collections={collections.data}
+              collections={order.shown}
               loading={collections.loading}
               error={collections.error}
               onRetry={collections.reload}

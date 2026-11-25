@@ -1,4 +1,4 @@
-import { deleteRows, selectRows } from '../../../shared/api/supabase';
+import { deleteRows, selectRows, updateRows } from '../../../shared/api/supabase';
 import { deleteCloudinaryImage } from '../../../shared/api/webApi';
 import { Photo, PhotoFilter } from '../types';
 
@@ -74,4 +74,12 @@ export async function deletePhotos(photos: Photo[]): Promise<{ cdnFailed: number
   }
   await deleteRows('images', `id=in.(${photos.map(p => p.id).join(',')})`);
   return { cdnFailed };
+}
+
+/** Chuyển nhiều ảnh sang bộ sưu tập khác bằng một lệnh (đổi cột `collection_id`). */
+export async function movePhotos(photoIds: number[], collectionId: number): Promise<void> {
+  if (!photoIds.length) {
+    return;
+  }
+  await updateRows('images', `id=in.(${photoIds.join(',')})`, { collection_id: collectionId });
 }

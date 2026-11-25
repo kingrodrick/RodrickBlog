@@ -94,10 +94,7 @@ export function ImageSourceFlow({ open, kind, limit, query, onClose, onPicked, o
 
   return (
     <>
-      <Sheet visible={step === 'menu'} onClose={dismiss}>
-        <Text variant="heading" style={styles.title}>
-          Thêm ảnh minh họa
-        </Text>
+      <Sheet visible={step === 'menu'} onClose={dismiss} title="Thêm ảnh minh họa">
         <View style={styles.body}>
           <Option title="Thư viện máy" hint="Chọn ảnh từ bộ sưu tập" onPress={library} />
           <Option
@@ -112,10 +109,7 @@ export function ImageSourceFlow({ open, kind, limit, query, onClose, onPicked, o
         </View>
       </Sheet>
 
-      <Sheet visible={step === 'paste'} onClose={dismiss}>
-        <Text variant="heading" style={styles.title}>
-          Dán liên kết ảnh
-        </Text>
+      <Sheet visible={step === 'paste'} onClose={dismiss} title="Dán liên kết ảnh">
         <View style={styles.body}>
           <TextField
             label="Địa chỉ ảnh"
@@ -149,7 +143,6 @@ export function ImageSourceFlow({ open, kind, limit, query, onClose, onPicked, o
 }
 
 const styles = StyleSheet.create({
-  title: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 12 },
   body: { paddingHorizontal: 20, paddingBottom: 16, gap: 12 },
   option: { borderRadius: radius.card, padding: 16, gap: 2 },
 });

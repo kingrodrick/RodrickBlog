@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Chip, Sheet, Text } from '../../../shared/ui';
+import { Chip, Sheet } from '../../../shared/ui';
 import { PhotoFilter } from '../types';
 
 export const FILTER_LABEL: Record<PhotoFilter, string> = {
@@ -21,10 +21,7 @@ type Props = {
 /** Chọn loại ảnh hiện trong lưới; chạm một lựa chọn là áp dụng và đóng luôn. */
 export function FilterSheet({ visible, value, onChange, onClose }: Props) {
   return (
-    <Sheet visible={visible} onClose={onClose}>
-      <Text variant="heading" style={styles.title}>
-        Loại ảnh
-      </Text>
+    <Sheet visible={visible} onClose={onClose} title="Loại ảnh">
       <View style={styles.body}>
         {FILTERS.map(f => (
           <Chip
@@ -43,6 +40,5 @@ export function FilterSheet({ visible, value, onChange, onClose }: Props) {
 }
 
 const styles = StyleSheet.create({
-  title: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 12 },
   body: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingHorizontal: 20, paddingBottom: 16 },
 });

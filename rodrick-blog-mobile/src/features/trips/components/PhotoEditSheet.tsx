@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Image, ScrollView, StyleSheet, View } from 'react-native';
 import { ArrowLeftRight, Trash2 } from 'lucide-react-native';
+import { useRetained } from '../../../shared/hooks/useRetained';
 import { Button, Dialog, IconButton, Sheet, Text, TextField } from '../../../shared/ui';
 import { cloudinaryUrl } from '../../../shared/utils/cloudinary';
 import { iconSize, iconStroke, radius, useTheme } from '../../../theme';
@@ -35,18 +36,23 @@ export function PhotoEditSheet({ image, event, tripTitle, onClose, onChanged, on
   const [saving, setSaving] = useState(false);
   const [askDelete, setAskDelete] = useState(false);
 
+  // Mở ảnh khác thì nạp lại; đóng (image = null) thì giữ nguyên để vẽ lúc sheet trượt xuống.
   useEffect(() => {
-    setCaption(image?.caption ?? '');
-    setReplacement(null);
-    setSaving(false);
-    setChoosing(false);
-    setAskDelete(false);
+    if (image) {
+      setCaption(image.caption ?? '');
+      setReplacement(null);
+      setSaving(false);
+      setChoosing(false);
+      setAskDelete(false);
+    }
   }, [image]);
+  // Ảnh cuối cùng đã mở: sheet còn chạy hoạt ảnh đóng sau khi màn cha đặt image = null.
+  const shown = useRetained(image);
 
-  if (!image) {
+  if (!shown) {
     return null;
   }
-  const isReal = image.is_real_photo !== false;
+  const isReal = shown.is_real_photo !== false;
 
   const save = async () => {
     setSaving(true);
@@ -55,13 +61,13 @@ export function PhotoEditSheet({ image, event, tripTitle, onClose, onChanged, on
       if (replacement) {
         url = await uploadPending(replacement, photoFolder(tripTitle, event, isReal));
       }
-      await updateEventImage(image.id, {
+      await updateEventImage(shown.id, {
         caption: caption.trim() || null,
         ...(url ? { cloudinary_url: url, source_url: replacement?.sourceUrl ?? null } : {}),
       });
       if (url) {
         // Dòng DB đã trỏ sang ảnh mới; file cũ xoá được thì tốt, không thì bỏ qua.
-        discardCloudinaryFile(image.cloudinary_url).catch(() => false);
+        discardCloudinaryFile(shown.cloudinary_url).catch(() => false);
       }
       onChanged(url ? 'Đã đổi ảnh' : 'Đã lưu mô tả');
     } catch (e) {
@@ -75,7 +81,7 @@ export function PhotoEditSheet({ image, event, tripTitle, onClose, onChanged, on
     setAskDelete(false);
     setSaving(true);
     try {
-      const { cdnDeleted } = await removeEventImage(image);
+      const { cdnDeleted } = await removeEventImage(shown);
       onChanged(cdnDeleted ? 'Đã xoá ảnh' : 'Đã xoá ảnh, file trên Cloudinary chưa xoá được');
     } catch (e) {
       onError(e instanceof Error ? e.message : 'Không xoá được ảnh.');
@@ -84,14 +90,11 @@ export function PhotoEditSheet({ image, event, tripTitle, onClose, onChanged, on
     }
   };
 
-  const preview = replacement?.previewUri ?? cloudinaryUrl(image.cloudinary_url, { w: 900, h: 600 });
+  const preview = replacement?.previewUri ?? cloudinaryUrl(shown.cloudinary_url, { w: 900, h: 600 });
 
   return (
     <>
-      <Sheet visible onClose={saving ? () => {} : onClose}>
-        <Text variant="heading" style={styles.title}>
-          Sửa ảnh
-        </Text>
+      <Sheet visible={image !== null} onClose={saving ? () => {} : onClose} title="Sửa ảnh">
         <ScrollView
           contentContainerStyle={styles.body}
           keyboardShouldPersistTaps="handled"
@@ -147,7 +150,6 @@ export function PhotoEditSheet({ image, event, tripTitle, onClose, onChanged, on
 }
 
 const styles = StyleSheet.create({
-  title: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 12 },
   body: { paddingHorizontal: 20, gap: 12, paddingBottom: 8 },
   frame: { borderRadius: radius.card, padding: 6 },
   image: { width: '100%', aspectRatio: 16 / 10, borderRadius: 10 },

@@ -52,10 +52,7 @@ export function AddDocumentSheet({ picked, eventId, onClose, onSaved, onError }:
   };
 
   return (
-    <Sheet visible={picked !== null} onClose={saving ? () => {} : onClose}>
-      <Text variant="heading" style={styles.title}>
-        Thêm giấy tờ
-      </Text>
+    <Sheet visible={picked !== null} onClose={saving ? () => {} : onClose} title="Thêm giấy tờ">
       <View style={styles.body}>
         <TextField label="Tên giấy tờ" value={name} onChangeText={setName} error={nameError} editable={!saving} />
         <View style={styles.types}>
@@ -73,7 +70,6 @@ export function AddDocumentSheet({ picked, eventId, onClose, onSaved, onError }:
 }
 
 const styles = StyleSheet.create({
-  title: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 12 },
   body: { paddingHorizontal: 20, paddingBottom: 16, gap: 12 },
   types: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
 });

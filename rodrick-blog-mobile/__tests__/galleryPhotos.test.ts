@@ -4,7 +4,7 @@ jest.mock('../src/shared/api/config', () => ({
   WEB_API_BASE_URL: 'https://blog.example',
 }));
 
-import { deletePhotos, PAGE_SIZE, photosQuery } from '../src/features/galleries/api/photos';
+import { deletePhotos, movePhotos, PAGE_SIZE, photosQuery } from '../src/features/galleries/api/photos';
 import { Photo } from '../src/features/galleries/types';
 
 describe('photosQuery', () => {
@@ -80,5 +80,33 @@ describe('deletePhotos', () => {
     ) as unknown as typeof fetch;
 
     await expect(deletePhotos([photo(4)])).rejects.toThrow();
+  });
+});
+
+describe('movePhotos', () => {
+  const realFetch = globalThis.fetch;
+  afterEach(() => {
+    globalThis.fetch = realFetch;
+  });
+
+  it('đổi collection_id của các ảnh đã chọn bằng một lệnh PATCH', async () => {
+    const calls: { url: string; method?: string; body?: string }[] = [];
+    globalThis.fetch = jest.fn((url: string, init?: RequestInit) => {
+      calls.push({ url, method: init?.method, body: init?.body as string });
+      return json(null);
+    }) as unknown as typeof fetch;
+
+    await movePhotos([5, 6], 9);
+
+    expect(calls).toHaveLength(1);
+    expect(calls[0].method).toBe('PATCH');
+    expect(calls[0].url).toBe('https://example.supabase.co/rest/v1/images?id=in.(5,6)');
+    expect(JSON.parse(calls[0].body ?? '')).toEqual({ collection_id: 9 });
+  });
+
+  it('không có ảnh thì không gọi mạng', async () => {
+    globalThis.fetch = jest.fn() as unknown as typeof fetch;
+    await movePhotos([], 9);
+    expect(globalThis.fetch).not.toHaveBeenCalled();
   });
 });

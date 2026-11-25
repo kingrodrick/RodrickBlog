@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { HomeStackParamList } from '../../../navigation/type';
+import { TripsStackParamList } from '../../../navigation/type';
 import { ChevronLeft } from 'lucide-react-native';
 import {
   EmptyState,
@@ -71,7 +71,7 @@ function TripSections({
   );
 }
 
-type Nav = NativeStackNavigationProp<HomeStackParamList, 'TripsList'>;
+type Nav = NativeStackNavigationProp<TripsStackParamList, 'TripsList'>;
 
 export function TripsListScreen() {
   const navigation = useNavigation<Nav>();
@@ -81,13 +81,16 @@ export function TripsListScreen() {
     <Screen
       title="Danh sách chuyến đi"
       banner={offlineBanner(cachedAt)}
+      // Là gốc của tab Chuyến đi: chỉ có nút Quay lại khi có màn để quay về.
       headerLeft={
-        <IconButton
-          variant="ghost"
-          accessibilityLabel="Quay lại"
-          onPress={() => navigation.goBack()}
-          icon={renderBack}
-        />
+        navigation.canGoBack() ? (
+          <IconButton
+            variant="ghost"
+            accessibilityLabel="Quay lại"
+            onPress={() => navigation.goBack()}
+            icon={renderBack}
+          />
+        ) : undefined
       }
     >
       {loading ? (

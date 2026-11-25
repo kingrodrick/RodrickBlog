@@ -8,6 +8,8 @@ export type NewImage = {
   isReal: boolean;
   /** Trang/ảnh nguồn khi lấy từ bên ngoài (Pinterest, Google...). */
   sourceUrl?: string | null;
+  /** Bộ sưu tập gán cho ảnh; null hoặc bỏ trống là không gán. */
+  collectionId?: number | null;
 };
 
 /** Gắn một ảnh đã có trên Cloudinary vào mốc. Ảnh minh họa không mang thông tin máy ảnh. */
@@ -20,6 +22,7 @@ export async function addEventImage(event: DetailEvent, img: NewImage): Promise<
     is_real_photo: img.isReal,
     taken_at: event.trip_date,
     source_url: img.sourceUrl ?? null,
+    collection_id: img.collectionId ?? null,
     ...(img.isReal ? {} : { camera_gear: null }),
   });
 }

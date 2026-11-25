@@ -10,14 +10,12 @@ import {
 } from 'react-native';
 import { Check, Globe, ImageOff } from 'lucide-react-native';
 import { EmptyState, ErrorState, Skeleton } from '../../../shared/ui';
-import { cloudinaryUrl } from '../../../shared/utils/cloudinary';
 import { iconSize, iconStroke, layout, radius, useTheme } from '../../../theme';
+import { gridThumbUrl } from '../photoUrls';
 import { Photo } from '../types';
 
 /** Khe giữa các ô ảnh. */
 const GAP = 2;
-/** Ảnh thu nhỏ tải về cỡ này (đủ nét cho ô ~130pt ở màn mật độ 3x). */
-const THUMB = 360;
 
 type Props = {
   photos: Photo[];
@@ -121,7 +119,9 @@ function GridCell({
         <Image
           // Đổi key để dựng lại Image và xin ảnh lần nữa.
           key={attempt}
-          source={{ uri: cloudinaryUrl(photo.url, { w: THUMB, h: THUMB }) }}
+          // Ảnh giữ tỉ lệ, cắt vuông lúc hiển thị; màn xem ảnh dùng lại ảnh này làm ảnh tạm.
+          source={{ uri: gridThumbUrl(photo.url) }}
+          resizeMode="cover"
           onError={onError}
           style={box}
         />

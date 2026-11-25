@@ -5,6 +5,7 @@ import {
   LocalDocument,
   updateLocalDocumentType,
 } from '../../../shared/api/localDocuments';
+import { useRetained } from '../../../shared/hooks/useRetained';
 import { Button, Chip, Sheet, Text } from '../../../shared/ui';
 import { DOC_TYPE_LABEL } from './DocumentTicket';
 
@@ -22,6 +23,8 @@ const TYPES: LocalDocType[] = ['FLIGHT', 'TRANSPORT', 'BOOKING'];
 export function EditDocumentSheet({ doc, onClose, onSaved, onError }: Props) {
   const [type, setType] = useState<LocalDocType>('BOOKING');
   const [saving, setSaving] = useState(false);
+  // Giữ giấy tờ cuối cùng để vẽ trong lúc sheet trượt xuống.
+  const shownDoc = useRetained(doc);
 
   useEffect(() => {
     if (doc) {
@@ -49,13 +52,10 @@ export function EditDocumentSheet({ doc, onClose, onSaved, onError }: Props) {
   };
 
   return (
-    <Sheet visible={doc !== null} onClose={saving ? () => {} : onClose}>
-      <Text variant="heading" style={styles.title}>
-        Loại giấy tờ
-      </Text>
+    <Sheet visible={doc !== null} onClose={saving ? () => {} : onClose} title="Loại giấy tờ">
       <View style={styles.body}>
         <Text variant="caption" tone="secondary">
-          {doc?.name}
+          {shownDoc?.name}
         </Text>
         <View style={styles.types}>
           {TYPES.map(t => (
@@ -69,7 +69,6 @@ export function EditDocumentSheet({ doc, onClose, onSaved, onError }: Props) {
 }
 
 const styles = StyleSheet.create({
-  title: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 12 },
   body: { paddingHorizontal: 20, paddingBottom: 16, gap: 12 },
   types: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
 });
