@@ -1,5 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { checkCredentials, clearSession, loadSession, saveSession } from './authService';
+import { clearReadCache } from '../../shared/api/readCache';
 
 type Status = 'loading' | 'signedOut' | 'signedIn';
 
@@ -38,6 +39,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = useCallback(async () => {
     await clearSession();
+    // Dữ liệu chuyến đi lưu để xem khi mất mạng là của tài khoản này: xoá khi thoát.
+    await clearReadCache().catch(() => undefined);
     setUsername(null);
     setStatus('signedOut');
   }, []);

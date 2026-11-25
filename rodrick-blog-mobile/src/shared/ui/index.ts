@@ -5,6 +5,7 @@ export * from './TextField';
 export * from './Toast';
 export * from './Alert';
 export * from './Banner';
+export * from './OfflineBanner';
 export * from './Dialog';
 export * from './Badge';
 export * from './Chip';

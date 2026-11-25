@@ -8,6 +8,7 @@ import {
   EmptyState,
   ErrorState,
   IconButton,
+  offlineBanner,
   Screen,
   Skeleton,
   Text,
@@ -74,11 +75,12 @@ type Nav = NativeStackNavigationProp<HomeStackParamList, 'TripsList'>;
 
 export function TripsListScreen() {
   const navigation = useNavigation<Nav>();
-  const { data, loading, error, reload } = useAsync(fetchTrips);
+  const { data, loading, error, reload, cachedAt } = useAsync(fetchTrips);
 
   return (
     <Screen
       title="Danh sách chuyến đi"
+      banner={offlineBanner(cachedAt)}
       headerLeft={
         <IconButton
           variant="ghost"

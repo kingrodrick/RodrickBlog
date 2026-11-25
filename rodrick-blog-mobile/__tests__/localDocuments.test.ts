@@ -1,4 +1,9 @@
-import { addLocalDocument, listLocalDocuments, removeLocalDocument } from '../src/shared/api/localDocuments';
+import {
+  addLocalDocument,
+  listLocalDocuments,
+  removeLocalDocument,
+  updateLocalDocumentType,
+} from '../src/shared/api/localDocuments';
 
 const base = { name: 'Phiếu đặt bàn', type: 'BOOKING' as const, uri: 'file:///a.pdf', mimeType: 'application/pdf' };
 
@@ -19,5 +24,14 @@ describe('kho giấy tờ cục bộ', () => {
 
   it('mốc chưa có giấy tờ trả mảng rỗng', async () => {
     expect(await listLocalDocuments(999)).toEqual([]);
+  });
+});
+
+describe('sửa loại giấy tờ', () => {
+  it('chỉ đổi loại, giữ nguyên tên và tệp', async () => {
+    const d = await addLocalDocument({ ...base, eventId: 50 });
+    await updateLocalDocumentType(d.id, 'FLIGHT');
+    const [after] = await listLocalDocuments(50);
+    expect(after).toMatchObject({ id: d.id, type: 'FLIGHT', name: base.name, uri: base.uri });
   });
 });

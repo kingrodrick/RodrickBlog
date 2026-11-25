@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { ArrowRight } from 'lucide-react-native';
 import { Card, EmptyState, Text } from '../../../shared/ui';
@@ -213,14 +213,25 @@ export function InfoPage({ event, landscape, onOpenPhoto, onAddRoute, onViewRout
 export function DocsPage({
   docs,
   landscape,
+  onEdit,
   onDelete,
   onError,
 }: {
   docs: LocalDocument[];
   landscape?: boolean;
+  onEdit: (doc: LocalDocument) => void;
   onDelete: (doc: LocalDocument) => void;
   onError: (message: string) => void;
 }) {
+  // Mỗi lúc chỉ một thẻ trượt ra nút Sửa / Xoá, như danh sách lộ trình.
+  const [openId, setOpenId] = useState<string | null>(null);
+  // Giấy tờ đang mở bị xoá thì tự đóng.
+  useEffect(() => {
+    if (openId !== null && !docs.some(d => d.id === openId)) {
+      setOpenId(null);
+    }
+  }, [docs, openId]);
+
   return (
     <>
       <PageHead
@@ -232,7 +243,18 @@ export function DocsPage({
       {docs.length ? (
         <View style={styles.stack}>
           {docs.map(d => (
-            <DocumentTicket key={d.id} doc={d} onLongPress={() => onDelete(d)} onError={onError} />
+            <DocumentTicket
+              key={d.id}
+              doc={d}
+              open={openId === d.id}
+              onToggle={() => setOpenId(cur => (cur === d.id ? null : d.id))}
+              onEdit={() => {
+                setOpenId(null);
+                onEdit(d);
+              }}
+              onDelete={() => onDelete(d)}
+              onError={onError}
+            />
           ))}
         </View>
       ) : (

@@ -11,7 +11,16 @@ import {
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ChevronLeft, Pencil, Plus } from 'lucide-react-native';
-import { Dialog, ErrorState, IconButton, Screen, Skeleton, Text, Toast } from '../../../shared/ui';
+import {
+  Dialog,
+  ErrorState,
+  IconButton,
+  offlineBanner,
+  Screen,
+  Skeleton,
+  Text,
+  Toast,
+} from '../../../shared/ui';
 import { useAsync } from '../../../shared/hooks/useAsync';
 import { iconSize, iconStroke, layout, radius, useTheme } from '../../../theme';
 import { HomeStackParamList } from '../../../navigation/type';
@@ -19,6 +28,7 @@ import { fetchTripDetail } from '../api/tripDetail';
 import { deleteEventRouteById } from '../api/routeApi';
 import { LocalDocument, removeLocalDocument } from '../../../shared/api/localDocuments';
 import { AddDocumentSheet } from '../components/AddDocumentSheet';
+import { EditDocumentSheet } from '../components/EditDocumentSheet';
 import { AddPhotosFlow } from '../components/AddPhotosFlow';
 import { EditEventModal } from '../components/EditEventModal';
 import { DocsPage, InfoPage, PhotosPage } from '../components/EventPages';
@@ -86,6 +96,7 @@ type PagerProps = {
   onBack: () => void;
   /** Bấm nút thao tác của trang hiện tại (0: sửa mốc, 1: thêm giấy tờ, 2: thêm ảnh thực tế). */
   onAction: (page: number) => void;
+  onEditDoc: (doc: LocalDocument) => void;
   onDeleteDoc: (doc: LocalDocument) => void;
   onError: (message: string) => void;
   onAddRoute: () => void;
@@ -93,7 +104,7 @@ type PagerProps = {
   onDeleteRoute: (m: EventMap) => void;
 };
 
-function Pager({ event, docs, onBack, onAction, onDeleteDoc, onError, onAddRoute, onViewRoute, onDeleteRoute }: PagerProps) {
+function Pager({ event, docs, onBack, onAction, onEditDoc, onDeleteDoc, onError, onAddRoute, onViewRoute, onDeleteRoute }: PagerProps) {
   const { colors } = useTheme();
   const reduce = useReduceMotion();
   const { width: winW, height: winH } = useWindowDimensions();
@@ -127,7 +138,7 @@ function Pager({ event, docs, onBack, onAction, onDeleteDoc, onError, onAddRoute
       onViewRoute={onViewRoute}
       onDeleteRoute={onDeleteRoute}
     />,
-    <DocsPage key="docs" docs={docs} landscape={landscape} onDelete={onDeleteDoc} onError={onError} />,
+    <DocsPage key="docs" docs={docs} landscape={landscape} onEdit={onEditDoc} onDelete={onDeleteDoc} onError={onError} />,
     <PhotosPage key="photos" event={event} onOpenPhoto={openPhoto} landscape={landscape} />,
   ];
 
@@ -250,7 +261,7 @@ export function EventDetailScreen() {
   const navigation = useNavigation<Nav>();
   const { tripId, eventId, notice } = useRoute<Route>().params;
   const load = useCallback(() => fetchTripDetail(Number(tripId)), [tripId]);
-  const { data, loading, error, reload } = useAsync(load);
+  const { data, loading, error, reload, cachedAt } = useAsync(load);
   const event = data?.timeline_events.find(e => e.id === Number(eventId));
   const [toast, setToast] = useState<string | null>(null);
   const [toastKind, setToastKind] = useState<'success' | 'error'>('success');
@@ -259,6 +270,7 @@ export function EventDetailScreen() {
   const [addingPhotos, setAddingPhotos] = useState(false);
   const [pickedDoc, setPickedDoc] = useState<PickedDocument | null>(null);
   const [askDeleteDoc, setAskDeleteDoc] = useState<LocalDocument | null>(null);
+  const [editingDoc, setEditingDoc] = useState<LocalDocument | null>(null);
   const { docs, reload: reloadDocs } = useLocalDocuments(Number(eventId));
 
   const notify = useCallback((text: string, kind: 'success' | 'error' = 'success') => {
@@ -344,13 +356,14 @@ export function EventDetailScreen() {
 
   return (
     // Cả ba trang theo giao diện của máy/Cài đặt (sir chốt 20/11: trang Ảnh thực tế không ép tối).
-    <Screen scroll={false}>
+    <Screen scroll={false} banner={offlineBanner(cachedAt)}>
       <View style={styles.bleed}>
         <Pager
           event={event}
           docs={docs}
           onBack={() => navigation.goBack()}
           onAction={onAction}
+          onEditDoc={setEditingDoc}
           onDeleteDoc={setAskDeleteDoc}
           onError={text => notify(text, 'error')}
           onAddRoute={() => navigation.navigate('RouteEdit', { tripId, eventId })}
@@ -391,6 +404,16 @@ export function EventDetailScreen() {
           onSaved={() => {
             setPickedDoc(null);
             notify('Đã thêm giấy tờ');
+            reloadDocs();
+          }}
+        />
+        <EditDocumentSheet
+          doc={editingDoc}
+          onClose={() => setEditingDoc(null)}
+          onError={text => notify(text, 'error')}
+          onSaved={() => {
+            setEditingDoc(null);
+            notify('Đã đổi loại giấy tờ');
             reloadDocs();
           }}
         />

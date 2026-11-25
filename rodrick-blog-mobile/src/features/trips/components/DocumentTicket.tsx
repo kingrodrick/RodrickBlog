@@ -1,8 +1,16 @@
-import React from 'react';
-import { Image, Pressable, StyleSheet, View } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import {
+  Animated,
+  Easing,
+  Image,
+  Pressable,
+  StyleSheet,
+  View,
+} from 'react-native';
+import { Pencil, Trash2 } from 'lucide-react-native';
 import { LocalDocument } from '../../../shared/api/localDocuments';
 import { Text } from '../../../shared/ui';
-import { radius, useTheme } from '../../../theme';
+import { iconSize, iconStroke, radius, useTheme } from '../../../theme';
 import { isPdfDocument, openDocument } from '../documentFile';
 import { DocumentType } from '../types';
 
@@ -12,89 +20,176 @@ export const DOC_TYPE_LABEL: Record<DocumentType, string> = {
   BOOKING: 'Booking',
 };
 
-const NOTCH = 20;
+// Cùng cách trượt nút như hàng lộ trình (RouteList): nút tròn 44, cách nhau 6.
+const ACTION = 44;
+const GAP = 6;
+const PANEL = ACTION * 2 + GAP;
+const EASE = Easing.bezier(0.2, 0.8, 0.2, 1);
+const DANGER_BG = '#a3161f';
+/** Khe giữa thẻ và cụm nút khi mở. */
+const SLOT_GAP = 8;
+
+type Props = {
+  doc: LocalDocument;
+  /** Đang trượt ra hai nút Sửa / Xoá (mỗi lúc chỉ một thẻ mở). */
+  open: boolean;
+  onToggle: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+  onError?: (message: string) => void;
+};
 
 /**
- * Vé giấy tờ lưu trên máy: ảnh (mã QR có sẵn trong tệp) hoặc ô PDF, tên, loại.
- * Chạm để mở bằng trình xem của hệ thống; chạm giữ để xoá.
+ * Thẻ giấy tờ lưu trên máy: ảnh thu nhỏ (mã QR có sẵn trong tệp; PDF thì không có), loại, tên.
+ * Chạm để mở bằng trình xem của hệ thống; nhấn giữ thì thẻ co lại, trượt ra nút Sửa và Xoá.
  */
 export function DocumentTicket({
   doc,
-  onLongPress,
+  open,
+  onToggle,
+  onEdit,
+  onDelete,
   onError,
-}: {
-  doc: LocalDocument;
-  onLongPress?: () => void;
-  onError?: (message: string) => void;
-}) {
+}: Props) {
   const { colors } = useTheme();
+  const p = useRef(new Animated.Value(0)).current;
+  const first = useRef(true);
   const label = DOC_TYPE_LABEL[doc.type] ?? doc.type;
 
+  useEffect(() => {
+    if (first.current) {
+      first.current = false;
+      return;
+    }
+    Animated.timing(p, {
+      toValue: open ? 1 : 0,
+      duration: 280,
+      easing: EASE,
+      useNativeDriver: false,
+    }).start();
+  }, [open, p]);
+
+  const renderIcon = (Icon: typeof Pencil, color: string) => (
+    <Icon
+      size={iconSize.control}
+      color={color}
+      strokeWidth={iconStroke.normal}
+      strokeLinecap="round"
+    />
+  );
+
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={`${label}, ${doc.name}`}
-      onPress={() => openDocument(doc).catch(() => onError?.('Không mở được tệp. Cần một app xem PDF/ảnh trên máy.'))}
-      onLongPress={onLongPress}
-      style={({ pressed }) => [styles.ticket, { backgroundColor: colors.surface }, pressed && styles.pressed]}
-    >
-      <View style={styles.top}>
-        {isPdfDocument(doc) ? (
-          <View style={[styles.thumb, styles.pdf, { backgroundColor: colors.surfaceMuted }]}>
-            <Text variant="label" tone="secondary">
-              PDF
+    // Cụm nút nằm trong hàng (không nổi đè): vùng nút giãn từ 0 ra đủ hai nút,
+    // thẻ bên trái tự co lại nhường chỗ nên không bao giờ đè lên nút.
+    <View style={styles.row}>
+      <View style={styles.cardWrap}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`${label}, ${doc.name}`}
+          accessibilityHint={
+            open
+              ? 'Chạm để đóng nút sửa, xoá'
+              : 'Chạm để mở, nhấn giữ để sửa hoặc xoá'
+          }
+          delayLongPress={450}
+          onLongPress={onToggle}
+          onPress={
+            open
+              ? onToggle
+              : () =>
+                  openDocument(doc).catch(() =>
+                    onError?.(
+                      'Không mở được tệp. Cần một app xem PDF/ảnh trên máy.',
+                    ),
+                  )
+          }
+          style={[styles.card, { backgroundColor: colors.surface }]}
+        >
+          {isPdfDocument(doc) ? null : (
+            <Image
+              source={{ uri: doc.uri }}
+              style={[styles.thumb, { backgroundColor: colors.surfaceMuted }]}
+            />
+          )}
+          <View style={styles.info}>
+            <Text variant="overline" tone="muted">
+              {label}
             </Text>
+            <Text variant="heading">{doc.name}</Text>
           </View>
-        ) : (
-          <Image
-            source={{ uri: doc.uri }}
-            style={[styles.thumb, { backgroundColor: colors.surfaceMuted }]}
-          />
-        )}
-        <View style={styles.info}>
-          <Text variant="overline" tone="muted">
-            {label}
-          </Text>
-          <Text variant="heading">{doc.name}</Text>
-        </View>
+        </Pressable>
       </View>
 
-      {/* Đường xé vé: hai khuyết tròn màu nền và nét đứt */}
-      <View style={styles.tear}>
-        <View style={[styles.notch, styles.notchL, { backgroundColor: colors.background }]} />
-        <View style={styles.dashes}>
-          {Array.from({ length: 24 }, (_, i) => (
-            <View key={i} style={[styles.dash, { backgroundColor: colors.surfaceMuted }]} />
-          ))}
-        </View>
-        <View style={[styles.notch, styles.notchR, { backgroundColor: colors.background }]} />
-      </View>
-
-      <View style={styles.bottom}>
-        <Text variant="caption" tone="secondary" numberOfLines={1} style={styles.rowLabel}>
-          Chạm để mở • giữ để xoá
-        </Text>
-        <Text variant="label" tone="accent">
-          Mở
-        </Text>
-      </View>
-    </Pressable>
+      <Animated.View
+        pointerEvents={open ? 'auto' : 'none'}
+        style={[
+          styles.slot,
+          {
+            width: p.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, PANEL + SLOT_GAP],
+            }),
+          },
+        ]}
+      >
+        <Animated.View
+          style={[
+            styles.panel,
+            {
+              opacity: p,
+              transform: [
+                {
+                  translateX: p.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [24, 0],
+                  }),
+                },
+              ],
+            },
+          ]}
+        >
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Sửa loại giấy tờ"
+            onPress={onEdit}
+            style={[styles.action, { backgroundColor: colors.surfaceRaised }]}
+          >
+            {renderIcon(Pencil, colors.text)}
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Xoá giấy tờ"
+            onPress={onDelete}
+            style={[styles.action, { backgroundColor: DANGER_BG }]}
+          >
+            {renderIcon(Trash2, '#ffffff')}
+          </Pressable>
+        </Animated.View>
+      </Animated.View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  ticket: { borderRadius: radius.card, overflow: 'hidden' },
-  pressed: { opacity: 0.85 },
-  top: { flexDirection: 'row', gap: 16, padding: 20, paddingBottom: 16, alignItems: 'center' },
+  row: { flexDirection: 'row', alignItems: 'center' },
+  cardWrap: { flex: 1, minWidth: 0 },
+  card: {
+    flexDirection: 'row',
+    gap: 16,
+    padding: 20,
+    alignItems: 'center',
+    borderRadius: radius.card,
+  },
   thumb: { width: 96, height: 96, borderRadius: 10 },
-  pdf: { alignItems: 'center', justifyContent: 'center' },
   info: { flex: 1, minWidth: 0, gap: 2 },
-  tear: { height: NOTCH, justifyContent: 'center' },
-  notch: { position: 'absolute', width: NOTCH, height: NOTCH, borderRadius: NOTCH / 2 },
-  notchL: { left: -NOTCH / 2 },
-  notchR: { right: -NOTCH / 2 },
-  dashes: { flexDirection: 'row', justifyContent: 'space-between', marginHorizontal: 20, overflow: 'hidden' },
-  dash: { width: 8, height: 2 },
-  bottom: { flexDirection: 'row', justifyContent: 'space-between', padding: 20, paddingTop: 12 },
-  rowLabel: { flex: 1 },
+  // Vùng nút: rộng 0 khi đóng, cắt phần thừa để nút không lộ ra ngoài.
+  slot: { overflow: 'hidden', alignItems: 'flex-end' },
+  panel: { width: PANEL, flexDirection: 'row', alignItems: 'center', gap: GAP },
+  action: {
+    width: ACTION,
+    height: ACTION,
+    borderRadius: ACTION / 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });

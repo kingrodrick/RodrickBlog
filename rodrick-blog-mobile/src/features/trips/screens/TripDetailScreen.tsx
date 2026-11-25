@@ -13,7 +13,14 @@ import {
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ChevronLeft } from 'lucide-react-native';
-import { ErrorState, IconButton, Screen, Skeleton, Text } from '../../../shared/ui';
+import {
+  ErrorState,
+  IconButton,
+  offlineBanner,
+  Screen,
+  Skeleton,
+  Text,
+} from '../../../shared/ui';
 import { useAsync } from '../../../shared/hooks/useAsync';
 import { tripLength } from '../../../shared/utils/format';
 import { iconSize, iconStroke, layout, radius } from '../../../theme';
@@ -180,11 +187,11 @@ export function TripDetailScreen() {
   const navigation = useNavigation<Nav>();
   const { tripId } = useRoute<Route>().params;
   const load = useCallback(() => fetchTripDetail(Number(tripId)), [tripId]);
-  const { data, loading, error, reload } = useAsync(load);
+  const { data, loading, error, reload, cachedAt } = useAsync(load);
 
   if (data) {
     return (
-      <Screen scroll={false}>
+      <Screen scroll={false} banner={offlineBanner(cachedAt)}>
         <View style={styles.bleed}>
           <Timeline
             trip={data}

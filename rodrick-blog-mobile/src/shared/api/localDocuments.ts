@@ -45,6 +45,12 @@ export async function addLocalDocument(doc: Omit<LocalDocument, 'id' | 'addedAt'
   return saved;
 }
 
+/** Đổi loại giấy tờ (chỉ sửa được loại, tệp và tên giữ nguyên). */
+export async function updateLocalDocumentType(id: string, type: LocalDocType): Promise<void> {
+  const all = await readAll();
+  await writeAll(all.map(d => (d.id === id ? { ...d, type } : d)));
+}
+
 export async function removeLocalDocument(id: string): Promise<void> {
   const all = await readAll();
   await writeAll(all.filter(d => d.id !== id));

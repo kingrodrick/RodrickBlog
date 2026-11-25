@@ -1,4 +1,8 @@
 import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from './config';
+import { loadRead, noteCacheHit, saveRead } from './readCache';
+
+/** Mạng chập chờn: chờ tối đa 12 giây rồi dùng bản lưu. */
+const READ_TIMEOUT_MS = 12000;
 
 /** Header chung cho REST PostgREST. */
 function headers(): Record<string, string> {
@@ -24,15 +28,35 @@ async function fail(res: Response, fallback: string): Promise<never> {
 /**
  * Đọc bảng Supabase qua REST (PostgREST) bằng fetch, không cần thư viện supabase-js.
  * `query` là chuỗi tham số PostgREST, ví dụ: 'select=*,images(*)&order=start_date.desc'.
+ * Đọc được thì lưu lại; mất mạng thì trả bản đã lưu của đúng truy vấn này (xem readCache).
  */
 export async function selectRows<T>(table: string, query: string): Promise<T[]> {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${query}`, {
-    headers: headers(),
-  });
+  const key = `${table}?${query}`;
+  const init = { headers: headers() };
+
+  let res: Response;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), READ_TIMEOUT_MS);
+  try {
+    res = await fetch(`${SUPABASE_URL}/rest/v1/${key}`, { ...init, signal: controller.signal });
+  } catch {
+    // Lỗi mạng hoặc quá giờ (không phải lỗi máy chủ): dùng bản lưu nếu có.
+    const cached = await loadRead<T>(key);
+    if (cached) {
+      noteCacheHit(cached.savedAt);
+      return cached.rows;
+    }
+    throw new Error('Không có mạng và chưa có dữ liệu đã lưu cho mục này.');
+  } finally {
+    clearTimeout(timer);
+  }
+
   if (!res.ok) {
     return fail(res, 'Lỗi tải dữ liệu');
   }
-  return (await res.json()) as T[];
+  const rows = (await res.json()) as T[];
+  await saveRead(key, rows).catch(() => undefined);
+  return rows;
 }
 
 /** Thêm một dòng, trả về dòng vừa ghi (có id). */

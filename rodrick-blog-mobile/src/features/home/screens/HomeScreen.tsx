@@ -7,6 +7,7 @@ import {
   Card,
   EmptyState,
   ErrorState,
+  offlineBanner,
   Screen,
   Skeleton,
   Text,
@@ -108,7 +109,7 @@ export function HomeScreen() {
   }
 
   return (
-    <Screen>
+    <Screen banner={offlineBanner(trips.cachedAt ?? albums.cachedAt)}>
       <Greeting />
 
       {tripSection}

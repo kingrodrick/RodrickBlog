@@ -9,6 +9,7 @@ import {
   EmptyState,
   ErrorState,
   IconButton,
+  offlineBanner,
   Screen,
   Skeleton,
   Text,
@@ -143,10 +144,11 @@ export function PickEventScreen() {
   const navigation = useNavigation<Nav>();
   const { route } = useRoute<Route>().params;
   const load = useCallback(loadNearestTrip, []);
-  const { data, loading, error, reload } = useAsync(load);
+  const { data, loading, error, reload, cachedAt } = useAsync(load);
 
   return (
     <Screen
+      banner={offlineBanner(cachedAt)}
       headerLeft={
         <IconButton accessibilityLabel="Đóng" onPress={() => navigation.goBack()} icon={renderClose} />
       }
