@@ -19,6 +19,8 @@ type Props = {
   banner?: React.ReactNode;
   /** false nếu body tự quản cuộn (FlatList...). */
   scroll?: boolean;
+  /** 'handled': bấm nút trong body khi bàn phím đang mở thì nút ăn ngay, không chỉ đóng bàn phím. */
+  keyboardShouldPersistTaps?: 'never' | 'handled';
 };
 
 /** Bố cục mọi màn: header / body cuộn / footer. */
@@ -30,6 +32,7 @@ export function Screen({
   footer,
   banner,
   scroll = true,
+  keyboardShouldPersistTaps,
 }: Props) {
   const { colors, isDark } = useTheme();
   return (
@@ -56,6 +59,7 @@ export function Screen({
           style={styles.flex}
           contentContainerStyle={styles.content}
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps={keyboardShouldPersistTaps}
         >
           {children}
         </ScrollView>

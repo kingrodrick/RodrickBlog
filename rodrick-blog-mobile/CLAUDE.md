@@ -1,6 +1,6 @@
 # CLAUDE.md — Rodrick Mobile
 
-App di động (React Native CLI thuần, KHÔNG Expo) cho blog ảnh/du lịch Next.js của chủ dự án. Chức năng: đăng nhập, danh sách chuyến đi, chi tiết chuyến (timeline mốc), ảnh thật/ảnh tham khảo, giấy tờ, mở Google Maps.
+App di động (React Native CLI thuần, KHÔNG Expo) cho blog ảnh/du lịch Next.js của chủ dự án. Chức năng: đăng nhập, danh sách chuyến đi, chi tiết chuyến (timeline mốc), ảnh thật/ảnh tham khảo, giấy tờ, mở Google Maps, công cụ (đổi tiền VND ⇄ Yên, mở Google Dịch).
 
 ## Cách làm việc với chủ dự án
 - Giao tiếp bằng tiếng Việt, gọi chủ dự án là "sir", xưng "tôi". Ngắn gọn, thẳng vào việc.
@@ -15,13 +15,13 @@ App di động (React Native CLI thuần, KHÔNG Expo) cho blog ảnh/du lịch 
 Mọi giá trị dưới đây lấy từ hai nguồn này; nếu lệch thì canvas thắng.
 
 ## Công nghệ
-React Native CLI, TypeScript, React Navigation (native-stack + bottom-tabs), react-native-safe-area-context, react-native-screens, react-native-svg, lucide-react-native (icon), react-native-reanimated, react-native-keychain (lưu phiên), react-native-bootsplash, react-native-image-picker (chọn ảnh để tải lên Cloudinary), @react-native-documents/picker + @react-native-documents/viewer (chọn và mở giấy tờ PDF/ảnh), @react-native-async-storage/async-storage (kho giấy tờ cục bộ), react-native-webview (trình duyệt tìm ảnh minh họa trên Pinterest/Google), react-native-nitro-share-intent + react-native-nitro-modules (nhận liên kết Google Maps từ nút Chia sẻ, chỉ Android), `Linking` mở Google Maps. Không dùng Expo, không dùng thư viện UI dựng sẵn.
+React Native CLI, TypeScript, React Navigation (native-stack + bottom-tabs), react-native-safe-area-context, react-native-screens, react-native-svg, lucide-react-native (icon), react-native-reanimated, react-native-keychain (lưu phiên), react-native-bootsplash, react-native-image-picker (chọn ảnh để tải lên Cloudinary), @react-native-documents/picker + @react-native-documents/viewer (chọn và mở giấy tờ PDF/ảnh), @react-native-async-storage/async-storage (kho giấy tờ cục bộ), react-native-webview (trình duyệt tìm ảnh minh họa trên Pinterest/Google), react-native-nitro-share-intent + react-native-nitro-modules (nhận liên kết Google Maps từ nút Chia sẻ, chỉ Android), `Linking` mở Google Maps và Google Dịch. Tỉ giá JPY → VND lấy bằng `fetch` từ open.er-api.com (miễn phí, không cần key), dự phòng currency-api qua CDN jsdelivr; lưu bản gần nhất ở AsyncStorage để dùng khi mất mạng. Không dùng Expo, không dùng thư viện UI dựng sẵn.
 
 ## Cấu trúc thư mục
 ```
 src/
   features/
-    auth/ home/ trips/ galleries/ settings/
+    auth/ home/ trips/ galleries/ settings/ tools/
       (mỗi feature gồm: screens/ components/ hooks/ api/ types.ts index.ts)
   shared/   ui/ (nút, toast, icon, ô nhập), hooks/, utils/, api/
   theme/    màu, chữ, khoảng cách
@@ -40,10 +40,10 @@ Màn hình chỉ ghép component từ `shared/ui` (và component của chính fe
 1. Font hệ thống (San Francisco / Roboto), không nhúng font. Không dùng `fontFamily` tuỳ chỉnh.
 2. Bo góc: nhãn 8, nút/ô nhập 12, thẻ/vé 16, hộp thoại/sheet 24, chip/nút icon tròn (pill).
 3. Không dùng icon đi kèm chữ. Icon chỉ đứng một mình (nút icon, footer) và chỉ khi cần thu gọn. Ngoại lệ duy nhất: icon trạng thái trong toast/cảnh báo.
-4. Bố cục mọi màn: header (tiêu đề) / body (nội dung cuộn) / footer (4 icon điều hướng: Trang chủ, Giấy tờ, Ảnh, Cài đặt). Màn đăng nhập không có footer.
+4. Bố cục mọi màn: header (tiêu đề) / body (nội dung cuộn) / footer (4 icon điều hướng: Trang chủ, Công cụ, Ảnh, Cài đặt). Màn đăng nhập không có footer.
 5. Không viền, không bóng. Thẻ nổi lên bằng bước tông màu so với nền. Ngoại lệ có chủ đích: ô chọn giao diện ở Cài đặt, ô đang chọn có khung màu nhấn dày 3 bao ngoài (dựng bằng `View` đệm 3 nền màu nhấn, không dùng `borderWidth`).
 6. Một màu nhấn duy nhất: Torii #b61c25.
-7. Giấy tờ, ảnh, bản đồ gắn theo từng mốc (event) ở màn chi tiết mốc. Tab Giấy tờ/Ảnh là tổng hợp mọi thứ. Bản đồ không nhúng: nút "Chỉ đường" mở app Google Maps.
+7. Giấy tờ, ảnh, bản đồ gắn theo từng mốc (event) ở màn chi tiết mốc. Tab Ảnh là tổng hợp ảnh; giấy tờ chỉ xem ở màn chi tiết mốc (tab Giấy tờ đã thay bằng tab Công cụ). Bản đồ không nhúng: nút "Chỉ đường" mở app Google Maps.
 8. Giấy tờ chỉ lưu trên điện thoại (sao chép vào thư mục riêng của app, thông tin ở AsyncStorage), chỉ xem, không tải lên Cloudinary hay Supabase vì bảo mật. Bảng `documents` trên Supabase không dùng ở mobile.
 9. Vùng chạm tối thiểu 44×44pt. Mọi nút icon có `accessibilityLabel`.
 
@@ -75,9 +75,10 @@ Bước 4: 4·8·12·16·20·24. Lề màn 20, khe giữa thẻ 12, đệm trong
 Icon Lucide nét 1.75, đầu nét tròn; cỡ 16 (trong dòng chữ), 22 (nút, footer), 32 (trạng thái trống). Footer: nền đen trong suốt 88% (`rgba(0,0,0,0.88)`), icon màu chữ chính của giao diện tối. Mục đang chọn: icon tô đặc (fill), chi tiết bên trong khoét bằng màu thanh; không dùng khối nền dưới icon.
 
 ## Đặc tả component nền tảng
+**Screen** — header / body cuộn / footer như quy tắc 4. `keyboardShouldPersistTaps="handled"` cho màn có nút bấm khi bàn phím đang mở (ví dụ chip số nhanh ở Đổi tiền).
 **Button** — kiểu: primary, secondary, danger, link. Cỡ: lg 56 (padding ngang 28), md 48 (24), sm 36 (14); chữ 16/16/14 đậm 600; bo 12. Bị khoá: opacity 0.45. Đang tải: thay chữ bằng ActivityIndicator, giữ nguyên độ rộng. Đang nhấn: tối đi một bước. Link: chữ gạch chân, nền trong suốt. Đứng một mình thì rộng kín chiều ngang.
 **IconButton** — tròn 44, icon 22. Biến thể: nền bề mặt, trong suốt, nhấn mạnh (nền nút chính), nguy hiểm (icon màu lỗi). Có chấm báo 10px (đỏ nhấn, viền màu nền) khi có tin mới.
-**TextField** — nhãn 14/20 600 ở trên ô; ô cao 48, bo 12, viền 1px; focus viền 2px màu nhấn; lỗi viền 2px màu lỗi + dòng lỗi 13/18 bên dưới; ô mật khẩu có chữ "Hiện/Ẩn" bên phải. Không dùng placeholder làm nhãn.
+**TextField** — nhãn 14/20 600 ở trên ô; ô cao 48, bo 12, viền 1px; focus viền 2px màu nhấn; lỗi viền 2px màu lỗi + dòng lỗi 13/18 bên dưới; ô mật khẩu có chữ "Hiện/Ẩn" bên phải. Không dùng placeholder làm nhãn. `labelWidth`: nhãn nằm bên trái cùng dòng, rộng cố định để nhiều ô xếp dọc thẳng hàng (dùng ở màn Đổi tiền).
 **Toast** — theo giao diện (sáng: nền #fff, tối: #332d29), bo 16, một dòng 14/20, tối đa một nút chữ màu nhấn, tự tắt sau 3 giây, nổi phía trên footer. Có thể kèm icon trạng thái 22 (thành công/lỗi). `role=status`, lỗi dùng `alert`.
 **Alert (cảnh báo trong trang)** — thẻ bề mặt bo 16, thanh màu 4 bên trái + icon 22: thông tin #2d4a7a, thành công #4e6b3a, cảnh báo #a0611a, lỗi #a3161f; tiêu đề 15/20 600 + mô tả 13/18. Không tự tắt.
 **Banner ngoại tuyến** — dải bo 12, nền giấy vàng (#f4ead6 / #2a2318), chữ 13/18, nằm sát dưới header.
@@ -92,3 +93,8 @@ Icon Lucide nét 1.75, đầu nét tròn; cỡ 16 (trong dòng chữ), 22 (nút,
 3. Navigation: RootNavigator + MainTabs 4 icon.
 4. Feature theo thứ tự: auth → home → trips → galleries → settings, dùng dữ liệu mẫu (đặt trong `api/` của từng feature).
 5. Nối dữ liệu thật (Supabase) và đăng nhập an toàn: dùng Supabase Auth + react-native-keychain, KHÔNG nhúng thông tin admin cứng vào ứng dụng như bản web.
+
+## Tab Công cụ (`features/tools`)
+- Màn Công cụ: 2 thẻ. "Đổi tiền" mở màn Đổi tiền; "Dịch" mở thẳng app Google Dịch (link translate.google.com, mặc định Việt → Nhật), không có màn dịch trong app. App Google Dịch bỏ qua chữ gắn trong link, nên không gửi chữ sang; muốn gửi chữ phải viết module native (ACTION_SEND vào package Google Dịch), hỏi trước khi làm.
+- Đổi tiền: ô nhập và ô quy đổi (chỉ đọc) xếp dọc, nhãn bên trái; nút icon đảo VND ⇄ Yên bên phải; chip số nhanh dưới ô nhập (thêm chip "000" khi nhập VND); dòng "Đọc ¥... là" (romaji, phiên âm Việt, kanji); dòng nói rõ tỉ giá mới nhất hay tỉ giá đã lưu; mất mạng thì Banner "đang dùng tỉ giá lưu lúc ..."; cuối màn là thẻ "Cách đọc tiền Nhật".
+- Logic thuần có test: `currency.ts` (đọc/định dạng số kiểu Việt, đổi tiền), `yenReading.ts` (`readYen`, nhóm 4 số man/oku, số biến âm), `api/exchangeRate.ts` (nguồn chính, dự phòng, cache).

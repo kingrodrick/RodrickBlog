@@ -6,11 +6,12 @@ import {
   BottomTabBarProps,
 } from '@react-navigation/bottom-tabs';
 import { Circle, Path } from 'react-native-svg';
-import { House, FileText, Image, Settings } from 'lucide-react-native';
+import { House, Wrench, Image, Settings } from 'lucide-react-native';
 import { darkColors, iconSize, iconStroke, useTheme } from '../theme';
 import { useAuth } from '../features/auth';
 import { SettingsScreen } from '../features/settings';
 import { HomeStack } from './HomeStack';
+import { ToolsStack } from './ToolsStack';
 import { MainTabParamList } from './type';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -52,17 +53,8 @@ const KNOCKOUT: Record<
       stroke="none"
     />
   ),
-  Documents: (bg, w) => (
-    <Path
-      key="lines"
-      d="M14 2v5a1 1 0 0 0 1 1h5M10 9H8M16 13H8M16 17H8"
-      fill="none"
-      stroke={bg}
-      strokeWidth={w}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  ),
+  // Cờ lê là một nét liền: khi chọn chỉ cần tô đặc, không có chi tiết để khoét.
+  Tools: () => null,
   Photos: (bg, w) => [
     <Circle key="sun" cx="9" cy="9" r="2" fill={bg} stroke="none" />,
     <Path
@@ -82,7 +74,7 @@ const KNOCKOUT: Record<
 
 const ITEMS = {
   Home: { Icon: House, label: 'Trang chủ' },
-  Documents: { Icon: FileText, label: 'Giấy tờ' },
+  Tools: { Icon: Wrench, label: 'Công cụ' },
   Photos: { Icon: Image, label: 'Ảnh' },
   Settings: { Icon: Settings, label: 'Cài đặt' },
 } as const;
@@ -144,7 +136,7 @@ function SettingsTab() {
   return <SettingsScreen username={username} onSignOut={signOut} />;
 }
 
-/** Tab Giấy tờ / Ảnh chưa dựng; khai báo ngoài MainTabs để không bị dựng lại khi xoay màn. */
+/** Tab Ảnh chưa dựng; khai báo ngoài MainTabs để không bị dựng lại khi xoay màn. */
 const EmptyTab = () => null;
 
 export function MainTabs() {
@@ -156,7 +148,7 @@ export function MainTabs() {
       screenOptions={{ headerShown: false, tabBarPosition: landscape ? 'right' : 'bottom' }}
     >
       <Tab.Screen name="Home" component={HomeStack} />
-      <Tab.Screen name="Documents" component={EmptyTab} />
+      <Tab.Screen name="Tools" component={ToolsStack} />
       <Tab.Screen name="Photos" component={EmptyTab} />
       <Tab.Screen name="Settings" component={SettingsTab} />
     </Tab.Navigator>

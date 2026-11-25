@@ -25,9 +25,15 @@ export type HomeStackParamList = {
   PickEvent: { route: ParsedRoute };
 };
 
+/** Stack trong tab Công cụ. */
+export type ToolsStackParamList = {
+  ToolsMain: undefined;
+  Currency: undefined;
+};
+
 export type MainTabParamList = {
   Home: NavigatorScreenParams<HomeStackParamList> | undefined;
-  Documents: undefined;
+  Tools: NavigatorScreenParams<ToolsStackParamList> | undefined;
   Photos: undefined;
   Settings: undefined;
 };
